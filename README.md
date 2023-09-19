@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # benchmark-vis
+=======
+# DBenchVis
+>>>>>>> 8bb0f6257f25bb7379545d3007b6d8123a5ef829
 
 ## Project setup
 ```
