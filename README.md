@@ -1,4 +1,4 @@
-# benchmark-vis
+# DBenchVis
 
 ## Project setup
 ```
