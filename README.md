@@ -1,15 +1,54 @@
-<<<<<<< HEAD
-# benchmark-vis
-=======
 # DBenchVis
->>>>>>> 8bb0f6257f25bb7379545d3007b6d8123a5ef829
 
-## Project setup
+## Introduction
+DBenchVis 
+
+## Installation
+
+### Install Node.js & NPM Package
+
 ```
 npm install
+``` 
+
+If it is currently downloaded, ensure that it is version 10 or higher.
+
+To confirm the npm, execute the below  code in the  terminal.
+
+
+```
+npm -v
+node -v
 ```
 
-### Compiles and hot-reloads for development
+
+
+### Install Vue CLI
+```
+npm install -g @vue/cli
+vue —version
+```
+If you have a release that is less than 4.5, you may update it by using the command here.
+```
+npm upgrade —next
+```
+
+### Create A Vue 3 Project
+To accomplish so, use the terminal and type the following into the input field to access the computer:
+
+```
+cd ~/my-project-directory
+vue create my-project-name
+```
+
+
+### Run The Project
+The initial step is to navigate to the program file. 
+```
+cd my-project-name
+```
+To execute the application, use the command below.
+
 ```
 npm run serve
 ```
