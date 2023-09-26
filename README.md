@@ -53,6 +53,9 @@ To execute the application, use the command below.
 npm run serve
 ```
 
+### Install axios
+
+
 ### Compiles and minifies for production
 ```
 npm run build
