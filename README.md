@@ -25,7 +25,7 @@ node -v
 
 ### Install Vue CLI
 ```
-npm install -g @vue/cli
+sudo npm install -g @vue/cli
 vue —version
 ```
 If you have a release that is less than 4.5, you may update it by using the command here.
