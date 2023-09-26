@@ -1,70 +1,70 @@
-# DBenchVis
+# Getting Started with Create React App
 
-## Introduction
-DBenchVis 
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Installation
+## Available Scripts
 
-### Install Node.js & NPM Package
+In the project directory, you can run:
 
-```
-npm install
-``` 
+### `yarn start`
 
-If it is currently downloaded, ensure that it is version 10 or higher.
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-To confirm the npm, execute the below  code in the  terminal.
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
+### `yarn test`
 
-```
-npm -v
-node -v
-```
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
+### `yarn build`
 
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-### Install Vue CLI
-```
-sudo npm install -g @vue/cli
-vue —version
-```
-If you have a release that is less than 4.5, you may update it by using the command here.
-```
-npm upgrade —next
-```
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-### Create A Vue 3 Project
-To accomplish so, use the terminal and type the following into the input field to access the computer:
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-```
-cd ~/my-project-directory
-vue create my-project-name
-```
+### `yarn eject`
 
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-### Run The Project
-The initial step is to navigate to the program file. 
-```
-cd my-project-name
-```
-To execute the application, use the command below.
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-```
-npm run serve
-```
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-### Install axios
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
+## Learn More
 
-### Compiles and minifies for production
-```
-npm run build
-```
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-### Lints and fixes files
-```
-npm run lint
-```
+To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `yarn build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
