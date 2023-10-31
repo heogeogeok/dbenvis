@@ -1,10 +1,11 @@
 import Sidebar from "./Sidebar";
+import Tpch from "./tpch/Tpch";
 
 function MainPage() {
   return (
     <div className="flex">
       <Sidebar />
-      <h1>Main Page</h1>
+      <Tpch />
     </div>
   );
 }
