@@ -1,10 +1,12 @@
-import './App.css';
-import Drawing from "./components/Drawing";
+import { Routes, Route } from "react-router-dom";
+import MainPage from "./components/MainPage";
+
 function App() {
   return (
-    <div className="App">
-      {"Hello World!!"}
-      <Drawing/>
-</div> );
+    <Routes>
+      <Route path="/" element={<MainPage />} />
+    </Routes>
+  );
 }
+
 export default App;
