@@ -1,7 +1,5 @@
-import './App.css';
-import React, { useState, useEffect } from 'react';
-import Cmpview from "./tpch/Cmpview";
-import result from "./data/postgres/result"
+import { Routes, Route } from "react-router-dom";
+import MainPage from "./components/MainPage";
 
 function App() {
   const mainWidth = 200;
@@ -50,17 +48,10 @@ function App() {
 
 
   return (
-    <div className="App">
-      <div class="cmpContainer">
-        <Cmpview
-          size={mainWidth}
-          data={queryTimes}
-          margin={margin}
-          radius={radius}
-          barPadding={barPadding}
-        />
-      </div>
-    </div>
+    <Routes>
+      <Route path="/" element={<MainPage />} />
+    </Routes>
   );
 }
+
 export default App;
