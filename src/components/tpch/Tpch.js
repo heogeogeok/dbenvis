@@ -48,7 +48,7 @@ function Tpch() {
 
   return (
     <>
-      <QueryPlanView />
+      <QueryPlanView files={files} />
       <CompareView
         size={mainWidth}
         data={queryTimes}
