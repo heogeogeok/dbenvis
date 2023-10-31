@@ -3,7 +3,7 @@ import QueryPlanView from "./QueryPlanView";
 import CompareView from "./CompareView";
 import resultPath from "../../data/tpch-result";
 
-function Tpch() {
+function Tpch({ files }) {
   const [fileContents, setFileContents] = useState("");
 
   const mainWidth = 200;
