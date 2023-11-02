@@ -2,12 +2,24 @@ import { useState, useEffect } from "react";
 import QueryPlanView from "./QueryPlanView";
 import CompareView from "./CompareView";
 import resultPath from "../../data/tpch-result";
+import "../../assets/stylesheets/Tpch.css";
+import {
+  Card,
+  Typography,
+  List,
+  ListItem,
+  ListItemPrefix,
+  Accordion,
+  AccordionHeader,
+  AccordionBody,
+} from "@material-tailwind/react";
 
 function Tpch() {
   const [fileContents, setFileContents] = useState("");
 
-  const mainWidth = 200;
-  const subWidth = 150;
+  const size = 1000;
+  const width = 430;
+  const height = 200; 
   const margin = 20;
   const radius = 1.5;
   const barPadding = 0.3;
@@ -28,6 +40,8 @@ function Tpch() {
       queryTimes.push({ queryNumber, timeInSeconds });
     }
 
+    console.log(queryTimes);
+
     return queryTimes;
   };
 
@@ -47,16 +61,26 @@ function Tpch() {
   }, [fileContents]);
 
   return (
-    <>
-      <QueryPlanView />
-      <CompareView
-        size={mainWidth}
-        data={queryTimes}
-        margin={margin}
-        radius={radius}
-        barPadding={barPadding}
-      />
-    </>
+    <div className="App">
+      <div className="query-plan-container">
+        <Card>
+          <QueryPlanView />
+        </Card>
+      </div>
+      <div className="comparison-view-container">
+      <Card>
+        <CompareView
+          size={size}
+          height={height}
+          width={width}
+          data={queryTimes}
+          margin={margin}
+          radius={radius}
+          barPadding={barPadding}
+        />
+       </Card>
+      </div>
+    </div>
   );
 }
 
