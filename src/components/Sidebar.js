@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import Logo from "../assets/images/logo.png";
 import "../assets/stylesheets/Sidebar.css";
 import {
@@ -17,11 +17,53 @@ import {
 } from "@heroicons/react/24/solid";
 import { ChevronRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 
-export function Sidebar() {
-  const [open, setOpen] = React.useState(0);
+export function Sidebar({ selected, setSelected, files, setFiles }) {
+  const [open, setOpen] = useState(0);
 
   const handleOpen = (value) => {
     setOpen(open === value ? 0 : value);
+  };
+
+  const handleSelect = (value) => {
+    if (value !== selected && selected !== null) {
+      const confirmed = window.confirm(
+        "현재 내용이 저장되지 않습니다.\n변경하시겠습니까?"
+      );
+
+      if (confirmed) {
+        setSelected(value);
+        setFiles([]);
+      }
+    }
+
+    if (selected === null) {
+      setSelected(value);
+      setFiles([]);
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const selectedFiles = e.target.files;
+    const fileList = [...files, ...selectedFiles];
+
+    setFiles(fileList);
+  };
+
+  const handleFileRemove = (removeTargetId) => {
+    const dataTransfer = new DataTransfer();
+
+    files.forEach((file) => {
+      /* 삭제 대상 아닌 파일들만 dataTransfer에 추가 */
+      if (file.lastModified !== removeTargetId) {
+        dataTransfer.items.add(file);
+      }
+    });
+
+    const fileInput = document.querySelector("#file-input");
+    fileInput.files = dataTransfer.files;
+
+    /* File List에서 해당 첨부파일 삭제 */
+    setFiles(Array.from(dataTransfer.files));
   };
 
   return (
@@ -59,7 +101,7 @@ export function Sidebar() {
           </ListItem>
           <AccordionBody className="py-1">
             <List className="p-0">
-              <ListItem>
+              <ListItem onClick={() => handleSelect("TPC-H")}>
                 <ListItemPrefix>
                   <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
                 </ListItemPrefix>
@@ -94,7 +136,7 @@ export function Sidebar() {
           </ListItem>
           <AccordionBody className="py-1">
             <List className="p-0">
-              <ListItem>
+              <ListItem onClick={() => handleSelect("sysbench")}>
                 <ListItemPrefix>
                   <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
                 </ListItemPrefix>
@@ -104,13 +146,47 @@ export function Sidebar() {
           </AccordionBody>
         </Accordion>
         <hr className="my-2 border-blue-gray-50" />
-        <Typography color="blue-gray" className="mr-auto font-normal mb-2">
-          Upload Result
+        {/* 파일 업로드 */}
+        <Typography variant="small" className="font-semibold pb-1">
+          Upload Results
         </Typography>
-        <input
-          type="file"
-          className="file-input file-input-bordered file-input-info file-input-xs w-full max-w-xs"
-        />
+        <label htmlFor="attachment">
+          <input
+            type="file"
+            id="file-input"
+            className="file-input file-input-xs w-full"
+            disabled={selected === null}
+            onChange={handleFileUpload}
+          />
+          <ul>
+            {files.map((file) => (
+              <Typography
+                as="li"
+                variant="small"
+                key={file.lastModified}
+                className="pt-2 pl-4"
+              >
+                {file.name}{" "}
+                <button onClick={() => handleFileRemove(file.lastModified)}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-3 w-3"
+                    fill="none"
+                    viewBox="0 0 12 12"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1"
+                      d="M3 9L9 3M3 3l6 6"
+                    />
+                  </svg>
+                </button>
+              </Typography>
+            ))}
+          </ul>
+        </label>
       </List>
     </Card>
   );

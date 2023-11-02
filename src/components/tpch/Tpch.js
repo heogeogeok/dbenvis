@@ -4,17 +4,10 @@ import CompareView from "./CompareView";
 import resultPath from "../../data/tpch-result";
 import "../../assets/stylesheets/Tpch.css";
 import {
-  Card,
-  Typography,
-  List,
-  ListItem,
-  ListItemPrefix,
-  Accordion,
-  AccordionHeader,
-  AccordionBody,
+  Card
 } from "@material-tailwind/react";
 
-function Tpch() {
+function Tpch({ files }) {
   const [fileContents, setFileContents] = useState("");
 
   const size = 1000;
@@ -64,21 +57,21 @@ function Tpch() {
     <div className="App">
       <div className="query-plan-container">
         <Card>
-          <QueryPlanView />
+          <QueryPlanView files={files} />
         </Card>
       </div>
       <div className="comparison-view-container">
       <Card>
         <CompareView
-          size={size}
-          height={height}
-          width={width}
-          data={queryTimes}
-          margin={margin}
-          radius={radius}
-          barPadding={barPadding}
+           size={size}
+           height={height}
+           width={width}
+           data={queryTimes}
+           margin={margin}
+           radius={radius}
+           barPadding={barPadding}
         />
-       </Card>
+      </Card>
       </div>
     </div>
   );
