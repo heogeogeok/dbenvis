@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 function QueryPlanView({ files }) {
   const [contents, setContents] = useState([]);
+  
 
   useEffect(() => {
     if (files && files.length > 0) {

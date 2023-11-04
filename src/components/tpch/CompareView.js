@@ -1,14 +1,56 @@
-import React, {useRef, useEffect} from "react";
+import React, {useRef, useEffect, useState} from "react";
 import * as d3 from "d3";
 
-const CompareView = (props) => {
+const CompareView = ({files, ...props}) => {
     
     const barplotSvg = useRef(null);
     const svgSize = props.margin * 2 + props.size;
 
+    const [contents, setContents] = useState([]);
+    const [queryTimes, setQueryTimes] = useState([]);
+
+
+    /* 데이터 파싱 */
+    const parseQueryTimes = (fileContents) => {
+      const regex = /Query (\d+) \*\*[\s\S]+?Time: (\d+\.\d+) ms/g;
+      const queryTimes = [];
+      let match;
+  
+      while ((match = regex.exec(fileContents)) !== null) {
+        const queryNumber = match[1];
+        const timeInSeconds = parseFloat(match[2]) / 1000;
+        queryTimes.push({ queryNumber, timeInSeconds });
+      }
+  
+      console.log(queryTimes);
+  
+      return queryTimes;
+    };
+
+    useEffect(() => {
+      if (files && files.length > 0) {
+        const fileContents = [];
+  
+        /* Create a FileReader for each file */
+        files.forEach((file) => {
+          const fileReader = new FileReader();
+  
+          fileReader.onload = () => {
+            fileContents.push(fileReader.result);
+            setContents(fileContents);
+          };
+  
+          /* Read the file as text */
+          fileReader.readAsText(file);
+        }
+        );
+        const extractedQueryTimes = parseQueryTimes(contents);
+        setQueryTimes(extractedQueryTimes);
+      }
+    }, [files]);
+
     useEffect(() => {
         const barPadding = props.barPadding;
-        const data = props.data;
         const margin = props.margin;
         const height = props.height;
         const width = props.width;
@@ -16,23 +58,13 @@ const CompareView = (props) => {
         // Create an SVG container for the bar plot
         d3.select(barplotSvg.current).selectAll("*").remove();
 
-        // Add a text label for the title "Duration"
-        d3.select(barplotSvg.current)
-            .attr("width", svgSize)
-            .attr("height", svgSize)
-            .append("text")
-            .attr("x", margin) 
-            .attr("y", margin + 20)
-            .attr("text-anchor", "start")
-            .attr("font-weight", "bold");
-        
 
         // Extract query numbers and times from the data array
-        const queryNumbers = data.map((entry) => entry.queryNumber);
-        const queryTimes = data.map((entry) => entry.timeInSeconds);
+        const queryNumbers = queryTimes.map((entry) => entry.queryNumber);
+        const queryDuration =  queryTimes.map((entry) => entry.timeInSeconds);
 
         console.log(queryNumbers);
-        console.log(queryTimes);
+        console.log(queryDuration);
 
         // Create scales for x and y
         const xBarScale = d3.scaleBand()
@@ -42,7 +74,7 @@ const CompareView = (props) => {
             .padding(barPadding);
 
         const yBarScale = d3.scaleLinear()
-            .domain([0, d3.max(queryTimes)])
+            .domain([0, d3.max(queryDuration)])
             .range([height, 0]);
 
         // Create x and y axes
@@ -50,7 +82,6 @@ const CompareView = (props) => {
         const yBarAxis = d3.axisLeft(yBarScale);
         const barplotContainer = d3.select(barplotSvg.current);
 
-       
         // Draw x axis
         barplotContainer.append('g')
             .attr('transform', `translate(${margin}, ${height + margin})`)
@@ -64,7 +95,7 @@ const CompareView = (props) => {
         // Create bars
         barplotContainer.append('g')
             .selectAll()
-            .data(data)
+            .data(queryTimes)
             .join("rect")
             .attr("x", (d) => xBarScale(d.queryNumber) + margin)
             .attr("y", (d) => yBarScale(d.timeInSeconds) + margin)
@@ -73,15 +104,12 @@ const CompareView = (props) => {
             .attr("fill", "steelblue");
     }, [props]);
 
-    return (
-        
+    return (     
         <div className="mt-64">
             Duration
             <svg ref={barplotSvg} width={svgSize} height={svgSize}></svg>
         </div>
-
     )
-    
 }
 
 export default CompareView;
