@@ -9,6 +9,7 @@ const CompareView = ({files, ...props}) => {
     const [contents, setContents] = useState([]);
     const [queryTimes, setQueryTimes] = useState([]);
 
+    const [selectedBar, setSelectedBar] = useState(null);
 
     /* 데이터 파싱 */
     const parseQueryTimes = (fileContents) => {
@@ -44,16 +45,20 @@ const CompareView = ({files, ...props}) => {
           fileReader.readAsText(file);
         }
         );
-        const extractedQueryTimes = parseQueryTimes(contents);
-        setQueryTimes(extractedQueryTimes);
       }
     }, [files]);
+
+    useEffect(() => {
+      const extractedQueryTimes = parseQueryTimes(contents);
+      setQueryTimes(extractedQueryTimes);
+    }, [contents]);
 
     useEffect(() => {
         const barPadding = props.barPadding;
         const margin = props.margin;
         const height = props.height;
         const width = props.width;
+
 
         // Create an SVG container for the bar plot
         d3.select(barplotSvg.current).selectAll("*").remove();
@@ -92,6 +97,7 @@ const CompareView = ({files, ...props}) => {
             .attr('transform', `translate(${margin}, ${margin})`)
             .call(yBarAxis);
 
+
         // Create bars
         barplotContainer.append('g')
             .selectAll()
@@ -101,13 +107,19 @@ const CompareView = ({files, ...props}) => {
             .attr("y", (d) => yBarScale(d.timeInSeconds) + margin)
             .attr("width", xBarScale.bandwidth())
             .attr("height", (d) => height - yBarScale(d.timeInSeconds))
-            .attr("fill", "steelblue");
-    }, [props]);
+            .attr("fill", "steelblue")
+            .on('click', (d) => {
+              setSelectedBar(d);
+              barplotContainer.attr('opacity', '0.5');
+            });
+
+    }, [props, queryTimes, selectedBar]);
 
     return (     
         <div className="mt-64">
             Duration
-            <svg ref={barplotSvg} width={svgSize} height={svgSize}></svg>
+            <svg ref={barplotSvg} width={svgSize} height={svgSize}>
+            </svg>
         </div>
     )
 }
