@@ -84,13 +84,7 @@ export function Sidebar({ selected, setSelected, files, setFiles }) {
   };
 
   const handleCheckboxChange = (queryNumber) => {
-    const updatedQueries = [...selectedQueries];
-
-    if (updatedQueries.includes(queryNumber)) {
-      updatedQueries.splice(updatedQueries.indexOf(queryNumber), 1);
-    } else {
-      updatedQueries.push(queryNumber);
-    }
+    const updatedQueries = [queryNumber];
 
     setSelectedQueries(updatedQueries);
   };
