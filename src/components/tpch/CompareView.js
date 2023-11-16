@@ -3,12 +3,12 @@ import * as d3 from 'd3'
 
 const CompareView = ({ files, ...props }) => {
   const barplotSvg = useRef(null)
+  const selectedQuerySvg = useRef(null)
   const svgSize = props.margin * 2 + props.size
 
   const [contents, setContents] = useState([])
   const [queryTimes, setQueryTimes] = useState([])
-
-  const [selectedBar, setSelectedBar] = useState(null)
+  const [selectedQuery, setSelectedQuery] = useState({})
 
   /* 데이터 파싱 */
   const parseQueryTimes = fileContents => {
@@ -26,6 +26,7 @@ const CompareView = ({ files, ...props }) => {
 
     return queryTimes
   }
+
 
   useEffect(() => {
     if (files && files.length > 0) {
@@ -97,10 +98,80 @@ const CompareView = ({ files, ...props }) => {
       .attr('transform', `translate(${margin}, ${margin})`)
       .call(yBarAxis)
 
+    function onMouseOver(d, i) {
+      d3.select(this).transition().duration(400).style('fill', 'red')
+    }
+
+    function onMouseOut(d, i) {
+      d3.select(this).transition().duration(400).style('fill', 'steelblue')
+    }
+
+    const drawBarchart = (selectedQuery) => {
+      console.log('Selected Query: ' + selectedQuery)
+      const selectedNumber = selectedQuery.queryNumber
+      const selectedDuration = selectedQuery.timeInSeconds
+      console.log('queryNumber: ' + selectedNumber)
+      console.log('queryDuration: ' + selectedDuration)
+
+      const barPadding = props.barPadding
+      const margin = props.margin
+      const height = props.height
+      const width = props.width
+  
+      // Create an SVG container for the bar plot
+      d3.select(selectedQuerySvg.current).selectAll('*').remove()
+  
+      // Create scales for x and y
+      const xScale = d3
+        .scaleBand()
+        .domain([selectedNumber])
+        .range([0, width])
+        .align(0.5)
+        .padding(barPadding)
+  
+      const yScale = d3
+        .scaleLinear()
+        .domain([0, selectedDuration])
+        .range([height, 0])
+  
+      // Create x and y axes
+      const xAxis = d3.axisBottom(xScale)
+      const yAxis = d3.axisLeft(yScale)
+      const selectedContainer = d3.select(selectedQuerySvg.current)
+  
+      // Draw x axis
+      selectedContainer
+        .append('g')
+        .attr('transform', `translate(${margin}, ${height + margin})`)
+        .call(xAxis)
+  
+      // Draw y axis
+      selectedContainer
+        .append('g')
+        .attr('transform', `translate(${margin}, ${margin})`)
+        .call(yAxis)
+      
+      selectedContainer
+        .append('g')
+        .selectAll('rect')
+        .data([selectedQuery])
+        .join('rect')
+        .attr('x', d => xScale(d.queryNumber) + margin)
+        .attr('y', d => yScale(d.timeInSeconds) + margin)
+        .attr('width', xScale.bandwidth())
+        .attr('height', d => height - yScale(d.timeInSeconds))
+        .attr('fill', 'steelblue')
+    }
+
+    const onMouseClick = (d, i) => {
+      setSelectedQuery(i)
+      drawBarchart(selectedQuery)
+    }
+
     // Create bars
     barplotContainer
       .append('g')
-      .selectAll()
+      .selectAll('rect')
       .data(queryTimes)
       .join('rect')
       .attr('x', d => xBarScale(d.queryNumber) + margin)
@@ -108,16 +179,21 @@ const CompareView = ({ files, ...props }) => {
       .attr('width', xBarScale.bandwidth())
       .attr('height', d => height - yBarScale(d.timeInSeconds))
       .attr('fill', 'steelblue')
-
-    barplotContainer.selectAll('.bar').on('click', d => {
-      alert('abcd')
-    })
-  }, [props, queryTimes, selectedBar])
+      .on('mouseover', onMouseOver)
+      .on('mouseout', onMouseOut)
+      .on('click', onMouseClick)
+  }, [props, queryTimes, selectedQuery])
 
   return (
-    <div className="mt-64">
-      Duration
-      <svg ref={barplotSvg} width={svgSize} height={svgSize}></svg>
+    <div>
+      <div className='container'>
+        <div>Selected Query</div>
+        <svg ref={selectedQuerySvg} width={svgSize} height={svgSize} />
+        </div>
+        <div>Duration</div>
+          <svg ref={barplotSvg} width={svgSize} height={svgSize}></svg>
+        <div>
+      </div>
     </div>
   )
 }
