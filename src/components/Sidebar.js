@@ -30,6 +30,11 @@ import { ChevronRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 export function Sidebar({ selected, setSelected, files, setFiles }) {
   const [open, setOpen] = useState(0);
   const [selectedQueries, setSelectedQueries] = useState([]);
+  const [expand, setExpand] = useState(false);
+
+  const handleExpand = () => {
+    setExpand(expand === true ? false : true);
+  };
 
 
   const handleOpen = (value) => {
@@ -126,11 +131,11 @@ export function Sidebar({ selected, setSelected, files, setFiles }) {
           </ListItem>
           <AccordionBody className="py-1">
             <List className="p-0">
-              <ListItemButton onClick={() => handleSelect("TPC-H")}>
+              <ListItemButton onClick={() => { handleExpand(); handleSelect("TPC-H")}}>
                 <ListItemText primary="TPC-H"/>
-                {open ? <ExpandLess /> : <ExpandMore />}
+                  {expand ? <ExpandLess /> : <ExpandMore />}
               </ListItemButton>
-              <Collapse in={open} timeout="auto" unmountOnExit>
+              <Collapse in={expand} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                 {[...Array(21).keys()].map((queryNumber) => (
                       <ListItem
