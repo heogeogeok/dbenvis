@@ -26,11 +26,6 @@ function QueryPlanView({ files }) {
   return (
     <div>
       <h1>Query Plan View</h1>
-      <div>
-        {contents.map((content, index) => (
-          <p key={index}>{content}</p>
-        ))}
-      </div>
     </div>
   );
 }

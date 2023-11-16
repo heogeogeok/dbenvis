@@ -4,7 +4,10 @@ import * as d3 from 'd3'
 const CompareView = ({ files, ...props }) => {
   const barplotSvg = useRef(null)
   const selectedQuerySvg = useRef(null)
-  const svgSize = props.margin * 2 + props.size
+  const width = props.width
+  const selectedWidth = 350
+  const selectedHeight = 350
+  const barHeight = 350
 
   const [contents, setContents] = useState([])
   const [queryTimes, setQueryTimes] = useState([])
@@ -21,8 +24,6 @@ const CompareView = ({ files, ...props }) => {
       const timeInSeconds = parseFloat(match[2]) / 1000
       queryTimes.push({ queryNumber, timeInSeconds })
     }
-
-    console.log(queryTimes)
 
     return queryTimes
   }
@@ -65,9 +66,6 @@ const CompareView = ({ files, ...props }) => {
     const queryNumbers = queryTimes.map(entry => entry.queryNumber)
     const queryDuration = queryTimes.map(entry => entry.timeInSeconds)
 
-    console.log(queryNumbers)
-    console.log(queryDuration)
-
     // Create scales for x and y
     const xBarScale = d3
       .scaleBand()
@@ -107,11 +105,8 @@ const CompareView = ({ files, ...props }) => {
     }
 
     const drawBarchart = (selectedQuery) => {
-      console.log('Selected Query: ' + selectedQuery)
       const selectedNumber = selectedQuery.queryNumber
       const selectedDuration = selectedQuery.timeInSeconds
-      console.log('queryNumber: ' + selectedNumber)
-      console.log('queryDuration: ' + selectedDuration)
 
       const barPadding = props.barPadding
       const margin = props.margin
@@ -188,11 +183,11 @@ const CompareView = ({ files, ...props }) => {
     <div>
       <div className='container'>
         <div>Selected Query</div>
-        <svg ref={selectedQuerySvg} width={svgSize} height={svgSize} />
+        <svg ref={selectedQuerySvg} width={selectedWidth} height={selectedHeight} />
         </div>
+      <div className='container'>
         <div>Duration</div>
-          <svg ref={barplotSvg} width={svgSize} height={svgSize}></svg>
-        <div>
+        <svg ref={barplotSvg} width={width} height={barHeight}></svg>
       </div>
     </div>
   )
