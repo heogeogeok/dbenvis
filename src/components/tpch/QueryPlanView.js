@@ -1,36 +1,55 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import * as d3 from "d3";
 
 function QueryPlanView({ files }) {
   const [contents, setContents] = useState([]);
-  
+  const [queryPlans, setQueryPlans] = useState([]);
 
   useEffect(() => {
     if (files && files.length > 0) {
       const fileContents = [];
 
-      /* Create a FileReader for each file */
+      // create a FileReader for each file */
       files.forEach((file) => {
         const fileReader = new FileReader();
 
         fileReader.onload = () => {
           fileContents.push(fileReader.result);
-          setContents(fileContents);
+          setContents((current) => [...current, ...fileContents]);
         };
 
-        /* Read the file as text */
+        // read the file as text
         fileReader.readAsText(file);
       });
     }
   }, [files]);
 
+  useEffect(() => {
+    // parse query plan and convert it as JSON
+    const parsedQueryPlans = contents.map((content) => {
+      const start = content.indexOf("[");
+      const end = content.lastIndexOf("]");
+
+      const raw = JSON.stringify(
+        content.substring(start, end + 1),
+        null,
+        2
+      ).replace(/\+$/gm, "");
+
+      console.log(raw);
+
+      return JSON.parse(raw);
+    });
+
+    setQueryPlans((current) => [...current, ...parsedQueryPlans]);
+  }, [contents]);
+
+  useEffect(() => {}, [queryPlans]);
+
   return (
     <div>
       <h1>Query Plan View</h1>
-      <div>
-        {contents.map((content, index) => (
-          <p key={index}>{content}</p>
-        ))}
-      </div>
+      <div>{queryPlans}</div>
     </div>
   );
 }
