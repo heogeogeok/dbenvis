@@ -1,15 +1,13 @@
 import { useState } from "react";
 import Logo from "../assets/images/logo.png";
 import "../assets/stylesheets/Sidebar.css";
-import FormControlLabel from '@mui/material/FormControlLabel';
-import { Collapse, FormGroup } from "@mui/material";
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Checkbox from '@mui/material/Checkbox';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import IconButton from "@material-tailwind/react";
+import { Collapse } from "@mui/material";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Checkbox from "@mui/material/Checkbox";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 
 import {
   Card,
@@ -35,7 +33,6 @@ export function Sidebar({ selected, setSelected, files, setFiles }) {
   const handleExpand = () => {
     setExpand(expand === true ? false : true);
   };
-
 
   const handleOpen = (value) => {
     setOpen(open === value ? 0 : value);
@@ -89,7 +86,6 @@ export function Sidebar({ selected, setSelected, files, setFiles }) {
     setSelectedQueries(updatedQueries);
   };
 
-
   return (
     <Card className="h-[calc(100vh-0.5rem)] w-full max-w-[16rem] p-4 shadow-xl shadow-blue-gray-900/5">
       <div className="flex items-center p-4 gap-2">
@@ -125,41 +121,38 @@ export function Sidebar({ selected, setSelected, files, setFiles }) {
           </ListItem>
           <AccordionBody className="py-1">
             <List className="p-0">
-              <ListItemButton onClick={() => { handleExpand(); handleSelect("TPC-H")}}>
-                <ListItemText primary="TPC-H"/>
-                  {expand ? <ExpandLess /> : <ExpandMore />}
+              <ListItemButton
+                onClick={() => {
+                  handleExpand();
+                  handleSelect("TPC-H");
+                }}
+              >
+                <ListItemText primary="TPC-H" />
+                {expand ? <ExpandLess /> : <ExpandMore />}
               </ListItemButton>
               <Collapse in={expand} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                {[...Array(21).keys()].map((queryNumber) => (
-                      <ListItem
-                        key={queryNumber + 1}
-                        secondaryAction={
-                          <IconButton edge="end" aria-label="comments">
-                            {/* Add the appropriate icon for secondaryAction */}
-                          </IconButton>
-                        }
-                        disablePadding
+                <List component="div" disablepadding="true">
+                  {[...Array(21).keys()].map((queryNumber) => (
+                    <ListItem key={queryNumber + 1}>
+                      <ListItemButton
+                        role={undefined}
+                        onClick={() => handleCheckboxChange(queryNumber + 1)}
+                        dense
                       >
-                        <ListItemButton
-                          role={undefined}
-                          onClick={() => handleCheckboxChange(queryNumber + 1)}
-                          dense
-                        >
-                          <ListItemIcon>
-                            <Checkbox
-                              checked={selectedQueries.includes(queryNumber + 1)}
-                              tabIndex={-1}
-                              disableRipple
-                            />
-                          </ListItemIcon>
-                          <ListItemText
-                            id={queryNumber + 1}
-                            primary={`Query ${queryNumber + 1}`}
+                        <ListItemIcon>
+                          <Checkbox
+                            checked={selectedQueries.includes(queryNumber + 1)}
+                            tabIndex={-1}
+                            disableRipple
                           />
-                        </ListItemButton>
-                      </ListItem>
-                    ))}
+                        </ListItemIcon>
+                        <ListItemText
+                          id={queryNumber + 1}
+                          primary={`Query ${queryNumber + 1}`}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
                 </List>
               </Collapse>
             </List>
