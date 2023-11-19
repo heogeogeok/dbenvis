@@ -119,7 +119,7 @@ function Sidebar({ selected, setSelected, files, setFiles }) {
                             <Checkbox
                               className="w-4 h-4 hover:before:opacity-0"
                               checked={selectedQuery === queryNumber + 1}
-                              onClick={() =>
+                              onChange={() =>
                                 handleCheckboxChange(queryNumber + 1)
                               }
                               ripple={false}
