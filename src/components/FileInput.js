@@ -3,16 +3,23 @@ import "../assets/stylesheets/FileInput.css";
 function FileInput({ selected, files, setFiles }) {
   const handleFileUpload = (e) => {
     const newFile = e.target.files;
-    const fileList = [...files, ...newFile];
 
-    setFiles(fileList);
+    // 중복 여부 확인
+    const exists = files.some(
+      (file) => file.lastModified === newFile[0].lastModified
+    );
+
+    if (!exists) {
+      const fileList = [...files, ...newFile];
+      setFiles(fileList);
+    }
   };
 
   const handleFileRemove = (removeTargetId) => {
     const dataTransfer = new DataTransfer();
 
     files.forEach((file) => {
-      /* 삭제 대상 아닌 파일들만 dataTransfer에 추가 */
+      // 삭제 대상 아닌 파일들만 dataTransfer에 추가
       if (file.lastModified !== removeTargetId) {
         dataTransfer.items.add(file);
       }
@@ -21,7 +28,7 @@ function FileInput({ selected, files, setFiles }) {
     const fileInput = document.querySelector("#file-input");
     fileInput.files = dataTransfer.files;
 
-    /* File List에서 해당 첨부파일 삭제 */
+    // File List에서 해당 첨부파일 삭제
     setFiles(Array.from(dataTransfer.files));
   };
 
@@ -40,8 +47,8 @@ function FileInput({ selected, files, setFiles }) {
         </div>
         <ul>
           {files.map((file) => (
-            <div className="file-list">
-              <p className="file-name">{file.name} </p>
+            <li key={file.lastModified} className="file-list">
+              <p className="file-name">{file.name}</p>
               <button onClick={() => handleFileRemove(file.lastModified)}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -58,7 +65,7 @@ function FileInput({ selected, files, setFiles }) {
                   />
                 </svg>
               </button>
-            </div>
+            </li>
           ))}
         </ul>
       </label>

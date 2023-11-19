@@ -1,3 +1,7 @@
+.tpch-container {
+  display: flex;
+}
+
 .query-plan-container {
   width: 600px;
   display: inline-block;
