@@ -6,13 +6,6 @@ import { Card } from "@material-tailwind/react";
 function Tpch(props) {
   const { resultFiles, explainFiles } = props;
 
-  const size = 1000;
-  const width = 430;
-  const height = 200;
-  const margin = 20;
-  const radius = 1.5;
-  const barPadding = 0.3;
-
   return (
     <div className="tpch-container">
       <div className="view-container">
@@ -22,15 +15,7 @@ function Tpch(props) {
       </div>
       <div className="view-container">
         <Card>
-          <CompareView
-            files={resultFiles}
-            size={size}
-            height={height}
-            width={width}
-            margin={margin}
-            radius={radius}
-            barPadding={barPadding}
-          />
+          <CompareView files={resultFiles} />
         </Card>
       </div>
     </div>

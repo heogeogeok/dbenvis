@@ -5,8 +5,11 @@
 
 .view-container {
   width: 550px;
+  height: 90vh;
   padding: 5px;
   text-align: center;
+  overflow-x: hidden; /* hide when horizontally overflowed */
+  overflow-y: auto; /* scroll when vertically overflowed */
 }
 
 .title {
@@ -16,11 +19,17 @@
   padding: 10px;
 }
 
-.rect {
-  cursor: pointer;
+.chart-container {
+  padding-bottom: 20px;
 }
 
-.path {
-  fill: none;
-  stroke: black;
+.plan-container {
+  display: flex;
+  align-items: center;
+}
+
+.node-label {
+  font-family: "NanumSquareB";
+  font-size: x-small;
+  background-color: white;
 }

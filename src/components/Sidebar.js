@@ -117,7 +117,7 @@ function Sidebar(props) {
                     <p className="sub-menu-text">TPC-H</p>
                   </AccordionHeader>
                   {/* 쿼리 선택 */}
-                  <AccordionBody className="p-0">
+                  <AccordionBody className="h-40 p-0 overflow-y-auto">
                     <List>
                       {[...Array(21).keys()].map((queryNumber) => (
                         <ListItem

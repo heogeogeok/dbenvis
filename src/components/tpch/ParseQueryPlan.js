@@ -27,7 +27,7 @@ function ParseQueryPlan({ files }) {
     }
   }, [files]);
 
-  /* input 전처리 + query plan 업데이트 */
+  /* input preprocessing + query plan update */
   useEffect(() => {
     const planContents = [];
 
@@ -52,9 +52,16 @@ function ParseQueryPlan({ files }) {
   return (
     <div>
       <h1 className="title">Query Plan</h1>
-      {queryPlans.map((queryPlan, index) => (
-        <QueryPlanView key={index} plan={queryPlan.Plan} />
-      ))}
+      <div className="plan-container">
+        {queryPlans.map((queryPlan, index) => (
+          <QueryPlanView
+            key={index}
+            width={400 / queryPlans.length}
+            marginX={50 / queryPlans.length}
+            plan={queryPlan.Plan}
+          />
+        ))}
+      </div>
     </div>
   );
 }
