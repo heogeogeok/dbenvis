@@ -1,0 +1,24 @@
+.header {
+  position: fixed; /* 고정 */
+  top: 0;
+  width: 100%;
+  background-color: white;
+  z-index: 1000; /* 가장 앞에 위치 하도록 */
+}
+
+.header-items {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 5px 0px;
+}
+
+.header-logo {
+  width: 20px;
+  height: 20px;
+}
+
+.header-name {
+  font-family: "NanumSquareEB";
+  font-size: x-large;
+}

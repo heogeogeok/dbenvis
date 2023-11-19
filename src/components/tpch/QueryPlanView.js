@@ -14,7 +14,7 @@ const QueryPlanView = (props) => {
       .attr("width", width)
       .attr("height", height);
 
-    const treeLayout = d3.tree().size([height, width]);
+    const treeLayout = d3.tree().size([300, 300]);
     const root = d3.hierarchy(data);
     const treeData = treeLayout(root);
 
