@@ -25,26 +25,22 @@ function ParseQueryPlan({ files }) {
   }, [files]);
 
   useEffect(() => {
-    // parse query plan and extract "Plan" element
+    // preprocess the input
     contents.forEach((content) => {
       const regex = /\[([\s\S]*)]/;
       const match = content.match(regex);
 
-      console.log(match[1]);
-
       if (match) {
-        let planElement = match[1];
-        // remove every "+"
-        planElement = planElement.replace(/\+/g, "");
+        // extract plan and remove every "+"
+        let plan = match[1].replace(/\+/g, "");
 
-        setQueryPlans((current) => [...current, JSON.parse(planElement)]);
+        // replace "Plans" with "children"
+        plan = plan.replace(/"Plans":/g, '"children":');
+
+        setQueryPlans((current) => [...current, JSON.parse(plan)]);
       }
     });
   }, [contents]);
-
-  useEffect(() => {
-    console.log("queryPlans changed:", queryPlans);
-  }, [queryPlans]);
 
   return (
     <div>

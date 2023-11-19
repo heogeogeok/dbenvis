@@ -1,28 +1,27 @@
 .query-plan-container {
-    width: 50%; 
-    display: inline-block;
-    vertical-align: top; 
-    text-align: center;
+  width: 600px;
+  display: inline-block;
+  vertical-align: top;
+  text-align: center;
 }
 
 .comparison-view-container {
-    width: 800;
-    height: 2000;
-    display: inline-block;
-    vertical-align: top;
-    text-align: center;
+  width: 600px;
+  display: inline-block;
+  vertical-align: top;
+  text-align: center;
 }
 
-.container{
-    display: flex;
-    justify-content: center;
-    -ms-user-select: none; 
-    -moz-user-select: -moz-none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
-    user-select: none;
+.container {
+  display: flex;
+  justify-content: center;
 }
 
 .rect {
-    cursor: pointer;
+  cursor: pointer;
+}
+
+.path {
+  fill: none;
+  stroke: black;
 }
