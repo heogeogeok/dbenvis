@@ -20,3 +20,10 @@
   fill: none;
   stroke: black;
 }
+
+.title {
+  font-family: "NanumSquareEB";
+  font-size: large;
+  color: black;
+  padding: 10px;
+}

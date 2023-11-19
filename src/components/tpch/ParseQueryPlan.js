@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import QueryPlanView from "./QueryPlanView";
+import "../../assets/stylesheets/Tpch.css";
 
 function ParseQueryPlan({ files }) {
   const [contents, setContents] = useState([]);
   const [queryPlans, setQueryPlans] = useState([]);
 
   useEffect(() => {
-    if (files && files.length > 0) {
+    if (files && files.length == 0) {
+      // 업로드 한 파일 없는 경우
+      setContents([]);
+    } else if (files && files.length > 0) {
       const fileContents = [];
 
       // create a FileReader for each file
@@ -15,7 +19,7 @@ function ParseQueryPlan({ files }) {
 
         fileReader.onload = () => {
           fileContents.push(fileReader.result);
-          setContents((current) => [...current, ...fileContents]);
+          setContents(fileContents);
         };
 
         // read the file as text
@@ -24,8 +28,10 @@ function ParseQueryPlan({ files }) {
     }
   }, [files]);
 
+  /* input 전처리 + query plan 업데이트 */
   useEffect(() => {
-    // preprocess the input
+    const planContents = [];
+
     contents.forEach((content) => {
       const regex = /\[([\s\S]*)]/;
       const match = content.match(regex);
@@ -34,17 +40,19 @@ function ParseQueryPlan({ files }) {
         // extract plan and remove every "+"
         let plan = match[1].replace(/\+/g, "");
 
-        // replace "Plans" with "children"
+        // d3의 계층구조 따르기 위해 "Plans"를 "children"으로 대체
         plan = plan.replace(/"Plans":/g, '"children":');
 
-        setQueryPlans((current) => [...current, JSON.parse(plan)]);
+        planContents.push(JSON.parse(plan));
       }
     });
+
+    setQueryPlans(planContents);
   }, [contents]);
 
   return (
     <div>
-      <h1>Query Plan View</h1>
+      <h1 className="title">Query Plan</h1>
       {queryPlans.map((queryPlan, index) => (
         <QueryPlanView key={index} plan={queryPlan.Plan} />
       ))}
