@@ -12,13 +12,13 @@ function Tpch({ files }) {
   const barPadding = 0.3;
 
   return (
-    <div className="container">
-      <div className="query-plan-container">
+    <div className="tpch-container">
+      <div className="view-container">
         <Card>
           <ParseQueryPlan files={files} />
         </Card>
       </div>
-      <div className="comparison-view-container">
+      <div className="view-container">
         <Card>
           <CompareView
             files={files}

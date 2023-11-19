@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
 
 const CompareView = ({ files, ...props }) => {
@@ -181,7 +181,7 @@ const CompareView = ({ files, ...props }) => {
   return (
     <div>
       <div className="container">
-        <div>Selected Query</div>
+        <h1 className="title">Query {selectedQuery.queryNumber} Duration</h1>
         <svg
           ref={selectedQuerySvg}
           width={selectedWidth}
@@ -189,7 +189,7 @@ const CompareView = ({ files, ...props }) => {
         />
       </div>
       <div className="container">
-        <div>Duration</div>
+        <h1 className="title">Duration</h1>
         <svg ref={barplotSvg} width={width} height={barHeight}></svg>
       </div>
     </div>

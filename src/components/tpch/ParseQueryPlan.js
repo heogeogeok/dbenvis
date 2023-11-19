@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import QueryPlanView from "./QueryPlanView";
-import "../../assets/stylesheets/Tpch.css";
 
 function ParseQueryPlan({ files }) {
   const [contents, setContents] = useState([]);
   const [queryPlans, setQueryPlans] = useState([]);
 
   useEffect(() => {
-    if (files && files.length == 0) {
+    if (files && files.length === 0) {
       // 업로드 한 파일 없는 경우
       setContents([]);
     } else if (files && files.length > 0) {

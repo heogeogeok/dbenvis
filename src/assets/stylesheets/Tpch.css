@@ -1,19 +1,19 @@
 .tpch-container {
   display: flex;
+  padding-left: 5px;
 }
 
-.query-plan-container {
-  width: 600px;
-  display: inline-block;
-  vertical-align: top;
+.view-container {
+  width: 550px;
+  padding: 5px;
   text-align: center;
 }
 
-.comparison-view-container {
-  width: 600px;
-  display: inline-block;
-  vertical-align: top;
-  text-align: center;
+.title {
+  font-family: "NanumSquareEB";
+  font-size: large;
+  color: black;
+  padding: 10px;
 }
 
 .rect {
@@ -23,11 +23,4 @@
 .path {
   fill: none;
   stroke: black;
-}
-
-.title {
-  font-family: "NanumSquareEB";
-  font-size: large;
-  color: black;
-  padding: 10px;
 }
