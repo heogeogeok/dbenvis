@@ -3,12 +3,13 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Tpch from "./tpch/Tpch";
 import Sysbench from "./sysbench/Sysbench";
-
 import "../App.css";
 
 function Layout() {
   const [selected, setSelected] = useState(null); // 선택한 benchmark
-  const [files, setFiles] = useState([]); // TODO: files가 여기 있는게 맞나?
+
+  const [resultFiles, setResultFiles] = useState([]);
+  const [explainFiles, setExplainFiles] = useState([]);
 
   return (
     <div className="container">
@@ -17,11 +18,15 @@ function Layout() {
         <Sidebar
           selected={selected}
           setSelected={setSelected}
-          files={files}
-          setFiles={setFiles}
+          resultFiles={resultFiles}
+          setResultFiles={setResultFiles}
+          explainFiles={explainFiles}
+          setExplainFiles={setExplainFiles}
         />
-        {selected === "TPC-H" && <Tpch files={files} />}
-        {selected === "sysbench" && <Sysbench files={files} />}
+        {selected === "TPC-H" && (
+          <Tpch resultFiles={resultFiles} explainFiles={explainFiles} />
+        )}
+        {selected === "sysbench" && <Sysbench files={resultFiles} />}
       </div>
     </div>
   );

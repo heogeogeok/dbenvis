@@ -1,6 +1,8 @@
 import "../assets/stylesheets/FileInput.css";
 
-function FileInput({ selected, files, setFiles }) {
+function FileInput(props) {
+  const { inputType, selected, files, setFiles } = props;
+
   const handleFileUpload = (e) => {
     const newFile = e.target.files;
 
@@ -34,7 +36,7 @@ function FileInput({ selected, files, setFiles }) {
 
   return (
     <div>
-      <p className="upload-text">Upload Results</p>
+      <p className="upload-text">{inputType}</p>
       <label htmlFor="attachment">
         <div className="py-1">
           <input

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import FileInput from "./FileInput";
 import "../assets/stylesheets/Sidebar.css";
-
 import {
   Card,
   List,
@@ -18,7 +17,16 @@ import {
 } from "@heroicons/react/24/solid";
 import { ChevronRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 
-function Sidebar({ selected, setSelected, files, setFiles }) {
+function Sidebar(props) {
+  const {
+    selected,
+    setSelected,
+    resultFiles,
+    setResultFiles,
+    explainFiles,
+    setExplainFiles,
+  } = props;
+
   const [open, setOpen] = useState([]);
   const [expand, setExpand] = useState(false);
 
@@ -37,13 +45,15 @@ function Sidebar({ selected, setSelected, files, setFiles }) {
 
       if (confirmed) {
         setSelected(value);
-        setFiles([]);
+        setResultFiles([]);
+        setExplainFiles([]);
       }
     }
 
     if (selected === null) {
       setSelected(value);
-      setFiles([]);
+      setResultFiles([]);
+      setExplainFiles([]);
     }
   };
 
@@ -57,7 +67,7 @@ function Sidebar({ selected, setSelected, files, setFiles }) {
 
   return (
     <Card className="main-card">
-      <List className="pt-2">
+      <List className="pt-4 gap-4">
         {/* 메인 메뉴 1: OLAP */}
         <Accordion
           open={open === 1}
@@ -175,9 +185,26 @@ function Sidebar({ selected, setSelected, files, setFiles }) {
             </List>
           </AccordionBody>
         </Accordion>
-        <hr className="mr-8 my-2 border-blue-gray-50" />
+        <hr className="mr-8 border-blue-gray-50" />
         {/* 결과 파일 업로드 */}
-        <FileInput selected={selected} files={files} setFiles={setFiles} />
+        <FileInput
+          inputType={"Upload Results"}
+          selected={selected}
+          files={resultFiles}
+          setFiles={setResultFiles}
+        />
+        {/* OLAP benchmark의 경우 query plan 추가 */}
+        {selected === "TPC-H" && (
+          <div>
+            <hr className="mr-8 my-4 border-blue-gray-50" />
+            <FileInput
+              inputType={"Upload Query Plans"}
+              selected={selected}
+              files={explainFiles}
+              setFiles={setExplainFiles}
+            />
+          </div>
+        )}
       </List>
     </Card>
   );
