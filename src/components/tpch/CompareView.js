@@ -1,17 +1,14 @@
-import React, { useRef, useEffect, useState } from 'react'
-import * as d3 from 'd3'
+import React, { useEffect, useState } from 'react'
+import { BarChart } from '@mui/x-charts/BarChart'
 
 const CompareView = ({ files, ...props }) => {
-  const barplotSvg = useRef(null)
-  const selectedQuerySvg = useRef(null)
-  const width = props.width
-  const selectedWidth = 350
-  const selectedHeight = 350
-  const barHeight = 350
-
   const [contents, setContents] = useState([])
   const [queryTimes, setQueryTimes] = useState([])
   const [selectedQuery, setSelectedQuery] = useState({})
+  const [xAxisData, setXAxisData] = useState([]);
+  const [seriesData, setSeriesData] = useState([]);
+  const [fileNames, setFileNames] = useState([]);
+
 
   /* 데이터 파싱 */
   const parseQueryTimes = fileContents => {
@@ -27,7 +24,11 @@ const CompareView = ({ files, ...props }) => {
 
     return queryTimes
   }
-
+  
+  const handleClick = (d, i) => {
+    // setSelectedQuery(queryTimes[i])
+    console.log('Query number: ' + selectedQuery.queryNumber)
+  }
 
   useEffect(() => {
     if (files && files.length > 0) {
@@ -45,6 +46,8 @@ const CompareView = ({ files, ...props }) => {
         /* Read the file as text */
         fileReader.readAsText(file)
       })
+      // Set contents after reading all files
+      setContents(fileContents);
     }
   }, [files])
 
@@ -54,141 +57,50 @@ const CompareView = ({ files, ...props }) => {
   }, [contents])
 
   useEffect(() => {
-    const barPadding = props.barPadding
-    const margin = props.margin
-    const height = props.height
-    const width = props.width
-
-    // Create an SVG container for the bar plot
-    d3.select(barplotSvg.current).selectAll('*').remove()
-
     // Extract query numbers and times from the data array
     const queryNumbers = queryTimes.map(entry => entry.queryNumber)
-    const queryDuration = queryTimes.map(entry => entry.timeInSeconds)
+    const newFileNames = contents.map((_, index) => `File ${index + 1}`);
+    const groupedData = [];
 
-    // Create scales for x and y
-    const xBarScale = d3
-      .scaleBand()
-      .domain(queryNumbers)
-      .range([0, width])
-      .align(0.5)
-      .padding(barPadding)
 
-    const yBarScale = d3
-      .scaleLinear()
-      .domain([0, d3.max(queryDuration)])
-      .range([height, 0])
+    contents.forEach((file, fileIndex) => {
+      const fileData = parseQueryTimes(file);
+      fileData.forEach((entry) => {
+        const groupIndex = entry.queryNumber - 1; // Adjust to 0-based index
+        if (!groupedData[groupIndex]) {
+          groupedData[groupIndex] = { queryNumber: entry.queryNumber };
+        }
+        groupedData[groupIndex][fileNames[fileIndex]] = entry.timeInSeconds;
+      });
+    });
 
-    // Create x and y axes
-    const xBarAxis = d3.axisBottom(xBarScale)
-    const yBarAxis = d3.axisLeft(yBarScale)
-    const barplotContainer = d3.select(barplotSvg.current)
+    const newXAxisData = Array.from({ length: 21 }, (_, i) => i + 1);
+    const newSeriesData = fileNames.map((fileName, fileIndex) =>
+      queryNumbers.map((queryNumber) => groupedData[queryNumber - 1][fileName])
+    );
 
-    // Draw x axis
-    barplotContainer
-      .append('g')
-      .attr('transform', `translate(${margin}, ${height + margin})`)
-      .call(xBarAxis)
 
-    // Draw y axis
-    barplotContainer
-      .append('g')
-      .attr('transform', `translate(${margin}, ${margin})`)
-      .call(yBarAxis)
+    setXAxisData(newXAxisData);
+    setFileNames(newFileNames);
+    setSeriesData(newSeriesData);
 
-    function onMouseOver(d, i) {
-      d3.select(this).transition().duration(400).style('fill', 'red')
-    }
-
-    function onMouseOut(d, i) {
-      d3.select(this).transition().duration(400).style('fill', 'steelblue')
-    }
-
-    const drawBarchart = (selectedQuery) => {
-      const selectedNumber = selectedQuery.queryNumber
-      const selectedDuration = selectedQuery.timeInSeconds
-
-      const barPadding = props.barPadding
-      const margin = props.margin
-      const height = props.height
-      const width = props.width
-  
-      // Create an SVG container for the bar plot
-      d3.select(selectedQuerySvg.current).selectAll('*').remove()
-  
-      // Create scales for x and y
-      const xScale = d3
-        .scaleBand()
-        .domain([selectedNumber])
-        .range([0, width])
-        .align(0.5)
-        .padding(barPadding)
-  
-      const yScale = d3
-        .scaleLinear()
-        .domain([0, selectedDuration])
-        .range([height, 0])
-  
-      // Create x and y axes
-      const xAxis = d3.axisBottom(xScale)
-      const yAxis = d3.axisLeft(yScale)
-      const selectedContainer = d3.select(selectedQuerySvg.current)
-  
-      // Draw x axis
-      selectedContainer
-        .append('g')
-        .attr('transform', `translate(${margin}, ${height + margin})`)
-        .call(xAxis)
-  
-      // Draw y axis
-      selectedContainer
-        .append('g')
-        .attr('transform', `translate(${margin}, ${margin})`)
-        .call(yAxis)
-      
-      selectedContainer
-        .append('g')
-        .selectAll('rect')
-        .data([selectedQuery])
-        .join('rect')
-        .attr('x', d => xScale(d.queryNumber) + margin)
-        .attr('y', d => yScale(d.timeInSeconds) + margin)
-        .attr('width', xScale.bandwidth())
-        .attr('height', d => height - yScale(d.timeInSeconds))
-        .attr('fill', 'steelblue')
-    }
-
-    const onMouseClick = (d, i) => {
-      setSelectedQuery(i)
-      drawBarchart(selectedQuery)
-    }
-
-    // Create bars
-    barplotContainer
-      .append('g')
-      .selectAll('rect')
-      .data(queryTimes)
-      .join('rect')
-      .attr('x', d => xBarScale(d.queryNumber) + margin)
-      .attr('y', d => yBarScale(d.timeInSeconds) + margin)
-      .attr('width', xBarScale.bandwidth())
-      .attr('height', d => height - yBarScale(d.timeInSeconds))
-      .attr('fill', 'steelblue')
-      .on('mouseover', onMouseOver)
-      .on('mouseout', onMouseOut)
-      .on('click', onMouseClick)
-  }, [props, queryTimes, selectedQuery])
+  }, [queryTimes, contents, fileNames])
 
   return (
     <div>
-      <div className='container'>
-        <div>Selected Query</div>
-        <svg ref={selectedQuerySvg} width={selectedWidth} height={selectedHeight} />
-        </div>
-      <div className='container'>
-        <div>Duration</div>
-        <svg ref={barplotSvg} width={width} height={barHeight}></svg>
-      </div>
+      <BarChart
+        xAxis={[{ scaleType: 'band', data: ['group A', 'group B', 'group C'] }]}
+        series={[{ data: [4, 3, 5] }, { data: [1, 6, 3] }, { data: [2, 5, 6] }]}
+        width={500}
+        height={300}
+      />
+      <BarChart
+        xAxis={[{ scaleType: 'band', data: xAxisData }]}
+        series={seriesData.map((data, fileIndex) => ({ data, label: fileNames[fileIndex] }))}
+        width={500}
+        height={300}
+        onClick={handleClick}
+      />
     </div>
   )
 }

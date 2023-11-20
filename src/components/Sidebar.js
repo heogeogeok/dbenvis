@@ -1,8 +1,7 @@
 import { useState } from "react";
 import Logo from "../assets/images/logo.png";
 import "../assets/stylesheets/Sidebar.css";
-import FormControlLabel from '@mui/material/FormControlLabel';
-import { Collapse, FormGroup } from "@mui/material";
+import { Collapse } from "@mui/material";
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
