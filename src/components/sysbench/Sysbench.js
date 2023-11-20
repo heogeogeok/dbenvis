@@ -9,20 +9,21 @@ function Sysbench({ files }) {
   const radius = 1.5;
   const barPadding = 0.3;
 
-  return;
-  <div>
-    <Card>
-      <MultiGraphCompare
-        files={files}
-        size={size}
-        width={width}
-        height={height}
-        margin={margin}
-        radius={radius}
-        barPadding={barPadding}
-      />
-    </Card>
-  </div>;
+  return (
+    <div>
+      <Card>
+        <MultiGraphCompare
+          files={files}
+          size={size}
+          width={width}
+          height={height}
+          margin={margin}
+          radius={radius}
+          barPadding={barPadding}
+        />
+      </Card>
+    </div>
+  );
 }
 
 export default Sysbench;

@@ -1,13 +1,13 @@
 import React, { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
 
-const MultiGraphCompare = ({ files, ...props }) => {
+const MultiGraphComparer = ({ files, ...props }) => {
   const [contents, setContents] = useState([]);
   const [queryResults, setQueryResults] = useState([]);
 
   const parseQueryResults = (fileContents) => {
     const results = [];
-    const lines = fileContents.split("\n");
+    const lines = fileContents.toString().split("\n");
 
     for (let line of lines) {
       // Stop at Latency histogram
@@ -45,7 +45,7 @@ const MultiGraphCompare = ({ files, ...props }) => {
         fileReader.onload = () => {
           fileContents.push(fileReader.result);
           setContents(fileContents);
-          console.log(fileReader.result); // logging after reading file
+          // console.log(fileReader.result); // logging after reading file
         };
 
         /* Read the file as text */
@@ -62,4 +62,4 @@ const MultiGraphCompare = ({ files, ...props }) => {
   return <div></div>;
 };
 
-export default MultiGraphCompare;
+export default MultiGraphComparer;
