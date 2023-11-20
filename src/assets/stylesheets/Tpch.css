@@ -3,15 +3,6 @@
   padding-left: 5px;
 }
 
-.view-container {
-  width: 550px;
-  height: 90vh;
-  padding: 5px;
-  text-align: center;
-  overflow-x: hidden; /* hide when horizontally overflowed */
-  overflow-y: auto; /* scroll when vertically overflowed */
-}
-
 .title {
   font-family: "NanumSquareEB";
   font-size: large;

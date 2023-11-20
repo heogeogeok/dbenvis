@@ -93,7 +93,7 @@ const CompareView = ({ files }) => {
     const { chartSvg, data, over, click, out } = props;
     const svg = d3.select(chartSvg.current);
 
-    svg.selectAll("*").remove(); //clear
+    svg.selectAll("*").remove(); // clear
 
     // create scales for x and y
     const xScale = d3
