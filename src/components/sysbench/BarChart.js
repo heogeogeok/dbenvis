@@ -75,7 +75,7 @@ const BarChart = ({ files, ...props }) => {
       chartSvg: barplotSvg,
       data: queryResults,
     })
-  }, [])
+  }, [queryResults])
 
   function drawBarChart(props) {
     const { chartSvg, data } = props
