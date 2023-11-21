@@ -1,22 +1,22 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useContext } from "react";
 import * as d3 from "d3";
-
+import { TpchContext } from "../../contexts/TpchContext";
 
 const CompareView = ({ files }) => {
+  const { selectedQuery, setSelectedQuery } = useContext(TpchContext);
+
   const barplotSvg = useRef(null);
   const selectedSvg = useRef(null);
 
-  const width = 450;
+  const width = document.body.clientWidth * 0.3;
   const height = 200;
-  const marginX = 50;
+  const marginX = document.body.clientWidth * 0.05;
   const marginY = 20;
   const barPadding = 0.3;
 
   const [contents, setContents] = useState([]);
   const [duration, setDuration] = useState([]);
-
   const [datasets, setDatasets] = useState([]);
-  const [selectedQuery, setSelectedQuery] = useState({});
 
   function onMouseOver() {
     // Save the original color
@@ -26,8 +26,9 @@ const CompareView = ({ files }) => {
     d3.select(this).transition().duration(200).style("fill", darkenColor(originalColor)); 
   }
   function onMouseClick(e) {
-    setSelectedQuery(e.target.__data__);
-    console.log(selectedQuery)
+    const selected = e.target.__data__;
+
+    if (selected) setSelectedQuery(selected.queryNumber - 1);
   }
   function onMouseOut() {
     d3.select(this).transition().duration(200).style("fill", (d) => d3.select(this).attr("fill"));
@@ -44,7 +45,6 @@ const CompareView = ({ files }) => {
     if (files && files.length === 0) {
       // 업로드 한 파일 없는 경우
       setContents([]);
-      setSelectedQuery({});
     } else if (files && files.length > 0) {
       const fileContents = [];
 
@@ -90,25 +90,27 @@ const CompareView = ({ files }) => {
 
   /* 모든 query에 대한 bar chart */
   useEffect(() => {
-    drawGroupedBarChart({
-      chartSvg: barplotSvg,
-      data: datasets,
-      over: onMouseOver,
-      click: onMouseClick,
-      out: onMouseOut,
-    });
-  }, [datasets]);
+    if (duration)
+      drawBarChart({
+        chartSvg: barplotSvg,
+        data: duration,
+        over: onMouseOver,
+        click: onMouseClick,
+        out: onMouseOut,
+      });
+  }, [duration]);
 
   /* 선택한 query에 대한 bar chart */
   useEffect(() => {
-    drawBarChart({
-      chartSvg: selectedSvg,
-      data: [selectedQuery],
-      over: null,
-      click: null,
-      out: null,
-    });
-  }, [selectedQuery]);
+    if (duration && duration[selectedQuery])
+      drawBarChart({
+        chartSvg: selectedSvg,
+        data: [duration[selectedQuery]],
+        over: null,
+        click: null,
+        out: null,
+      });
+  });
 
   function drawGroupedBarChart(props) {
     const { chartSvg, data, over, click, out} = props;
@@ -202,20 +204,23 @@ const CompareView = ({ files }) => {
       .attr("transform", `translate(${marginX}, ${marginY})`)
       .call(yAxis);
 
-    // draw bars
+    // draw bars with transition
     svg
       .append("g")
       .selectAll()
       .data(data)
       .join("g")
       .attr("x", (d) => xScale(d.queryNumber) + marginX)
-      .attr("y", (d) => yScale(d.timeInSeconds) + marginY)
+      .attr("y", (d) => height + marginY) // x axis에서 시작해서
       .attr("width", xScale.bandwidth())
-      .attr("height", (d) => height - yScale(d.timeInSeconds))
+      .attr("height", 0)
       .attr("fill", "#4ab180")
-      .on("mouseover", over)
-      .on("mouseout", out)
-      .on("click", click);
+      .transition()
+      .duration(1000)
+      .attr("y", (d) => yScale(d.timeInSeconds) + marginY) // value까지
+      .attr("height", (d) => height - yScale(d.timeInSeconds));
+
+    svg.on("mouseover", over).on("mouseout", out).on("click", click);
   }
 
   return (
@@ -230,19 +235,16 @@ const CompareView = ({ files }) => {
               height={height + 2 * marginY}
             ></svg>
           </div>
-          {selectedQuery.queryNumber >= 1 &&
-            selectedQuery.queryNumber <= 21 && (
-              <div className="chart-container">
-                <h1 className="title">
-                  Query {selectedQuery.queryNumber} Duration
-                </h1>
-                <svg
-                  ref={selectedSvg}
-                  width={width + 2 * marginX}
-                  height={height + 2 * marginY}
-                />
-              </div>
-            )}
+          {selectedQuery >= 0 && selectedQuery <= 20 && (
+            <div className="chart-container">
+              <h1 className="title">Query {selectedQuery + 1} Duration</h1>
+              <svg
+                ref={selectedSvg}
+                width={width + 2 * marginX}
+                height={height + 2 * marginY}
+              />
+            </div>
+          )}
         </>
       )}
     </>

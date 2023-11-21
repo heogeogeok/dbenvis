@@ -1,66 +1,78 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import QueryPlanView from "./QueryPlanView";
+import { TpchContext } from "../../contexts/TpchContext";
 
 function ParseQueryPlan({ files }) {
-  const [contents, setContents] = useState([]);
+  const { selectedQuery } = useContext(TpchContext);
   const [queryPlans, setQueryPlans] = useState([]);
 
   useEffect(() => {
-    if (files && files.length === 0) {
-      // 업로드 한 파일 없는 경우
-      setContents([]);
-    } else if (files && files.length > 0) {
-      const fileContents = [];
+    const loadFiles = async () => {
+      if (files && files.length > 0) {
+        const planContents = [];
 
-      // create a FileReader for each file
-      files.forEach((file) => {
-        const fileReader = new FileReader();
+        for (const file of files) {
+          const fileContent = await readFile(file);
+          const plans = extractPlans(fileContent);
 
-        fileReader.onload = () => {
-          fileContents.push(fileReader.result);
-          setContents(fileContents);
-        };
+          planContents.push(plans);
+        }
 
-        // read the file as text
-        fileReader.readAsText(file);
-      });
-    }
+        setQueryPlans(planContents);
+      } else {
+        // 업로드 한 파일 없는 경우
+        setQueryPlans([]);
+      }
+    };
+
+    loadFiles();
   }, [files]);
 
-  /* input preprocessing + query plan update */ 
-  useEffect(() => {
-    const planContents = [];
+  const readFile = (file) => {
+    return new Promise((resolve) => {
+      const fileReader = new FileReader();
 
-    contents.forEach((content) => {
-      const regex = /\[([\s\S]*)]/;
-      const match = content.match(regex);
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
 
-      if (match) {
-        // extract plan and remove every "+"
-        let plan = match[1].replace(/\+/g, "");
-
-        // d3의 계층구조 따르기 위해 "Plans"를 "children"으로 대체
-        plan = plan.replace(/"Plans":/g, '"children":');
-
-        planContents.push(JSON.parse(plan));
-      }
+      // read the file as text
+      fileReader.readAsText(file);
     });
+  };
 
-    setQueryPlans(planContents);
-  }, [contents]);
+  /* input preprocessing + query plan update */
+  const extractPlans = (content) => {
+    const regex = /\[(.*?)\](?=\s*\()/gs;
+    let match = null;
+    const plans = [];
+
+    while ((match = regex.exec(content)) !== null) {
+      // extract plan and remove every "+"
+      let plan = match[1].replace(/\+/g, "");
+
+      // d3의 계층구조 따르기 위해 "Plans"를 "children"으로 대체
+      plan = plan.replace(/"Plans":/g, '"children":');
+
+      plans.push(JSON.parse(plan));
+    }
+
+    return plans;
+  };
 
   return (
     <div>
       <h1 className="title">Query Plan</h1>
       <div className="plan-container">
-        {queryPlans.map((queryPlan, index) => (
-          <QueryPlanView
-            key={index}
-            width={400 / queryPlans.length}
-            marginX={50 / queryPlans.length}
-            plan={queryPlan.Plan}
-          />
-        ))}
+        {queryPlans.map((plans, index) =>
+          plans.length > 0 && plans[selectedQuery] ? (
+            <QueryPlanView
+              key={index}
+              width={(document.body.clientWidth * 0.4) / queryPlans.length}
+              plan={plans[selectedQuery].Plan}
+            />
+          ) : null
+        )}
       </div>
     </div>
   );

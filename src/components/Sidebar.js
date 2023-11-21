@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import FileInput from "./FileInput";
+import { TpchContext } from "../contexts/TpchContext";
 import "../assets/stylesheets/Sidebar.css";
 import {
   Card,
@@ -30,8 +31,7 @@ function Sidebar(props) {
   const [open, setOpen] = useState([]);
   const [expand, setExpand] = useState(false);
 
-  // TODO: CompareView와 연동되도록 수정
-  const [selectedQuery, setSelectedQuery] = useState(0);
+  const { selectedQuery, setSelectedQuery } = useContext(TpchContext);
 
   const handleOpen = (value) => {
     setOpen(open === value ? 0 : value);
@@ -80,7 +80,7 @@ function Sidebar(props) {
             />
           }
         >
-          <ListItem className="w-48 p-1" selected={open === 1} ripple={false}>
+          <ListItem className="p-1" selected={open === 1} ripple={false}>
             <AccordionHeader
               onClick={() => handleOpen(1)}
               className="p-0 border-b-0"
@@ -95,7 +95,7 @@ function Sidebar(props) {
             <List>
               {/* 서브 메뉴 1-1: TPC-H */}
               <ListItem
-                className="w-44 p-1 hover:bg-transparent"
+                className="p-1 hover:bg-transparent"
                 onClick={() => {
                   handleSelect("TPC-H");
                 }}
@@ -121,17 +121,15 @@ function Sidebar(props) {
                     <List>
                       {[...Array(21).keys()].map((queryNumber) => (
                         <ListItem
-                          key={queryNumber + 1}
-                          className="w-40 h-6 hover:after:opacity-0"
+                          key={queryNumber}
+                          className="h-6 hover:after:opacity-0"
                           ripple={false}
                         >
                           <ListItemPrefix>
                             <Checkbox
                               className="w-4 h-4 hover:before:opacity-0"
-                              checked={selectedQuery === queryNumber + 1}
-                              onChange={() =>
-                                handleCheckboxChange(queryNumber + 1)
-                              }
+                              checked={selectedQuery === queryNumber}
+                              onChange={() => handleCheckboxChange(queryNumber)}
                               ripple={false}
                             />
                           </ListItemPrefix>
@@ -159,7 +157,7 @@ function Sidebar(props) {
             />
           }
         >
-          <ListItem className="w-48 p-1" selected={open === 2}>
+          <ListItem className="p-1" selected={open === 2}>
             <AccordionHeader
               onClick={() => handleOpen(2)}
               className="p-0 border-b-0"
@@ -174,7 +172,7 @@ function Sidebar(props) {
             <List>
               {/* 서브 메뉴 2-1: sysbench */}
               <ListItem
-                className="w-44 p-1"
+                className="p-1"
                 onClick={() => handleSelect("sysbench")}
               >
                 <ListItemPrefix>
@@ -185,7 +183,7 @@ function Sidebar(props) {
             </List>
           </AccordionBody>
         </Accordion>
-        <hr className="mr-8 border-blue-gray-50" />
+        <hr />
         {/* 결과 파일 업로드 */}
         <FileInput
           inputType={"Upload Results"}
@@ -196,7 +194,7 @@ function Sidebar(props) {
         {/* OLAP benchmark의 경우 query plan 추가 */}
         {selected === "TPC-H" && (
           <div>
-            <hr className="mr-8 my-4 border-blue-gray-50" />
+            <hr className="my-4" />
             <FileInput
               inputType={"Upload Query Plans"}
               selected={selected}

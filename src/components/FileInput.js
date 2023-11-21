@@ -42,7 +42,7 @@ function FileInput(props) {
           <input
             type="file"
             id="file-input"
-            className="file-input file-input-xs w-48"
+            className="file-input file-input-xs w-11/12"
             disabled={selected === null}
             onChange={handleFileUpload}
           />

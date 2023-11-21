@@ -1,8 +1,18 @@
 .container {
-  width: 1400px; /* fixed width */
-  margin: auto; /* 화면의 가운데에 위치하도록 */
+  width: 100%;
+  margin-left: 3vw;
 }
 
 .main-container {
   display: flex; /* sidebar와 visualization view가 수평에 위치하도록 */
+}
+
+.view-container {
+  min-width: 550px;
+  width: 40vw;
+  height: 90vh;
+  padding: 5px;
+  text-align: center;
+  overflow-x: hidden; /* hide when horizontally overflowed */
+  overflow-y: auto; /* scroll when vertically overflowed */
 }
