@@ -21,7 +21,9 @@ const CompareView = ({ files }) => {
     d3.select(this).transition().duration(200).style("fill", "#2a9453");
   }
   function onMouseClick(e) {
-    setSelectedQuery(e.target.__data__.queryNumber - 1);
+    const selected = e.target.__data__;
+
+    if (selected) setSelectedQuery(selected.queryNumber - 1);
   }
   function onMouseOut() {
     d3.select(this).transition().duration(200).style("fill", "#4ab180");
@@ -136,10 +138,9 @@ const CompareView = ({ files }) => {
       .attr("y", (d) => yScale(d.timeInSeconds) + marginY)
       .attr("width", xScale.bandwidth())
       .attr("height", (d) => height - yScale(d.timeInSeconds))
-      .attr("fill", "#4ab180")
-      .on("mouseover", over)
-      .on("mouseout", out)
-      .on("click", click);
+      .attr("fill", "#4ab180");
+
+    svg.on("mouseover", over).on("mouseout", out).on("click", click);
   }
 
   return (
