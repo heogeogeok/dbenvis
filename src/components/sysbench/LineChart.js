@@ -10,7 +10,7 @@ const LineChart = (props) => {
   const marginY = 50;
 
   const queryResults = props.queryResults;
-  const randomNum = Math.floor(Math.random() * 1000)
+  const avgTps = props.avgTps;
 
   function drawLineChart(props) {
     const { chartSvg, data } = props;
@@ -66,7 +66,7 @@ const LineChart = (props) => {
 
   return (
     <div>
-      <p className="title"> Average TPS: {randomNum} </p>
+      <p className="title"> Average TPS: {avgTps} </p>
       <svg ref={lineplotSvg} width={width} height={height}></svg>
     </div>
   );
