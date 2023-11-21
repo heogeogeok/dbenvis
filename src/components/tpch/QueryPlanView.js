@@ -15,7 +15,13 @@ const QueryPlanView = (props) => {
       .attr("width", width)
       .attr("height", height + 2 * marginY)
       .append("g") // 그룹으로 묶어서
-      .attr("transform", `translate(0, ${marginY})`); // margin 적용
+      .attr("transform", `translate(0, ${marginY})`) // margin 적용
+      .call(
+        d3.zoom().on("zoom", (event) => {
+          svg.attr("transform", event.transform);
+        })
+      )
+      .append("g");
 
     const treeLayout = d3.tree().size([width, height]);
 

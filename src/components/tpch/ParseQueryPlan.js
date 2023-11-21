@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import QueryPlanView from "./QueryPlanView";
 import { TpchContext } from "../../contexts/TpchContext";
+import { Card } from "@material-tailwind/react";
 
 function ParseQueryPlan({ files }) {
   const { selectedQuery } = useContext(TpchContext);
@@ -66,11 +67,13 @@ function ParseQueryPlan({ files }) {
       <div className="plan-container">
         {queryPlans.map((plans, index) =>
           plans.length > 0 && plans[selectedQuery] ? (
-            <QueryPlanView
-              key={index}
-              width={(document.body.clientWidth * 0.4) / queryPlans.length}
-              plan={plans[selectedQuery].Plan}
-            />
+            <Card>
+              <QueryPlanView
+                key={index}
+                width={(document.body.clientWidth * 0.4) / queryPlans.length}
+                plan={plans[selectedQuery].Plan}
+              />
+            </Card>
           ) : null
         )}
       </div>
