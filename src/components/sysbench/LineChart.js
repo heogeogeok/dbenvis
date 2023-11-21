@@ -5,7 +5,7 @@ const LineChart = (props) => {
   const lineplotSvg = useRef(null);
 
   const width = props.width;
-  const height = 0.5 * document.body.clientHeight;
+  const height = 0.35 * document.body.clientHeight;
   const marginX = props.margin;
   const marginY = 50;
 

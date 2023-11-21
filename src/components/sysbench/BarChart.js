@@ -1,128 +1,133 @@
-import * as d3 from 'd3'
-import { useRef, useEffect, useState } from 'react'
+import * as d3 from "d3";
+import { useRef, useEffect, useState } from "react";
 
 const BarChart = ({ files, ...props }) => {
-  const barplotSvg = useRef(null)
+  const barplotSvg = useRef(null);
 
-  const width = document.body.clientWidth * 0.3
-  const height = 200
-  const marginX = document.body.clientWidth * 0.05
-  const marginY = 20
-  const barPadding = 0.3
+  const width = document.body.clientWidth * 0.3;
+  const height = 200;
+  const marginX = document.body.clientWidth * 0.05;
+  const marginY = 30;
+  const barPadding = 0.3;
 
-  const [queryResults, setQueryResults] = useState([])
+  const [queryResults, setQueryResults] = useState([]);
 
-  const dbname = ['PostgreSQL', 'MariaDB']
+  const dbname = ["PostgreSQL", "MariaDB", "SQL Server", "MySQL"];
 
   useEffect(() => {
     const loadFiles = async () => {
       if (files && files.length > 0) {
-        const fileContents = []
+        const fileContents = [];
 
-        let i = 0
+        let i = 0;
 
         for (const file of files) {
-          const fileContent = await readFile(file)
-          const results = extractAvgTps(fileContent)
+          const fileContent = await readFile(file);
+          const results = extractAvgTps(fileContent);
 
-          console.log('result', results)
+          console.log("result", results);
 
-          fileContents.push({ name: dbname[i], transactionsPerSec: results })
-          i++
+          fileContents.push({ name: dbname[i], transactionsPerSec: results });
+          i++;
         }
 
-        setQueryResults(fileContents)
-        console.log(queryResults)
+        setQueryResults(fileContents);
+        console.log(queryResults);
       } else {
         // 업로드 한 파일 없는 경우
-        setQueryResults([])
+        setQueryResults([]);
       }
-    }
+    };
 
-    loadFiles()
-  }, [files])
+    loadFiles();
+  }, [files]);
 
-  const readFile = file => {
-    return new Promise(resolve => {
-      const fileReader = new FileReader()
+  const readFile = (file) => {
+    return new Promise((resolve) => {
+      const fileReader = new FileReader();
 
       fileReader.onload = () => {
-        resolve(fileReader.result)
-      }
+        resolve(fileReader.result);
+      };
 
       // read the file as text
-      fileReader.readAsText(file)
-    })
-  }
+      fileReader.readAsText(file);
+    });
+  };
 
   /* input preprocessinge */
-  const extractAvgTps = content => {
-    const regex = /transactions:\s+\d+\s+\(([\d.]+)\s+per sec.\)/
-    const match = content.match(regex)
+  const extractAvgTps = (content) => {
+    const regex = /transactions:\s+\d+\s+\(([\d.]+)\s+per sec.\)/;
+    const match = content.match(regex);
 
     if (match) {
-      const transactionsPerSec = parseFloat(match[1]) // per sec 값 추출
-      console.log('tps: ' + transactionsPerSec)
-      return transactionsPerSec
+      const transactionsPerSec = parseFloat(match[1]); // per sec 값 추출
+      console.log("tps: " + transactionsPerSec);
+      return transactionsPerSec;
     } else {
-      console.error('Unable to extract average from the content')
-      return null
+      console.error("Unable to extract average from the content");
+      return null;
     }
-  }
+  };
 
   useEffect(() => {
     drawBarChart({
       chartSvg: barplotSvg,
       data: queryResults,
-    })
-  }, [queryResults])
+    });
+  }, [queryResults]);
 
   function drawBarChart(props) {
-    const { chartSvg, data } = props
-    const svg = d3.select(chartSvg.current)
+    const { chartSvg, data } = props;
+    const svg = d3.select(chartSvg.current);
 
-    svg.selectAll('*').remove() // clear
+    svg.selectAll("*").remove(); // clear
 
     // create scales for x and y
     const xScale = d3
       .scaleBand()
-      .domain(data.map(entry => entry.name))
+      .domain(data.map((entry) => entry.name))
       .range([0, width])
       .align(0.5)
-      .padding(barPadding)
+      .padding(barPadding);
 
     const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(data, d => d.transactionsPerSec)])
-      .range([height, 0])
+      .domain([0, d3.max(data, (d) => d.transactionsPerSec)])
+      .range([height, 0]);
+
+    const colorScale = d3
+      .scaleOrdinal()
+      .domain(data.map((entry) => entry.name))
+      .range(d3.schemeCategory10);
 
     // create x and y axes
-    const xAxis = d3.axisBottom(xScale)
-    const yAxis = d3.axisLeft(yScale)
+    const xAxis = d3.axisBottom(xScale);
+    const yAxis = d3.axisLeft(yScale);
 
     // draw x and y axes
     svg
-      .append('g')
-      .attr('transform', `translate(${marginX}, ${height + marginY})`)
-      .call(xAxis)
+      .append("g")
+      .attr("transform", `translate(${marginX}, ${height + marginY})`)
+      .call(xAxis);
 
     svg
-      .append('g')
-      .attr('transform', `translate(${marginX}, ${marginY})`)
-      .call(yAxis)
+      .append("g")
+      .attr("transform", `translate(${marginX}, ${marginY})`)
+      .call(yAxis);
 
     // draw bars
     svg
-      .append('g')
-      .selectAll('rect')
+      .append("g")
+      .selectAll("rect")
       .data(data)
       .enter()
-      .append('rect')
-      .attr('x', d => xScale(d.name) + marginX)
-      .attr('y', d => yScale(d.transactionsPerSec) + marginY)
-      .attr('width', xScale.bandwidth())
-      .attr('height', d => height - yScale(d.transactionsPerSec))
-      .attr('fill', d => (d.name === 'PostgreSQL' ? 'lightgreen' : 'plum'))
+      .append("rect")
+      .attr("x", (d) => xScale(d.name) + marginX)
+      .attr("y", (d) => yScale(d.transactionsPerSec) + marginY)
+      .attr("width", xScale.bandwidth())
+      .attr("height", (d) => height - yScale(d.transactionsPerSec))
+      .attr("fill", (d) => colorScale(d.name));
   }
   return (
     <>
@@ -133,7 +138,7 @@ const BarChart = ({ files, ...props }) => {
         height={height + 2 * marginY}
       ></svg>
     </>
-  )
-}
+  );
+};
 
-export default BarChart
+export default BarChart;
