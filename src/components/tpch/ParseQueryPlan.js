@@ -64,12 +64,12 @@ function ParseQueryPlan({ files }) {
     <div>
       <h1 className="title">Query Plan</h1>
       <div className="plan-container">
-        {queryPlans.map((array, index) =>
-          array.length > 0 && array[selectedQuery] ? (
+        {queryPlans.map((plans, index) =>
+          plans.length > 0 && plans[selectedQuery] ? (
             <QueryPlanView
               key={index}
               width={(document.body.clientWidth * 0.4) / queryPlans.length}
-              plan={array[selectedQuery].Plan}
+              plan={plans[selectedQuery].Plan}
             />
           ) : null
         )}

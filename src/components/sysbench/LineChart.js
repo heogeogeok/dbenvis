@@ -4,10 +4,11 @@ import * as d3 from "d3";
 const LineChart = (props) => {
   const lineplotSvg = useRef(null);
 
-  const width = 500;
-  const height = 300;
-  const marginX = 50;
-  const marginY = 20;
+  const width = props.width;
+  const height = 0.5 * document.body.clientHeight;
+  const marginX = props.margin;
+  const marginY = 50;
+
   const queryResults = props.queryResults;
 
   function drawLineChart(props) {
@@ -64,11 +65,7 @@ const LineChart = (props) => {
 
   return (
     <div>
-      <svg
-        ref={lineplotSvg}
-        width={width + 2 * marginX}
-        height={height + 2 * marginY}
-      ></svg>
+      <svg ref={lineplotSvg} width={width} height={height}></svg>
     </div>
   );
 };

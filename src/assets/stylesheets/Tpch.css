@@ -3,11 +3,6 @@
   padding-left: 5px;
 }
 
-.tpch-card {
-  min-height: 80vh;
-  height: auto;
-}
-
 .title {
   font-family: "NanumSquareEB";
   font-size: large;

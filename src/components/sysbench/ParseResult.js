@@ -1,35 +1,53 @@
 import { useEffect, useState } from "react";
 import LineChart from "./LineChart";
+import { Card } from "@material-tailwind/react";
 
 const ParseResult = ({ files }) => {
-  const [contents, setContents] = useState([]);
   const [queryResults, setQueryResults] = useState([]);
 
   useEffect(() => {
-    if (files && files.length === 0) {
-      // 업로드 한 파일 없는 경우
-      setContents([]);
-    } else if (files && files.length > 0) {
-      const fileContents = [];
+    const loadFiles = async () => {
+      if (files && files.length > 0) {
+        const fileContents = [];
 
-      // create a FileReader for each file
-      files.forEach((file) => {
-        const fileReader = new FileReader();
+        for (const file of files) {
+          const fileContent = await readFile(file);
+          const results = extractResults(fileContent);
 
-        fileReader.onload = () => {
-          fileContents.push(fileReader.result);
-          setContents(fileContents);
-        };
+          fileContents.push(results);
+        }
 
-        // read the file as text
-        fileReader.readAsText(file);
-      });
-    }
+        setQueryResults(fileContents);
+      } else {
+        // 업로드 한 파일 없는 경우
+        setQueryResults([]);
+      }
+    };
+
+    loadFiles();
   }, [files]);
 
-  useEffect(() => {
+  const readFile = (file) => {
+    return new Promise((resolve) => {
+      const fileReader = new FileReader();
+
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
+
+      // read the file as text
+      fileReader.readAsText(file);
+    });
+  };
+
+  /* input preprocessing + query result update */
+  const extractResults = (content) => {
+    const regex =
+      /\[\s*(\d+s)\s*\]\s*thds:\s*(\d+)\s*tps:\s*([\d.]+)\s*qps:\s*([\d.]+).*lat\s*\(ms,99%\):\s*([\d.]+)\s*err\/s:\s*([\d.]+)/;
+    let match = null;
     const results = [];
-    const lines = contents.toString().split("\n");
+
+    const lines = content.toString().split("\n");
 
     for (let line of lines) {
       // Stop at Latency histogram
@@ -37,9 +55,8 @@ const ParseResult = ({ files }) => {
         break;
       }
 
-      const match = line.match(
-        /\[\s*(\d+s)\s*\]\s*thds:\s*(\d+)\s*tps:\s*([\d.]+)\s*qps:\s*([\d.]+).*lat\s*\(ms,99%\):\s*([\d.]+)\s*err\/s:\s*([\d.]+)/
-      );
+      match = line.match(regex);
+
       if (match) {
         const [_, time, thds, tps, qps, lat, err] = match;
         results.push({
@@ -50,18 +67,41 @@ const ParseResult = ({ files }) => {
         });
       }
     }
-    setQueryResults(results);
-  }, [contents]);
+
+    return results;
+  };
 
   return (
     <div>
       <h1 className="title">Benchmark Result</h1>
-      {contents.length > 0 && (
-        <div className="Line-container">
-          <LineChart
-            // key={index}
-            queryResults={queryResults}
-          />
+      {/* 차트 여러개인 경우 두개씩 보이도록 */}
+      {queryResults.length >= 1 && (
+        <div className="chart-container">
+          {queryResults.length === 1 ? (
+            <div>
+              {queryResults.map((results, index) => (
+                <LineChart
+                  key={index}
+                  width={0.4 * document.documentElement.clientWidth}
+                  margin={0.03 * document.documentElement.clientWidth}
+                  queryResults={results}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {queryResults.map((results, index) => (
+                <Card>
+                  <LineChart
+                    key={index}
+                    width={0.2 * document.documentElement.clientWidth}
+                    margin={0.03 * document.documentElement.clientWidth}
+                    queryResults={results}
+                  />
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
