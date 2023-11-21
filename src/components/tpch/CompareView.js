@@ -128,17 +128,21 @@ const CompareView = ({ files }) => {
       .attr("transform", `translate(${marginX}, ${marginY})`)
       .call(yAxis);
 
-    // draw bars
+    // draw bars with transition
     svg
       .append("g")
       .selectAll("rect")
       .data(data)
       .join("rect")
       .attr("x", (d) => xScale(d.queryNumber) + marginX)
-      .attr("y", (d) => yScale(d.timeInSeconds) + marginY)
+      .attr("y", (d) => height + marginY) // x axis에서 시작해서
       .attr("width", xScale.bandwidth())
-      .attr("height", (d) => height - yScale(d.timeInSeconds))
-      .attr("fill", "#4ab180");
+      .attr("height", 0)
+      .attr("fill", "#4ab180")
+      .transition()
+      .duration(1000)
+      .attr("y", (d) => yScale(d.timeInSeconds) + marginY) // value까지
+      .attr("height", (d) => height - yScale(d.timeInSeconds));
 
     svg.on("mouseover", over).on("mouseout", out).on("click", click);
   }
