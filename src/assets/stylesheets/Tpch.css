@@ -1,28 +1,35 @@
-.query-plan-container {
-    width: 50%; 
-    display: inline-block;
-    vertical-align: top; 
-    text-align: center;
+.tpch-container {
+  display: flex;
+  padding-left: 5px;
 }
 
-.comparison-view-container {
-    width: 800;
-    height: 2000;
-    display: inline-block;
-    vertical-align: top;
-    text-align: center;
+.view-container {
+  width: 550px;
+  height: 90vh;
+  padding: 5px;
+  text-align: center;
+  overflow-x: hidden; /* hide when horizontally overflowed */
+  overflow-y: auto; /* scroll when vertically overflowed */
 }
 
-.container{
-    display: flex;
-    justify-content: center;
-    -ms-user-select: none; 
-    -moz-user-select: -moz-none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
-    user-select: none;
+.title {
+  font-family: "NanumSquareEB";
+  font-size: large;
+  color: black;
+  padding: 10px;
 }
 
-.rect {
-    cursor: pointer;
+.chart-container {
+  padding-bottom: 20px;
+}
+
+.plan-container {
+  display: flex;
+  align-items: center;
+}
+
+.node-label {
+  font-family: "NanumSquareB";
+  font-size: x-small;
+  background-color: white;
 }

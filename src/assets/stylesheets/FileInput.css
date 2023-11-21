@@ -1,0 +1,21 @@
+.upload-text {
+  font-family: "NanumSquareEB";
+  font-size: small;
+  margin-right: auto;
+}
+
+.file-list {
+  width: 192px;
+  padding-left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.file-name {
+  font-family: "NanumSquareB";
+  font-size: small;
+  white-space: nowrap; /* 줄바꿈 안하도록 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* overflow text의 경우 ...으로 나타냄 */
+}

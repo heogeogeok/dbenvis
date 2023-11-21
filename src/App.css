@@ -1,0 +1,8 @@
+.container {
+  width: 1400px; /* fixed width */
+  margin: auto; /* 화면의 가운데에 위치하도록 */
+}
+
+.main-container {
+  display: flex; /* sidebar와 visualization view가 수평에 위치하도록 */
+}

@@ -1,4 +1,22 @@
-.logo {
-  width: 20px;
-  height: 20px;
+.main-card {
+  width: 210px; /* 화면의 15% */
+  min-height: 90vh; /* 최소 높이는 화면의 90% */
+  height: auto; /* Sidebar에 맞춰 높이 조절 */
+}
+
+.main-menu-text {
+  font-family: "NanumSquareEB";
+  font-size: medium;
+  margin-right: auto;
+}
+
+.sub-menu-text {
+  font-family: "NanumSquareB";
+  font-size: medium;
+  margin-right: auto;
+}
+
+.query-menu-text {
+  font-family: "NanumSquareR";
+  font-size: small;
 }
