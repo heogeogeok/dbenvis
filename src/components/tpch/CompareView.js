@@ -1,25 +1,27 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useContext } from "react";
 import * as d3 from "d3";
+import { TpchContext } from "../../contexts/TpchContext";
 
 const CompareView = ({ files }) => {
+  const { selectedQuery, setSelectedQuery } = useContext(TpchContext);
+
   const barplotSvg = useRef(null);
   const selectedSvg = useRef(null);
 
-  const width = 450;
+  const width = document.body.clientWidth * 0.3;
   const height = 200;
-  const marginX = 50;
+  const marginX = document.body.clientWidth * 0.05;
   const marginY = 20;
   const barPadding = 0.3;
 
   const [contents, setContents] = useState([]);
   const [duration, setDuration] = useState([]);
-  const [selectedQuery, setSelectedQuery] = useState({});
 
   function onMouseOver() {
     d3.select(this).transition().duration(200).style("fill", "#2a9453");
   }
   function onMouseClick(e) {
-    setSelectedQuery(e.target.__data__);
+    setSelectedQuery(e.target.__data__.queryNumber - 1);
   }
   function onMouseOut() {
     d3.select(this).transition().duration(200).style("fill", "#4ab180");
@@ -29,7 +31,6 @@ const CompareView = ({ files }) => {
     if (files && files.length === 0) {
       // 업로드 한 파일 없는 경우
       setContents([]);
-      setSelectedQuery({});
     } else if (files && files.length > 0) {
       const fileContents = [];
 
@@ -69,25 +70,27 @@ const CompareView = ({ files }) => {
 
   /* 모든 query에 대한 bar chart */
   useEffect(() => {
-    drawBarChart({
-      chartSvg: barplotSvg,
-      data: duration,
-      over: onMouseOver,
-      click: onMouseClick,
-      out: onMouseOut,
-    });
+    if (duration)
+      drawBarChart({
+        chartSvg: barplotSvg,
+        data: duration,
+        over: onMouseOver,
+        click: onMouseClick,
+        out: onMouseOut,
+      });
   }, [duration]);
 
   /* 선택한 query에 대한 bar chart */
   useEffect(() => {
-    drawBarChart({
-      chartSvg: selectedSvg,
-      data: [selectedQuery],
-      over: null,
-      click: null,
-      out: null,
-    });
-  }, [selectedQuery]);
+    if (duration && duration[selectedQuery])
+      drawBarChart({
+        chartSvg: selectedSvg,
+        data: [duration[selectedQuery]],
+        over: null,
+        click: null,
+        out: null,
+      });
+  });
 
   function drawBarChart(props) {
     const { chartSvg, data, over, click, out } = props;
@@ -151,19 +154,16 @@ const CompareView = ({ files }) => {
               height={height + 2 * marginY}
             ></svg>
           </div>
-          {selectedQuery.queryNumber >= 1 &&
-            selectedQuery.queryNumber <= 21 && (
-              <div className="chart-container">
-                <h1 className="title">
-                  Query {selectedQuery.queryNumber} Duration
-                </h1>
-                <svg
-                  ref={selectedSvg}
-                  width={width + 2 * marginX}
-                  height={height + 2 * marginY}
-                />
-              </div>
-            )}
+          {selectedQuery >= 0 && selectedQuery <= 20 && (
+            <div className="chart-container">
+              <h1 className="title">Query {selectedQuery + 1} Duration</h1>
+              <svg
+                ref={selectedSvg}
+                width={width + 2 * marginX}
+                height={height + 2 * marginY}
+              />
+            </div>
+          )}
         </>
       )}
     </>

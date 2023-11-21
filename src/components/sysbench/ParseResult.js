@@ -56,12 +56,14 @@ const ParseResult = ({ files }) => {
   return (
     <div>
       <h1 className="title">Benchmark Result</h1>
-      <div className="Line-container">
-        <LineChart
-          // key={index}
-          queryResults={queryResults}
-        />
-      </div>
+      {contents.length > 0 && (
+        <div className="Line-container">
+          <LineChart
+            // key={index}
+            queryResults={queryResults}
+          />
+        </div>
+      )}
     </div>
   );
 };

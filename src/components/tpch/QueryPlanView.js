@@ -6,17 +6,16 @@ const QueryPlanView = (props) => {
 
   const width = props.width;
   const height = 0.8 * document.body.clientHeight;
-  const marginX = props.marginX;
   const marginY = 50;
 
   function drawTree(data) {
     const svg = d3
       .select(treeSvg.current)
       .append("svg")
-      .attr("width", width + 2 * marginX)
+      .attr("width", width)
       .attr("height", height + 2 * marginY)
       .append("g") // 그룹으로 묶어서
-      .attr("transform", `translate(${marginX}, ${marginY})`); // margin 적용
+      .attr("transform", `translate(0, ${marginY})`); // margin 적용
 
     const treeLayout = d3.tree().size([width, height]);
 
@@ -64,7 +63,7 @@ const QueryPlanView = (props) => {
       <svg
         className="node-label"
         ref={treeSvg}
-        width={width + 2 * marginX}
+        width={width}
         height={height + 2 * marginY}
       ></svg>
     </div>

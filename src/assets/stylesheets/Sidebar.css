@@ -1,5 +1,5 @@
 .main-card {
-  width: 210px; /* 화면의 15% */
+  width: 240px; /* fixed width 사용 */
   min-height: 90vh; /* 최소 높이는 화면의 90% */
   height: auto; /* Sidebar에 맞춰 높이 조절 */
 }

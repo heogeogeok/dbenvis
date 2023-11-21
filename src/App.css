@@ -1,6 +1,6 @@
 .container {
-  width: 1400px; /* fixed width */
-  margin: auto; /* 화면의 가운데에 위치하도록 */
+  width: 100%;
+  margin-left: 3vw;
 }
 
 .main-container {
@@ -8,7 +8,8 @@
 }
 
 .view-container {
-  width: 550px;
+  min-width: 550px;
+  width: 40vw;
   height: 90vh;
   padding: 5px;
   text-align: center;

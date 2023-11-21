@@ -3,6 +3,11 @@
   padding-left: 5px;
 }
 
+.tpch-card {
+  min-height: 80vh;
+  height: auto;
+}
+
 .title {
   font-family: "NanumSquareEB";
   font-size: large;
@@ -11,7 +16,7 @@
 }
 
 .chart-container {
-  padding-bottom: 20px;
+  padding-bottom: 10vh;
 }
 
 .plan-container {
@@ -21,6 +26,6 @@
 
 .node-label {
   font-family: "NanumSquareB";
-  font-size: x-small;
+  font-size: medium;
   background-color: white;
 }
