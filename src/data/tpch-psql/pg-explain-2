@@ -1,0 +1,300 @@
+                                                QUERY PLAN                                                
+----------------------------------------------------------------------------------------------------------
+ [                                                                                                       +
+   {                                                                                                     +
+     "Plan": {                                                                                           +
+       "Node Type": "Limit",                                                                             +
+       "Parallel Aware": false,                                                                          +
+       "Startup Cost": 13655.54,                                                                         +
+       "Total Cost": 13655.55,                                                                           +
+       "Plan Rows": 1,                                                                                   +
+       "Plan Width": 192,                                                                                +
+       "Plans": [                                                                                        +
+         {                                                                                               +
+           "Node Type": "Sort",                                                                          +
+           "Parent Relationship": "Outer",                                                               +
+           "Parallel Aware": false,                                                                      +
+           "Startup Cost": 13655.54,                                                                     +
+           "Total Cost": 13655.55,                                                                       +
+           "Plan Rows": 1,                                                                               +
+           "Plan Width": 192,                                                                            +
+           "Sort Key": ["supplier.s_acctbal DESC", "nation.n_name", "supplier.s_name", "part.p_partkey"],+
+           "Plans": [                                                                                    +
+             {                                                                                           +
+               "Node Type": "Nested Loop",                                                               +
+               "Parent Relationship": "Outer",                                                           +
+               "Parallel Aware": false,                                                                  +
+               "Join Type": "Inner",                                                                     +
+               "Startup Cost": 0.71,                                                                     +
+               "Total Cost": 13655.53,                                                                   +
+               "Plan Rows": 1,                                                                           +
+               "Plan Width": 192,                                                                        +
+               "Inner Unique": true,                                                                     +
+               "Join Filter": "(nation.n_regionkey = region.r_regionkey)",                               +
+               "Plans": [                                                                                +
+                 {                                                                                       +
+                   "Node Type": "Nested Loop",                                                           +
+                   "Parent Relationship": "Outer",                                                       +
+                   "Parallel Aware": false,                                                              +
+                   "Join Type": "Inner",                                                                 +
+                   "Startup Cost": 0.71,                                                                 +
+                   "Total Cost": 13654.46,                                                               +
+                   "Plan Rows": 1,                                                                       +
+                   "Plan Width": 200,                                                                    +
+                   "Inner Unique": true,                                                                 +
+                   "Join Filter": "(supplier.s_nationkey = nation.n_nationkey)",                         +
+                   "Plans": [                                                                            +
+                     {                                                                                   +
+                       "Node Type": "Nested Loop",                                                       +
+                       "Parent Relationship": "Outer",                                                   +
+                       "Parallel Aware": false,                                                          +
+                       "Join Type": "Inner",                                                             +
+                       "Startup Cost": 0.71,                                                             +
+                       "Total Cost": 13652.90,                                                           +
+                       "Plan Rows": 1,                                                                   +
+                       "Plan Width": 174,                                                                +
+                       "Inner Unique": true,                                                             +
+                       "Plans": [                                                                        +
+                         {                                                                               +
+                           "Node Type": "Nested Loop",                                                   +
+                           "Parent Relationship": "Outer",                                               +
+                           "Parallel Aware": false,                                                      +
+                           "Join Type": "Inner",                                                         +
+                           "Startup Cost": 0.42,                                                         +
+                           "Total Cost": 13652.59,                                                       +
+                           "Plan Rows": 1,                                                               +
+                           "Plan Width": 38,                                                             +
+                           "Inner Unique": false,                                                        +
+                           "Plans": [                                                                    +
+                             {                                                                           +
+                               "Node Type": "Seq Scan",                                                  +
+                               "Parent Relationship": "Outer",                                           +
+                               "Parallel Aware": false,                                                  +
+                               "Relation Name": "part",                                                  +
+                               "Alias": "part",                                                          +
+                               "Startup Cost": 0.00,                                                     +
+                               "Total Cost": 710.00,                                                     +
+                               "Plan Rows": 71,                                                          +
+                               "Plan Width": 30,                                                         +
+                               "Filter": "(((p_type)::text ~~ '%BRASS'::text) AND (p_size = 41))"        +
+                             },                                                                          +
+                             {                                                                           +
+                               "Node Type": "Index Scan",                                                +
+                               "Parent Relationship": "Inner",                                           +
+                               "Parallel Aware": false,                                                  +
+                               "Scan Direction": "Forward",                                              +
+                               "Index Name": "idx_partsupp_partkey",                                     +
+                               "Relation Name": "partsupp",                                              +
+                               "Alias": "partsupp",                                                      +
+                               "Startup Cost": 0.42,                                                     +
+                               "Total Cost": 182.28,                                                     +
+                               "Plan Rows": 1,                                                           +
+                               "Plan Width": 22,                                                         +
+                               "Index Cond": "(ps_partkey = part.p_partkey)",                            +
+                               "Filter": "((SubPlan 1) = ps_supplycost)",                                +
+                               "Plans": [                                                                +
+                                 {                                                                       +
+                                   "Node Type": "Aggregate",                                             +
+                                   "Strategy": "Plain",                                                  +
+                                   "Partial Mode": "Simple",                                             +
+                                   "Parent Relationship": "SubPlan",                                     +
+                                   "Subplan Name": "SubPlan 1",                                          +
+                                   "Parallel Aware": false,                                              +
+                                   "Startup Cost": 43.45,                                                +
+                                   "Total Cost": 43.46,                                                  +
+                                   "Plan Rows": 1,                                                       +
+                                   "Plan Width": 32,                                                     +
+                                   "Plans": [                                                            +
+                                     {                                                                   +
+                                       "Node Type": "Nested Loop",                                       +
+                                       "Parent Relationship": "Outer",                                   +
+                                       "Parallel Aware": false,                                          +
+                                       "Join Type": "Inner",                                             +
+                                       "Startup Cost": 0.85,                                             +
+                                       "Total Cost": 43.45,                                              +
+                                       "Plan Rows": 1,                                                   +
+                                       "Plan Width": 6,                                                  +
+                                       "Inner Unique": false,                                            +
+                                       "Join Filter": "(nation_1.n_regionkey = region_1.r_regionkey)",   +
+                                       "Plans": [                                                        +
+                                         {                                                               +
+                                           "Node Type": "Seq Scan",                                      +
+                                           "Parent Relationship": "Outer",                               +
+                                           "Parallel Aware": false,                                      +
+                                           "Relation Name": "region",                                    +
+                                           "Alias": "region_1",                                          +
+                                           "Startup Cost": 0.00,                                         +
+                                           "Total Cost": 1.06,                                           +
+                                           "Plan Rows": 1,                                               +
+                                           "Plan Width": 4,                                              +
+                                           "Filter": "(r_name = 'AFRICA'::bpchar)"                       +
+                                         },                                                              +
+                                         {                                                               +
+                                           "Node Type": "Nested Loop",                                   +
+                                           "Parent Relationship": "Inner",                               +
+                                           "Parallel Aware": false,                                      +
+                                           "Join Type": "Inner",                                         +
+                                           "Startup Cost": 0.85,                                         +
+                                           "Total Cost": 42.33,                                          +
+                                           "Plan Rows": 4,                                               +
+                                           "Plan Width": 14,                                             +
+                                           "Inner Unique": true,                                         +
+                                           "Plans": [                                                    +
+                                             {                                                           +
+                                               "Node Type": "Nested Loop",                               +
+                                               "Parent Relationship": "Outer",                           +
+                                               "Parallel Aware": false,                                  +
+                                               "Join Type": "Inner",                                     +
+                                               "Startup Cost": 0.71,                                     +
+                                               "Total Cost": 41.71,                                      +
+                                               "Plan Rows": 4,                                           +
+                                               "Plan Width": 14,                                         +
+                                               "Inner Unique": true,                                     +
+                                               "Plans": [                                                +
+                                                 {                                                       +
+                                                   "Node Type": "Index Scan",                            +
+                                                   "Parent Relationship": "Outer",                       +
+                                                   "Parallel Aware": false,                              +
+                                                   "Scan Direction": "Forward",                          +
+                                                   "Index Name": "idx_partsupp_partkey",                 +
+                                                   "Relation Name": "partsupp",                          +
+                                                   "Alias": "partsupp_1",                                +
+                                                   "Startup Cost": 0.42,                                 +
+                                                   "Total Cost": 8.50,                                   +
+                                                   "Plan Rows": 4,                                       +
+                                                   "Plan Width": 14,                                     +
+                                                   "Index Cond": "(ps_partkey = part.p_partkey)"         +
+                                                 },                                                      +
+                                                 {                                                       +
+                                                   "Node Type": "Index Scan",                            +
+                                                   "Parent Relationship": "Inner",                       +
+                                                   "Parallel Aware": false,                              +
+                                                   "Scan Direction": "Forward",                          +
+                                                   "Index Name": "supplier_pkey",                        +
+                                                   "Relation Name": "supplier",                          +
+                                                   "Alias": "supplier_1",                                +
+                                                   "Startup Cost": 0.29,                                 +
+                                                   "Total Cost": 8.30,                                   +
+                                                   "Plan Rows": 1,                                       +
+                                                   "Plan Width": 12,                                     +
+                                                   "Index Cond": "(s_suppkey = partsupp_1.ps_suppkey)"   +
+                                                 }                                                       +
+                                               ]                                                         +
+                                             },                                                          +
+                                             {                                                           +
+                                               "Node Type": "Index Scan",                                +
+                                               "Parent Relationship": "Inner",                           +
+                                               "Parallel Aware": false,                                  +
+                                               "Scan Direction": "Forward",                              +
+                                               "Index Name": "nation_pkey",                              +
+                                               "Relation Name": "nation",                                +
+                                               "Alias": "nation_1",                                      +
+                                               "Startup Cost": 0.14,                                     +
+                                               "Total Cost": 0.16,                                       +
+                                               "Plan Rows": 1,                                           +
+                                               "Plan Width": 12,                                         +
+                                               "Index Cond": "(n_nationkey = supplier_1.s_nationkey)"    +
+                                             }                                                           +
+                                           ]                                                             +
+                                         }                                                               +
+                                       ]                                                                 +
+                                     }                                                                   +
+                                   ]                                                                     +
+                                 }                                                                       +
+                               ]                                                                         +
+                             }                                                                           +
+                           ]                                                                             +
+                         },                                                                              +
+                         {                                                                               +
+                           "Node Type": "Index Scan",                                                    +
+                           "Parent Relationship": "Inner",                                               +
+                           "Parallel Aware": false,                                                      +
+                           "Scan Direction": "Forward",                                                  +
+                           "Index Name": "supplier_pkey",                                                +
+                           "Relation Name": "supplier",                                                  +
+                           "Alias": "supplier",                                                          +
+                           "Startup Cost": 0.29,                                                         +
+                           "Total Cost": 0.30,                                                           +
+                           "Plan Rows": 1,                                                               +
+                           "Plan Width": 148,                                                            +
+                           "Index Cond": "(s_suppkey = partsupp.ps_suppkey)"                             +
+                         }                                                                               +
+                       ]                                                                                 +
+                     },                                                                                  +
+                     {                                                                                   +
+                       "Node Type": "Seq Scan",                                                          +
+                       "Parent Relationship": "Inner",                                                   +
+                       "Parallel Aware": false,                                                          +
+                       "Relation Name": "nation",                                                        +
+                       "Alias": "nation",                                                                +
+                       "Startup Cost": 0.00,                                                             +
+                       "Total Cost": 1.25,                                                               +
+                       "Plan Rows": 25,                                                                  +
+                       "Plan Width": 38                                                                  +
+                     }                                                                                   +
+                   ]                                                                                     +
+                 },                                                                                      +
+                 {                                                                                       +
+                   "Node Type": "Seq Scan",                                                              +
+                   "Parent Relationship": "Inner",                                                       +
+                   "Parallel Aware": false,                                                              +
+                   "Relation Name": "region",                                                            +
+                   "Alias": "region",                                                                    +
+                   "Startup Cost": 0.00,                                                                 +
+                   "Total Cost": 1.06,                                                                   +
+                   "Plan Rows": 1,                                                                       +
+                   "Plan Width": 4,                                                                      +
+                   "Filter": "(r_name = 'AFRICA'::bpchar)"                                               +
+                 }                                                                                       +
+               ]                                                                                         +
+             }                                                                                           +
+           ]                                                                                             +
+         }                                                                                               +
+       ]                                                                                                 +
+     }                                                                                                   +
+   }                                                                                                     +
+ ]
+(1 row)
+
+ s_acctbal |          s_name           |          n_name           | p_partkey |          p_mfgr           |                s_address                 |     s_phone     |                                              s_comment                                              
+-----------+---------------------------+---------------------------+-----------+---------------------------+------------------------------------------+-----------------+-----------------------------------------------------------------------------------------------------
+   9836.53 | Supplier#000005077        | ALGERIA                   |     10074 | Manufacturer#3            | AoD06AAcIfuPu4B6YzUyFOYgVyb6             | 10-852-519-9875 | ven accounts. quickly express deposits was blithe
+   9789.53 | Supplier#000009333        | ETHIOPIA                  |      4332 | Manufacturer#4            | e9JTDP8Pt7IrPBBlimjs ,                   | 15-289-312-9549 | e furiously quickly special packages. fluffily final pearls are about the
+   9194.06 | Supplier#000002367        | ALGERIA                   |      9866 | Manufacturer#4            | c42IIv2nUcLJ9hGrhhiAmfOQwvq1zgzxg8tv     | 10-321-635-8217 |  sauternes boost carefully sly
+   9182.66 | Supplier#000002593        | KENYA                     |      2592 | Manufacturer#1            | oRkHFWHinuEMfLR1OPZSbW0rjYBK             | 24-370-287-8574 | ffily. fluffily regular platelets sleep carefully. even asymptotes boost qu
+   9024.58 | Supplier#000008952        | ETHIOPIA                  |     13949 | Manufacturer#1            | Pieung,FW1704mtb                         | 15-856-379-5065 | y even ideas. ironic theodolites use furiously fluffily express pinto beans.
+   8476.39 | Supplier#000001029        | ETHIOPIA                  |     16026 | Manufacturer#2            | 6quaw3pjSuzrj5d                          | 15-507-720-2035 | ly fluffily even pinto beans. bold packages across the doggedly unusual deposits slee
+   7856.00 | Supplier#000004130        | KENYA                     |      9129 | Manufacturer#2            | 2Qd5FYKuN,sT                             | 24-766-166-3005 | finally fluffily final deposits. unusual ideas sublate slyly furiously regular accounts: slyly ex
+   7461.28 | Supplier#000003479        | MOROCCO                   |      8478 | Manufacturer#1            | OuQuffXBJFwrjPQCrqqVkj8jJA15Ex           | 25-609-427-3896 | sly. fluffily even instructions detect carefully! final theodolites haggle blithely fur
+   6714.90 | Supplier#000002382        | ETHIOPIA                  |     17379 | Manufacturer#5            | otBPUYXGv LZifYiBq1XPTVKn7d              | 15-391-167-3113 | s boost after the quickly pendin
+   6353.37 | Supplier#000002399        | MOROCCO                   |      4898 | Manufacturer#3            | SrJEPXIjxUZm21                           | 25-717-506-8761 | arefully ironic accounts run furiously! quickly unusual requests print 
+   6257.01 | Supplier#000005576        | ALGERIA                   |     18072 | Manufacturer#5            | UXqU25sDkQRbz7YI8U                       | 10-616-875-3742 |  final requests. pending theodolites are enticingly; ironic requests nag around 
+   6095.56 | Supplier#000001547        | ALGERIA                   |      6546 | Manufacturer#2            | bgbQboa0uUWjyXQlmtmHvXh                  | 10-509-209-3829 | ts nag final, final accounts. quietly even requests solve fu
+   5997.41 | Supplier#000002760        | ETHIOPIA                  |       259 | Manufacturer#2            | JwaOuD8jdeWmVr6SEnVbF,KpdO6              | 15-554-965-5719 | aggle carefully final deposits. furiously ironic pinto be
+   5632.80 | Supplier#000006638        | ALGERIA                   |      6637 | Manufacturer#1            | DwONGWZWPFxc8PO7                         | 10-918-771-1784 | , pending packages wake slyly. special packages haggle blithely bold depths: theodoli
+   5262.96 | Supplier#000006538        | ETHIOPIA                  |     14036 | Manufacturer#1            | P3cQB4pXMpKnmFaV6KoSH                    | 15-992-941-8372 | express theodolites cajole furiously according to the final, ironic packa
+   5139.45 | Supplier#000004403        | MOZAMBIQUE                |     16899 | Manufacturer#2            | kNuMkd6GbeJpDyrfPTvzGks1bxWRPC           | 26-971-753-9655 | integrate carefully about the pending, even deposits. furiously pending instructions 
+   4869.04 | Supplier#000005121        | KENYA                     |      7620 | Manufacturer#4            | tSJ3v6tz8dkFGm1nBLzG5TDKWlwunrmsTbN      | 24-323-343-8567 | riously regular dependencies. quickly exp
+   4479.45 | Supplier#000001945        | MOZAMBIQUE                |      4444 | Manufacturer#5            | edI,,ekDTNDdlzQYIHnhdbkw                 | 26-826-634-5171 | lar accounts cajole slyly blithel
+   4407.93 | Supplier#000005916        | ALGERIA                   |     15915 | Manufacturer#3            | eTiCaIOAelGmGFFsaevI6pm                  | 10-514-995-4456 | nts. blithely pending accounts wake quickly against t
+   4210.77 | Supplier#000009724        | ALGERIA                   |     14721 | Manufacturer#3            | ICG8T,65SKiEHuEM7cuXDdb1s UACT           | 10-375-108-2181 | es: quickly final platelets use fluff
+   4183.98 | Supplier#000003615        | MOZAMBIQUE                |      6114 | Manufacturer#4            | tMQyLZmdndVb9Q9VUh,yQNXRnYE6nv           | 26-633-200-8239 | ffily thin theodolites. requests mainta
+   3955.67 | Supplier#000002411        | MOZAMBIQUE                |     14907 | Manufacturer#1            | vhHQgR,vY3s,Ntb,yIUYN6XCZFMopFZslUL      | 26-906-744-9070 | lyly final deposits haggle furiously ironic theodolites. even, final theodolites wake. qui
+   3932.75 | Supplier#000002768        | MOROCCO                   |       267 | Manufacturer#2            | Z5XIwCs200u2A2aA                         | 25-753-877-2336 | ts integrate after the blith
+   3902.59 | Supplier#000006140        | ALGERIA                   |     16139 | Manufacturer#5            | 93EycC3P9tiKu5XEkgb3duqG0                | 10-779-683-2433 | ent foxes. quietly unusual requests sleep carefully from the doggedly express instructions. bli
+   3853.97 | Supplier#000009014        | ALGERIA                   |      4013 | Manufacturer#5            | VESdCwbtiG1mRHWvkdOZsmZJU                | 10-628-325-8932 |  even packages boost slyly carefully 
+   3284.77 | Supplier#000009084        | ALGERIA                   |      4083 | Manufacturer#3            | vFZS4BU4E8BTJ5r8PcrZFtc2pnIXm            | 10-830-177-5803 | cial accounts. slyly final theodolites detect slyly fluffily regular reques
+   1887.55 | Supplier#000000803        | MOROCCO                   |       802 | Manufacturer#3            | ,IXoixqcMluU5OEK7RhD,mDrBE2E3ygs         | 25-347-400-8216 | uiet ideas. even packages haggle carefully according to the fluffily slow requests. furiously ironi
+   1681.78 | Supplier#000001314        | MOROCCO                   |     18812 | Manufacturer#4            | aJDmqSRKvJC1Kgj,ceIfkh                   | 25-594-221-9764 | ously regular pinto beans. quickly express depo
+   1602.63 | Supplier#000009110        | MOZAMBIQUE                |      6609 | Manufacturer#3            | XF7zJMesO8DPCVXLFFK6OI                   | 26-849-550-2740 | nusual ideas boost carefully! theodolites wake furiously. blithely pendi
+   1280.51 | Supplier#000001407        | ALGERIA                   |      6406 | Manufacturer#2            | WK03co4CUF2cG2,hv rnQ                    | 10-436-924-3833 | ages boost carefully express accoun
+    933.88 | Supplier#000006626        | MOZAMBIQUE                |     16625 | Manufacturer#4            | ObYBeLozdoDjS7f791dqrXWBgfQR7xwOigm ,eVg | 26-897-536-6470 |  carefully regular foxes boost slyly regular packages-- bli
+    617.59 | Supplier#000002962        | ALGERIA                   |     17959 | Manufacturer#1            | gRQXWtrUwB6Al99PmX1O                     | 10-441-106-4025 | tions boost slyly regular, express dolphins. ironic ideas haggle slyl
+    378.43 | Supplier#000002045        | KENYA                     |     12044 | Manufacturer#5            | 3GVjWVjXkGXUeF82afLa,A                   | 24-956-242-7409 | ter the fluffily even deposits
+     92.44 | Supplier#000000058        | MOZAMBIQUE                |     17556 | Manufacturer#3            | 01dEADIZoCULZXg                          | 26-659-969-5586 | refully final foxes are. even, express courts according to the b
+   -194.72 | Supplier#000009559        | MOROCCO                   |      4558 | Manufacturer#4            | 8dQO1,H5piQRBDV,96PYVVCXW2dunI0yKXJJ77Bh | 25-566-702-1125 | ironic accounts sleep. courts cajole slyly. accounts sleep final deposi
+   -519.74 | Supplier#000009299        | KENYA                     |     11795 | Manufacturer#1            | UKUpKpXccW5X4r1n1UIIxpjpJH               | 24-957-349-7082 | press packages are quickly after the furiously silent accounts. unus
+   -763.43 | Supplier#000006017        | MOROCCO                   |      6016 | Manufacturer#1            | IUor4VqlDPJqahcVWH6KpmA29cbnu5X0SnD6     | 25-309-274-1235 | e after the even instructions. carefully silent deposits sleep.
+   -787.56 | Supplier#000001443        | MOROCCO                   |     16440 | Manufacturer#3            | mRFGwS7y1HfgWC6styUuSst8orq2JlJhCWHCsr7r | 25-723-252-9388 | accounts. bold, pending ideas haggle blithely along the carefully ruthless deposits. qui
+(38 rows)
+

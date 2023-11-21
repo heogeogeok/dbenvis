@@ -19,6 +19,7 @@ const CompareView = ({ files }) => {
 
   const [contents, setContents] = useState([]);
   const [duration, setDuration] = useState([]);
+  const [datasets, setDatasets] = useState([]);
 
   function onMouseOver() {
     // Save the original color

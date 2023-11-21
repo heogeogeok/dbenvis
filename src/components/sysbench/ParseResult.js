@@ -1,75 +1,91 @@
-import { useEffect, useState } from "react";
-import LineChart from "./LineChart";
-import { Card } from "@material-tailwind/react";
+import { useEffect, useState } from 'react'
+import LineChart from './LineChart'
+import { Card } from '@material-tailwind/react'
 
 const ParseResult = ({ files }) => {
-  const [queryResults, setQueryResults] = useState([]);
+  const [queryResults, setQueryResults] = useState([])
 
   useEffect(() => {
     const loadFiles = async () => {
       if (files && files.length > 0) {
-        const fileContents = [];
+        const fileContents = []
 
         for (const file of files) {
-          const fileContent = await readFile(file);
-          const results = extractResults(fileContent);
+          const fileContent = await readFile(file)
+          const results = extractResults(fileContent)
+          const avgTps = extractAvgTps(fileContent)
 
-          fileContents.push(results);
+          fileContents.push({ results, avgTps })
         }
 
-        setQueryResults(fileContents);
+        setQueryResults(fileContents)
+        console.log('ddddd ' + queryResults)
       } else {
         // 업로드 한 파일 없는 경우
-        setQueryResults([]);
+        setQueryResults([])
       }
-    };
+    }
 
-    loadFiles();
-  }, [files]);
+    loadFiles()
+  }, [files])
 
-  const readFile = (file) => {
-    return new Promise((resolve) => {
-      const fileReader = new FileReader();
+  const readFile = file => {
+    return new Promise(resolve => {
+      const fileReader = new FileReader()
 
       fileReader.onload = () => {
-        resolve(fileReader.result);
-      };
+        resolve(fileReader.result)
+      }
 
       // read the file as text
-      fileReader.readAsText(file);
-    });
-  };
+      fileReader.readAsText(file)
+    })
+  }
 
   /* input preprocessing + query result update */
-  const extractResults = (content) => {
+  const extractResults = content => {
     const regex =
-      /\[\s*(\d+s)\s*\]\s*thds:\s*(\d+)\s*tps:\s*([\d.]+)\s*qps:\s*([\d.]+).*lat\s*\(ms,99%\):\s*([\d.]+)\s*err\/s:\s*([\d.]+)/;
-    let match = null;
-    const results = [];
+      /\[\s*(\d+s)\s*\]\s*thds:\s*(\d+)\s*tps:\s*([\d.]+)\s*qps:\s*([\d.]+).*lat\s*\(ms,99%\):\s*([\d.]+)\s*err\/s:\s*([\d.]+)/
+    let match = null
+    const results = []
 
-    const lines = content.toString().split("\n");
+    const lines = content.toString().split('\n')
 
     for (let line of lines) {
       // Stop at Latency histogram
-      if (line.includes("Latency histogram (values are in milliseconds)")) {
-        break;
+      if (line.includes('Latency histogram (values are in milliseconds)')) {
+        break
       }
 
-      match = line.match(regex);
+      match = line.match(regex)
 
       if (match) {
-        const [_, time, thds, tps, qps, lat, err] = match;
+        const [_, time, thds, tps, qps, lat, err] = match
         results.push({
           time: parseInt(time),
           tps: parseFloat(tps),
           qps: parseFloat(qps),
           lat: parseFloat(lat),
-        });
+        })
       }
     }
 
-    return results;
-  };
+    return results
+  }
+
+  const extractAvgTps = content => {
+    const regex = /transactions:\s+\d+\s+\(([\d.]+)\s+per sec.\)/
+    const match = content.match(regex)
+
+    if (match) {
+      const transactionsPerSec = parseFloat(match[1]) // per sec 값 추출
+      console.log('tps: ' + transactionsPerSec)
+      return transactionsPerSec
+    } else {
+      console.error('Unable to extract average from the content')
+      return null
+    }
+  }
 
   return (
     <div>
@@ -84,7 +100,8 @@ const ParseResult = ({ files }) => {
                   key={index}
                   width={0.4 * document.documentElement.clientWidth}
                   margin={0.03 * document.documentElement.clientWidth}
-                  queryResults={results}
+                  queryResults={results.results}
+                  avgTps={results.avgTps}
                 />
               ))}
             </div>
@@ -96,7 +113,8 @@ const ParseResult = ({ files }) => {
                     key={index}
                     width={0.2 * document.documentElement.clientWidth}
                     margin={0.03 * document.documentElement.clientWidth}
-                    queryResults={results}
+                    queryResults={results.results}
+                    avgTps={results.avgTps}
                   />
                 </Card>
               ))}
@@ -105,7 +123,7 @@ const ParseResult = ({ files }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default ParseResult;
+export default ParseResult
