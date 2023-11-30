@@ -54,7 +54,6 @@ const LineChart = (props) => {
       .attr("stroke", "#4ab180")
       .attr("stroke-width", 1)
       .attr("d", line);
-    console.log(data);
   }
 
   useEffect(() => {

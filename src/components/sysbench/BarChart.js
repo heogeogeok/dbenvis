@@ -25,14 +25,11 @@ const BarChart = ({ files, ...props }) => {
           const fileContent = await readFile(file);
           const results = extractAvgTps(fileContent);
 
-          console.log("result", results);
-
           fileContents.push({ name: dbname[i], transactionsPerSec: results });
           i++;
         }
 
         setQueryResults(fileContents);
-        console.log(queryResults);
       } else {
         // 업로드 한 파일 없는 경우
         setQueryResults([]);
@@ -62,7 +59,6 @@ const BarChart = ({ files, ...props }) => {
 
     if (match) {
       const transactionsPerSec = parseFloat(match[1]); // per sec 값 추출
-      console.log("tps: " + transactionsPerSec);
       return transactionsPerSec;
     } else {
       console.error("Unable to extract average from the content");
