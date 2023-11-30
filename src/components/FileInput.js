@@ -8,7 +8,7 @@ function FileInput(props) {
 
     // 중복 여부 확인
     const exists = files.some(
-      (file) => file.lastModified === newFile[0].lastModified
+      (file) => file?.lastModified === newFile[0]?.lastModified
     );
 
     if (!exists) {
