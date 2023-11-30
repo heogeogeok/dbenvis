@@ -196,8 +196,6 @@ const CompareView = ({ files }) => {
       (entry) => entry.queryNumber === (selectedQuery + 1).toString()
     );
 
-    console.log(selectedData);
-
     // create scales for x and y
     const xScale = d3
       .scaleBand()
