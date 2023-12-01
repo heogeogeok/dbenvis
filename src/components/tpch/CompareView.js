@@ -19,7 +19,6 @@ const CompareView = ({ files }) => {
 
   const [contents, setContents] = useState([]);
   const [duration, setDuration] = useState([]);
-  const [datasets, setDatasets] = useState([]);
 
   function onMouseOver() {
     // Save the original color
@@ -57,7 +56,6 @@ const CompareView = ({ files }) => {
     if (files && files.length === 0) {
       // 업로드 한 파일 없는 경우
       setContents([]);
-      setSelectedQuery({});
     } else if (files && files.length > 0) {
       const fileContents = [];
 
