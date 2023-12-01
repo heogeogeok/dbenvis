@@ -111,7 +111,7 @@ const CompareView = ({ files }) => {
       chartSvg: selectedSvg,
       data: duration,
     });
-  }, [selectedQuery]);
+  });
 
   function drawGroupedBarChart(props) {
     const { chartSvg, data, click } = props;
@@ -180,7 +180,9 @@ const CompareView = ({ files }) => {
       .on("mouseover", function (event, d) {
         tooltip
           .html(
-            `File Index: ${d.fileIndex}<br> Query Number: ${d.queryNumber}<br> Duration: ${d.timeInSeconds}`
+            `File Index: ${d.fileIndex}<br> Query Number: ${
+              d.queryNumber
+            }<br> Duration: ${d.timeInSeconds.toFixed(2)} sec`
           )
           .style("visibility", "visible");
         d3.select(this).attr("fill", (d) =>
