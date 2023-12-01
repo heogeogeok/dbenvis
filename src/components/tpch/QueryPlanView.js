@@ -57,7 +57,14 @@ const QueryPlanView = (props) => {
         .append("text")
         .attr("dy", -10)
         .attr("text-anchor", "middle")
-        .text((d) => d.data["Node Type"]);
+        .text(
+          (d) =>
+            d.data["Node Type"]
+              ? d.data["Node Type"]
+              : d.data.children["Node Type"]
+              ? d.data.children["Node Type"]
+              : "Nested Loop" // TODO: ...이건 좀...
+        );
 
       nodes
         .append("text")
