@@ -21,16 +21,6 @@ const CompareView = ({ files }) => {
   const [contents, setContents] = useState([]);
   const [duration, setDuration] = useState([]);
 
-  function onMouseOver() {
-    // Save the original color
-    const originalColor = d3.select(this).attr("fill");
-
-    // Transition to the darker color
-    d3.select(this)
-      .transition()
-      .duration(200)
-      .style("fill", darkenColor(originalColor));
-  }
   function onMouseClick(e) {
     const selected = e.target.__data__;
     if (selected) setSelectedQuery(selected.queryNumber - 1);
