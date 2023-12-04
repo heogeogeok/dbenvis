@@ -30,7 +30,7 @@ function FileInput(props) {
     const fileInput = document.querySelector("#file-input");
     fileInput.files = dataTransfer.files;
 
-    // File List에서 해당 첨부파일 삭제
+    // File List에서 해당 파일 삭제
     setFiles(Array.from(dataTransfer.files));
   };
 

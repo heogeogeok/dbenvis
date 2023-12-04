@@ -274,8 +274,6 @@ Time: 14.811 ms
 (1 row)
 
 Time: 4187.748 ms (00:04.188)
-DROP VIEW
-Time: 3.291 ms
 
 
 ** Query 16 **
