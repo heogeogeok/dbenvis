@@ -31,7 +31,6 @@ const opTypes = [
   ["grouping_operation", "Group"],
   ["ordering_operation", "Order"],
   ["duplicates_removal", "Distinct"],
-  ["materialized_from_subquery", "Materialize"],
 ];
 
 const joinTypes = [
@@ -78,7 +77,7 @@ export function extractMySQL(content) {
     );
     jsonPlan = JSON.parse(
       JSON.stringify(jsonPlan).replace(
-        /"grouping_operation":|"ordering_operation":|"duplicates_removal":|"table":|"materialized_from_subquery":|"attached_subqueries":|"query_block":/g,
+        /"grouping_operation":|"ordering_operation":|"duplicates_removal":|"table":|"query_block":/g,
         '"children":'
       )
     );
@@ -93,7 +92,7 @@ export function extractMySQL(content) {
 function traverse(data) {
   function process(i, value) {
     if (value !== null && typeof value === "object") {
-      // 1. handle Nested Loop
+      // handle Nested Loop
       if (value["nested_loop"]) {
         value["children"] = { "Node Type": "Nested Loop" };
         handleNestedLoop(
@@ -103,11 +102,24 @@ function traverse(data) {
         );
       }
 
-      // 2. handle operations
+      // handle Attached Subqueries
+      if (value["attached_subqueries"]) {
+        value["children"] = value["attached_subqueries"][0]["query_block"];
+        if (value["children"])
+          value["children"]["Node Type"] = "Attached Subqueries";
+      }
+
+      // handle Materialized from Subquery
+      if (value["materialized_from_subquery"]) {
+        value["children"] = value["materialized_from_subquery"]["query_block"];
+        if (value["children"]) value["children"]["Node Type"] = "Materialize";
+      }
+
+      // 3. handle operations
       const opType = opTypes.find((type) => type[0] === i);
       if (opType) value["Node Type"] = opType[1];
 
-      // 3. handle Table
+      // 4. handle Table
       if (i === "table") {
         const scanType = scanTypes.find(
           (type) => type[0] === value.access_type
