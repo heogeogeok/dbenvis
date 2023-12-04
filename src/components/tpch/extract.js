@@ -3,10 +3,8 @@
  * 데이터베이스마다 함수 추가하는 방식으로 구현 가능
  */
 
-import { json } from "d3";
-
 /*
- * PostgreSQL
+ * 1. PostgreSQL
  */
 export function extractPostgreSQL(content) {
   const regex = /\[(.*?)\](?=\s*\()/gs;
@@ -27,17 +25,22 @@ export function extractPostgreSQL(content) {
 }
 
 /*
- * MySQL
+ * 2. MySQL
  */
 const opTypes = [
   ["grouping_operation", "Group"],
   ["ordering_operation", "Order"],
   ["duplicates_removal", "Distinct"],
   ["materialized_from_subquery", "Materialize"],
-  ["attached_subqueries", "Attached Subqueries"], // 안먹혀
 ];
 
 const joinTypes = [
+  ["Block Nested Loop", "Block Nested Loop"],
+  ["Batched Key Access", "Batched Key Access"],
+  ["hash join", "Hash Join"],
+];
+
+const scanTypes = [
   ["system", "Single Row\n(system constant)"],
   ["const", "Single Row\n(constant)"],
   ["eq_ref", "Unique Key Lookup"],
@@ -88,32 +91,36 @@ export function extractMySQL(content) {
 }
 
 function traverse(data) {
-  for (var i in data) {
-    if (data[i] !== null && typeof data[i] === "object") {
+  function process(i, value) {
+    if (value !== null && typeof value === "object") {
       // 1. handle Nested Loop
-      if (data[i]["nested_loop"]) {
-        data[i]["children"] = { "Node Type": "Nested Loop" };
+      if (value["nested_loop"]) {
+        value["children"] = { "Node Type": "Nested Loop" };
         handleNestedLoop(
-          data[i]["nested_loop"],
-          data[i]["children"],
-          data[i]["nested_loop"].length - 1
+          value["nested_loop"],
+          value["children"],
+          value["nested_loop"].length - 1
         );
       }
 
       // 2. handle operations
       const opType = opTypes.find((type) => type[0] === i);
-      if (opType) data[i]["Node Type"] = opType[1];
+      if (opType) value["Node Type"] = opType[1];
 
       // 3. handle Table
       if (i === "table") {
-        const joinType = joinTypes.find(
-          (type) => type[0] === data[i].access_type
+        const scanType = scanTypes.find(
+          (type) => type[0] === value.access_type
         );
-        data[i]["Node Type"] = joinType ? joinType[1] : "Unknown";
+        value["Node Type"] = scanType ? scanType[1] : "Unknown";
       }
 
-      traverse(data[i]);
+      traverse(value);
     }
+  }
+
+  for (var i in data) {
+    process(i, data[i]);
   }
 }
 
@@ -128,6 +135,13 @@ function handleNestedLoop(og, data, num) {
   } else {
     data["children"] = [og[0]["table"], og[1]["table"]];
     data["children"]["Node Type"] = "Nested Loop";
+  }
+
+  if (og[num]["table"]["using_join_buffer"]) {
+    const joinType = joinTypes.find(
+      (type) => type[0] === og[num]["table"]["using_join_buffer"]
+    );
+    data["Node Type"] = joinType ? joinType[1] : "Unknown";
   }
 }
 
