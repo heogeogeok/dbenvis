@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import LineChart from "./LineChart";
-import { Card } from "@material-tailwind/react";
+import BarChart from "./BarChart";
 
 const ParseResult = ({ files }) => {
   const [queryResults, setQueryResults] = useState([]);
@@ -68,7 +68,6 @@ const ParseResult = ({ files }) => {
         });
       }
     }
-
     return results;
   };
 
@@ -87,39 +86,30 @@ const ParseResult = ({ files }) => {
 
   return (
     <div>
+      {/* <Card> */}
       <h1 className="title">Benchmark Result</h1>
       {/* 차트 여러개인 경우 두개씩 보이도록 */}
       {queryResults.length >= 1 && (
-        <div className="chart-container">
-          {queryResults.length === 1 ? (
-            <div>
-              {queryResults.map((results, index) => (
-                <LineChart
-                  key={index}
-                  width={0.4 * document.documentElement.clientWidth}
-                  margin={0.03 * document.documentElement.clientWidth}
-                  queryResults={results.results}
-                  avgTps={results.avgTps}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-2">
-              {queryResults.map((results, index) => (
-                <Card>
-                  <LineChart
-                    key={index}
-                    width={0.2 * document.documentElement.clientWidth}
-                    margin={0.03 * document.documentElement.clientWidth}
-                    queryResults={results.results}
-                    avgTps={results.avgTps}
-                  />
-                </Card>
-              ))}
-            </div>
-          )}
+        <div>
+          <div className="sysbench-container">
+            {queryResults.map((results, index) => (
+              <LineChart
+                key={index}
+                width={0.3 * document.documentElement.clientWidth}
+                margin={0.03 * document.documentElement.clientWidth}
+                queryResults={results.results}
+                avgTps={results.avgTps}
+                files={files}
+                name={files.name}
+              />
+            ))}
+          </div>
         </div>
       )}
+      {/* </Card> */}
+      <div>
+        <BarChart files={files} />
+      </div>
     </div>
   );
 };
