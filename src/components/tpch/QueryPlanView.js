@@ -57,21 +57,18 @@ const QueryPlanView = (props) => {
         .append("text")
         .attr("dy", -10)
         .attr("text-anchor", "middle")
-        .text(
-          (d) =>
-            d.data["Node Type"]
-              ? d.data["Node Type"]
-              : d.data.children["Node Type"]
-              ? d.data.children["Node Type"]
-              : "Nested Loop" // TODO: ...이건 좀...
-        );
+        .text((d) => d.data["Node Type"]);
 
       nodes
         .append("text")
         .attr("dy", 10)
         .attr("text-anchor", "middle")
         .text((d) =>
-          d.data["Relation Name"] ? d.data["Relation Name"].toUpperCase() : null
+          d.data["Relation Name"]
+            ? d.data["Relation Name"].toUpperCase()
+            : d.data.table_name
+            ? d.data.table_name.toUpperCase()
+            : null
         );
     },
     [width, height, marginY]
