@@ -2,9 +2,6 @@ import { useEffect, useState } from "react";
 import LineChart from "./LineChart";
 import BarChart from "./BarChart";
 
-import { Card } from "@material-tailwind/react";
-import { propTypesSelected } from "@material-tailwind/react/types/components/select";
-
 const ParseResult = ({ files }) => {
   const [queryResults, setQueryResults] = useState([]);
 
