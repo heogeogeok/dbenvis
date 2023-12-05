@@ -54,13 +54,18 @@ function ParseQueryPlan({ files }) {
       <div className="plan-container">
         {queryPlans.map((plans, index) =>
           plans.length > 0 && plans[selectedQuery] ? (
-            <Card key={index}>
-              <QueryPlanView
-                key={index}
-                width={(document.body.clientWidth * 0.5) / queryPlans.length}
-                plan={plans[selectedQuery].Plan}
-              />
-            </Card>
+            <div>
+              {files[index] && files[index].name ? (
+                <h1 className="filename-title">{files[index].name}</h1>
+              ) : null}
+              <Card key={index}>
+                <QueryPlanView
+                  key={index}
+                  width={(document.body.clientWidth * 0.5) / queryPlans.length}
+                  plan={plans[selectedQuery].Plan}
+                />
+              </Card>
+            </div>
           ) : null
         )}
       </div>

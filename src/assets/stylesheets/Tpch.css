@@ -13,6 +13,12 @@
   margin-top: 5px;
 }
 
+.filename-title {
+  font-family: "NanumSquareB";
+  font-size: medium;
+  color: black;
+}
+
 .chart-container {
   padding-bottom: 10vh;
 }
