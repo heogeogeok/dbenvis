@@ -3,7 +3,7 @@ import QueryPlanView from "./QueryPlanView";
 import { TpchContext } from "../../contexts/TpchContext";
 import { Card } from "@material-tailwind/react";
 
-import { extractPostgreSQL, extractMySQL } from "./extract";
+import { parsePostgreSQL, parseMySQL } from "./parse";
 
 function ParseQueryPlan({ files }) {
   const { selectedQuery } = useContext(TpchContext);
@@ -18,9 +18,9 @@ function ParseQueryPlan({ files }) {
           const fileContent = await readFile(file);
 
           // default: try PostgreSQL
-          let plans = extractPostgreSQL(fileContent);
+          let plans = parsePostgreSQL(fileContent);
           // 실패 시 try MySQL
-          if (plans.length === 0) plans = extractMySQL(fileContent);
+          if (plans.length === 0) plans = parseMySQL(fileContent);
 
           planContents.push(plans);
         }

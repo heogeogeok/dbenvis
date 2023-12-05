@@ -4,7 +4,7 @@
 }
 
 .title {
-  font-family: 'NanumSquareEB';
+  font-family: "NanumSquareEB";
   font-size: large;
   color: black;
   padding: 10px;
@@ -20,15 +20,20 @@
 }
 
 .node-label {
-  font-family: 'NanumSquareB';
-  font-size: medium;
+  font-family: "NanumSquareB";
+  font-size: 14px;
   background-color: white;
 }
 
+.relation-name {
+  font-family: "NanumSquareR";
+  font-size: 12px;
+}
+
 .tooltip {
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI',
-    Helvetica, Arial, sans-serif, 'Apple   Color Emoji', 'Segoe UI Emoji',
-    'Segoe UI Symbol';
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
+    Helvetica, Arial, sans-serif, "Apple   Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
   background: rgba(69, 77, 93, 0.9);
   border-radius: 0.1rem;
   color: #fff;

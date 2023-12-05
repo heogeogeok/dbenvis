@@ -1,18 +1,18 @@
 /*
- * extract.js: EXPLAIN 결과 전처리
+ * parse.js: EXPLAIN 결과 전처리
  * 데이터베이스마다 함수 추가하는 방식으로 구현 가능
  */
 
 /*
  * 1. PostgreSQL
  */
-export function extractPostgreSQL(content) {
+export function parsePostgreSQL(content) {
   const regex = /\[(.*?)\](?=\s*\()/gs;
   let match = null;
   const plans = [];
 
   while ((match = regex.exec(content)) !== null) {
-    // extract plan and remove every "+"
+    // parse plan and remove every "+"
     let plan = match[1].replace(/\+/g, "");
 
     // d3의 계층구조 따르기 위해 "Plans"를 "children"으로 대체
@@ -54,13 +54,13 @@ const scanTypes = [
   ["ALL", "Full Table Scan"],
 ];
 
-export function extractMySQL(content) {
+export function parseMySQL(content) {
   const regex = /EXPLAIN([\s\S]*?)Query_ID/g;
   let match = null;
   const plans = [];
 
   while ((match = regex.exec(content)) !== null) {
-    // extract plan and remove every "\n" and "\"
+    // parse plan and remove every "\n" and "\"
     let plan = match[1].replace(/\\n/g, "");
     plan = plan.replace(/\\/g, "");
 
