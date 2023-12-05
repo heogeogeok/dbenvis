@@ -162,11 +162,13 @@ const QueryPlanView = (props) => {
             : null
         );
 
-      // tooltip
+      // create tooltip
       var tooltip = d3
         .select("body")
-        .append("tooltip")
-        .attr("class", "node-tooltip");
+        .append("div")
+        .attr("class", "node-tooltip")
+        .style("position", "absolute")
+        .style("visibility", "hidden");
 
       nodes
         .on("mouseover", function (event, d) {
