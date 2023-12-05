@@ -55,60 +55,6 @@ const nodeColor = d3
 
 const QueryPlanView = props => {
   const treeSvg = useRef(null)
-const nodeColor = d3
-  .scaleOrdinal()
-  .domain([
-    "Limit",
-    "Aggregate",
-    "Gather",
-    "Gather Merge",
-    "Group",
-    "Sort",
-    "Order",
-    "Seq Scan",
-    "Index Scan",
-    "Index Only Scan",
-    "Full Index Scan",
-    "Full Table Scan",
-    "Unique Key Lookup",
-    "Non-Unique Key Lookup",
-    "Bitmap Heap Scan",
-    "Bitmap Index Scan",
-    "Nested Loop",
-    "Hash Join",
-    "Merge Join",
-    "Attached Subqueries",
-    "Hash",
-    "Materialize",
-  ])
-  .range([
-    "#fbb4ae",
-    "#b3cde3",
-    "#b3cde3",
-    "#b3cde3",
-    "#b3cde3",
-    "#ccebc5",
-    "#ccebc5",
-    "#decbe4",
-    "#decbe4",
-    "#decbe4",
-    "#decbe4",
-    "#decbe4",
-    "#decbe4",
-    "#decbe4",
-    "#decbe4",
-    "#decbe4",
-    "#fed9a6",
-    "#fed9a6",
-    "#fed9a6",
-    "#ffffcc",
-    "#e5d8bd",
-    "#fddaec",
-    "#f2f2f2",
-  ]);
-
-const QueryPlanView = (props) => {
-  const treeSvg = useRef(null);
 
   const width = props.width
   const height = 0.8 * document.body.clientHeight
