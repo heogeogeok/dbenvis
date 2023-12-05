@@ -4,10 +4,13 @@
 }
 
 .title {
-  font-family: 'NanumSquareEB';
+  font-family: "NanumSquareEB";
   font-size: large;
   color: black;
+  background-color: #f0f8ff;
+  border-radius: 20px;
   padding: 10px;
+  margin-top: 5px;
 }
 
 .chart-container {
@@ -20,20 +23,23 @@
 }
 
 .node-label {
-  font-family: 'NanumSquareB';
-  font-size: medium;
+  font-family: "NanumSquareEB";
+  font-size: 14px;
   background-color: white;
 }
 
+.relation-name {
+  font-family: "NanumSquareR";
+  font-size: 12px;
+}
+
 .tooltip {
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI',
-    Helvetica, Arial, sans-serif, 'Apple   Color Emoji', 'Segoe UI Emoji',
-    'Segoe UI Symbol';
+  font-family: "NanumSquareB";
   background: rgba(69, 77, 93, 0.9);
   border-radius: 0.1rem;
   color: #fff;
   display: block;
-  font-size: 14px;
+  font-size: small;
   max-width: 320px;
   padding: 0.2rem 0.4rem;
   position: absolute;
@@ -41,4 +47,14 @@
   white-space: pre;
   z-index: 300;
   visibility: hidden;
+}
+
+.node-tooltip {
+  font-family: "NanumSquareB";
+  font-size: small;
+  text-align: center;
+  position: absolute;
+  border: 4px dashed #809fff;
+  background-color: white;
+  padding: 5px;
 }
