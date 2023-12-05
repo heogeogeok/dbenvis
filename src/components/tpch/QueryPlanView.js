@@ -1,6 +1,58 @@
 import { useCallback, useEffect, useRef } from "react";
 import * as d3 from "d3";
 
+const nodeColor = d3
+  .scaleOrdinal()
+  .domain([
+    "Limit",
+    "Aggregate",
+    "Gather",
+    "Gather Merge",
+    "Group",
+    "Sort",
+    "Order",
+    "Seq Scan",
+    "Index Scan",
+    "Index Only Scan",
+    "Full Index Scan",
+    "Full Table Scan",
+    "Unique Key Lookup",
+    "Non-Unique Key Lookup",
+    "Bitmap Heap Scan",
+    "Bitmap Index Scan",
+    "Nested Loop",
+    "Hash Join",
+    "Merge Join",
+    "Attached Subqueries",
+    "Hash",
+    "Materialize",
+  ])
+  .range([
+    "#fbb4ae",
+    "#b3cde3",
+    "#b3cde3",
+    "#b3cde3",
+    "#b3cde3",
+    "#ccebc5",
+    "#ccebc5",
+    "#decbe4",
+    "#decbe4",
+    "#decbe4",
+    "#decbe4",
+    "#decbe4",
+    "#decbe4",
+    "#decbe4",
+    "#decbe4",
+    "#decbe4",
+    "#fed9a6",
+    "#fed9a6",
+    "#fed9a6",
+    "#ffffcc",
+    "#e5d8bd",
+    "#fddaec",
+    "#f2f2f2",
+  ]);
+
 const QueryPlanView = (props) => {
   const treeSvg = useRef(null);
 
@@ -16,25 +68,10 @@ const QueryPlanView = (props) => {
       const root = d3.hierarchy(data);
       const treeData = treeLayout(root);
 
-      const nodeColor = d3.scaleOrdinal([
-        "#fbb4ae",
-        "#b3cde3",
-        "#ccebc5",
-        "#decbe4",
-        "#fed9a6",
-        "#ffffcc",
-        "#e5d8bd",
-        "#fddaec",
-        "#f2f2f2",
-      ]);
-
       // query cost 계산
       const cost = treeData.links().map((link) => {
-        if (
+        if (link.target.data["Total Cost"]) {
           // PostgreSQL
-          link.target.data["Total Cost"] &&
-          link.target.data["Startup Cost"]
-        ) {
           return (
             link.target.data["Total Cost"] - link.target.data["Startup Cost"]
           );
@@ -60,7 +97,7 @@ const QueryPlanView = (props) => {
         .select(treeSvg.current)
         .append("svg")
         .attr("width", width)
-        .attr("height", d3.max[(height, treeData.height * 60)] + 2 * marginY)
+        .attr("height", height + 2 * marginY)
         .append("g") // 그룹으로 묶어서
         .attr("transform", `translate(0, ${marginY})`) // margin 적용
         .call(
@@ -124,6 +161,25 @@ const QueryPlanView = (props) => {
             ? d.data.table_name.toUpperCase()
             : null
         );
+
+      // tooltip
+      var tooltip = d3
+        .select("body")
+        .append("tooltip")
+        .attr("class", "node-tooltip");
+
+      nodes
+        .on("mouseover", function (event, d) {
+          tooltip.html(tooltipContent(d)).style("visibility", "visible");
+        })
+        .on("mousemove", function (e) {
+          tooltip
+            .style("top", e.pageY - 30 + "px")
+            .style("left", e.pageX + 10 + "px");
+        })
+        .on("mouseout", function () {
+          tooltip.style("visibility", "hidden");
+        });
     },
     [width, height, marginY]
   );
@@ -132,6 +188,38 @@ const QueryPlanView = (props) => {
     d3.select(treeSvg.current).selectAll("*").remove(); // clear
     drawTree(props.plan);
   }, [props, drawTree]);
+
+  function tooltipContent(d) {
+    let content = `Node Type: ${d.data["Node Type"]}`;
+
+    if (d.data["Total Cost"]) {
+      // PostgreSQL
+      if (d.data["Relation Name"]) {
+        content += `<br>Relation Name: ${d.data[
+          "Relation Name"
+        ].toUpperCase()}`;
+      }
+
+      content += `<br>Cost: ${(
+        d.data["Total Cost"] - d.data["Startup Cost"]
+      ).toFixed(2)}<br>Plan Rows: ${d.data["Plan Rows"]}<br>Plan Width: ${
+        d.data["Plan Width"]
+      }`;
+    } else if (d.data["cost_info"]) {
+      // MySQL
+      if (d.data["table_name"]) {
+        content += `<br>Relation Name: ${d.data["table_name"].toUpperCase()}`;
+      }
+
+      const totalCost = Object.entries(d.data.cost_info || {})
+        .filter(([key]) => key.includes("cost"))
+        .map(([_, value]) => parseFloat(value) || 0);
+
+      content += `<br>Cost: ${d3.sum(totalCost).toFixed(2)}`;
+    }
+
+    return content;
+  }
 
   return (
     <div>

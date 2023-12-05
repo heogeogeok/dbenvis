@@ -10,12 +10,12 @@ const CompareView = ({ files }) => {
   const selectedSvg = useRef(null);
 
   const width = document.body.clientWidth * 0.3;
-  const height = 300;
+  const height = 0.4 * document.body.clientHeight;
   const marginX = document.body.clientWidth * 0.01;
   const marginY = 20;
 
   const selectedWidth = document.body.clientWidth * 0.15;
-  const selectedHeight = 300;
+  const selectedHeight = 0.3 * document.body.clientHeight;
   const selectedMarginX = selectedWidth / 2;
 
   const [contents, setContents] = useState([]);
