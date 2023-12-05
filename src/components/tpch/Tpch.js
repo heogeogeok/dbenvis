@@ -8,12 +8,12 @@ function Tpch(props) {
 
   return (
     <div className="tpch-container">
-      <div className="view-container">
+      <div className="plan-view-container">
         <Card>
           <ParseQueryPlan files={explainFiles} />
         </Card>
       </div>
-      <div className="view-container">
+      <div className="compare-view-container">
         <Card>
           <CompareView files={resultFiles} />
         </Card>

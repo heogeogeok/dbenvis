@@ -16,3 +16,23 @@
   overflow-x: hidden; /* hide when horizontally overflowed */
   overflow-y: auto; /* scroll when vertically overflowed */
 }
+
+.plan-view-container {
+  min-width: 600px;
+  width: 50vw;
+  height: 90vh;
+  padding: 5px;
+  text-align: center;
+  overflow-x: hidden; /* hide when horizontally overflowed */
+  overflow-y: auto; /* scroll when vertically overflowed */
+}
+
+.compare-view-container {
+  min-width: 500px;
+  width: 30vw;
+  height: 90vh;
+  padding: 5px;
+  text-align: center;
+  overflow-x: hidden; /* hide when horizontally overflowed */
+  overflow-y: auto; /* scroll when vertically overflowed */
+}

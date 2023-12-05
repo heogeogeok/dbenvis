@@ -9,14 +9,14 @@ const CompareView = ({ files }) => {
   const barplotSvg = useRef(null);
   const selectedSvg = useRef(null);
 
-  const width = document.body.clientWidth * 0.4;
+  const width = document.body.clientWidth * 0.3;
   const height = 300;
   const marginX = document.body.clientWidth * 0.01;
   const marginY = 20;
 
-  const selectedWidth = document.body.clientWidth * 0.2;
+  const selectedWidth = document.body.clientWidth * 0.15;
   const selectedHeight = 300;
-  const selectedMarginX = document.body.clientWidth * 0.1;
+  const selectedMarginX = selectedWidth / 2;
 
   const [contents, setContents] = useState([]);
   const [duration, setDuration] = useState([]);

@@ -28,21 +28,8 @@ const QueryPlanView = (props) => {
         "#f2f2f2",
       ]);
 
-      const svg = d3
-        .select(treeSvg.current)
-        .append("svg")
-        .attr("width", width)
-        .attr("height", d3.max[(height, treeData.height * 60)] + 2 * marginY)
-        .append("g") // 그룹으로 묶어서
-        .attr("transform", `translate(0, ${marginY})`) // margin 적용
-        .call(
-          d3.zoom().on("zoom", (event) => {
-            svg.attr("transform", event.transform);
-          })
-        )
-        .append("g");
-
-      const linkSums = treeData.links().map((link) => {
+      // query cost 계산
+      const cost = treeData.links().map((link) => {
         if (
           // PostgreSQL
           link.target.data["Total Cost"] &&
@@ -63,11 +50,25 @@ const QueryPlanView = (props) => {
         return 0;
       });
 
-      // Create a scale for stroke width based on the sum of all cost values
+      // scale for stroke width
       const strokeWidthScale = d3
         .scaleLinear()
-        .domain([d3.min(linkSums), d3.max(linkSums)])
-        .range([1, 5]);
+        .domain([d3.min(cost), d3.max(cost)])
+        .range([1, 8]);
+
+      const svg = d3
+        .select(treeSvg.current)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", d3.max[(height, treeData.height * 60)] + 2 * marginY)
+        .append("g") // 그룹으로 묶어서
+        .attr("transform", `translate(0, ${marginY})`) // margin 적용
+        .call(
+          d3.zoom().on("zoom", (event) => {
+            svg.attr("transform", event.transform);
+          })
+        )
+        .append("g");
 
       // create edges with arrow markers
       svg
@@ -80,7 +81,7 @@ const QueryPlanView = (props) => {
         .attr("x2", (d) => d.source.x)
         .attr("y2", (d) => d.source.y)
         .attr("stroke", "red")
-        .attr("stroke-width", (d, i) => strokeWidthScale(linkSums[i]));
+        .attr("stroke-width", (d, i) => strokeWidthScale(cost[i]));
 
       // create nodes
       const nodes = svg
@@ -93,13 +94,13 @@ const QueryPlanView = (props) => {
       nodes
         .append("rect")
         .attr("fill", (d) => nodeColor(d.data["Node Type"]))
-        .attr("width", (d) => d.data["Node Type"].length * 8)
+        .attr("width", (d) => d.data["Node Type"].length * 9)
         .attr("height", (d) =>
           d.data["Relation Name"] || d.data.table_name ? 40 : 25
         )
         .attr("rx", 5)
         .attr("transform", (d) => {
-          let x = d.data["Node Type"].length * 8;
+          let x = d.data["Node Type"].length * 9;
           return `translate(${-x / 2}, -10)`;
         });
 

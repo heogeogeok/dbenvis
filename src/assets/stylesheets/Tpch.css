@@ -7,7 +7,10 @@
   font-family: "NanumSquareEB";
   font-size: large;
   color: black;
+  background-color: #f0f8ff;
+  border-radius: 20px;
   padding: 10px;
+  margin-top: 5px;
 }
 
 .chart-container {
@@ -20,7 +23,7 @@
 }
 
 .node-label {
-  font-family: "NanumSquareB";
+  font-family: "NanumSquareEB";
   font-size: 14px;
   background-color: white;
 }
@@ -31,9 +34,7 @@
 }
 
 .tooltip {
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
-    Helvetica, Arial, sans-serif, "Apple   Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol";
+  font-family: "NanumSquareB";
   background: rgba(69, 77, 93, 0.9);
   border-radius: 0.1rem;
   color: #fff;

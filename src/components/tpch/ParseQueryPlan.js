@@ -57,7 +57,7 @@ function ParseQueryPlan({ files }) {
             <Card key={index}>
               <QueryPlanView
                 key={index}
-                width={(document.body.clientWidth * 0.4) / queryPlans.length}
+                width={(document.body.clientWidth * 0.5) / queryPlans.length}
                 plan={plans[selectedQuery].Plan}
               />
             </Card>
