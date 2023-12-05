@@ -13,6 +13,11 @@
   margin-top: 5px;
 }
 
+.text {
+  font-family: "NanumSquareB";
+  font-size: small;
+}
+
 .filename-title {
   font-family: "NanumSquareB";
   font-size: medium;
@@ -28,6 +33,24 @@
   align-items: center;
 }
 
+.checkbox-container {
+  display: flex;
+  justify-content: end;
+  margin-right: 20px;
+}
+
+.x-axis {
+  font-family: "NanumSquareR";
+  font-size: small;
+  color: black;
+}
+
+.y-axis {
+  font-family: "NanumSquareR";
+  font-size: x-small;
+  color: black;
+}
+
 .node-label {
   font-family: "NanumSquareEB";
   font-size: 14px;
@@ -39,27 +62,23 @@
   font-size: 12px;
 }
 
-.tooltip {
-  font-family: "NanumSquareB";
-  background: rgba(69, 77, 93, 0.9);
-  border-radius: 0.1rem;
-  color: #fff;
-  display: block;
-  font-size: small;
-  max-width: 320px;
-  padding: 0.2rem 0.4rem;
+.bar-tooltip {
   position: absolute;
-  text-overflow: ellipsis;
-  white-space: pre;
-  z-index: 300;
   visibility: hidden;
+  font-family: "NanumSquareB";
+  font-size: small;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+  color: #fff;
+  padding: 5px;
 }
 
 .node-tooltip {
+  position: absolute;
+  visibility: hidden;
   font-family: "NanumSquareB";
   font-size: small;
   text-align: center;
-  position: absolute;
   border: 4px dashed #809fff;
   background-color: white;
   padding: 5px;

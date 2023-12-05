@@ -184,6 +184,18 @@ function Sidebar(props) {
           </AccordionBody>
         </Accordion>
         <hr />
+        {/* OLAP benchmark의 경우 query plan 추가 */}
+        {selected === "TPC-H" && (
+          <div>
+            <FileInput
+              inputType={"Upload Query Plans"}
+              selected={selected}
+              files={explainFiles}
+              setFiles={setExplainFiles}
+            />
+            <hr className="my-4" />
+          </div>
+        )}
         {/* 결과 파일 업로드 */}
         <FileInput
           inputType={"Upload Results"}
@@ -191,18 +203,6 @@ function Sidebar(props) {
           files={resultFiles}
           setFiles={setResultFiles}
         />
-        {/* OLAP benchmark의 경우 query plan 추가 */}
-        {selected === "TPC-H" && (
-          <div>
-            <hr className="my-4" />
-            <FileInput
-              inputType={"Upload Query Plans"}
-              selected={selected}
-              files={explainFiles}
-              setFiles={setExplainFiles}
-            />
-          </div>
-        )}
       </List>
     </Card>
   );

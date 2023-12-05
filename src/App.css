@@ -19,7 +19,7 @@
 
 .plan-view-container {
   min-width: 600px;
-  width: 50vw;
+  width: 45vw;
   height: 90vh;
   padding: 5px;
   text-align: center;
@@ -29,7 +29,7 @@
 
 .compare-view-container {
   min-width: 500px;
-  width: 30vw;
+  width: 35vw;
   height: 90vh;
   padding: 5px;
   text-align: center;
