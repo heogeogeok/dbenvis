@@ -2,12 +2,17 @@ import { useRef, useEffect, useState, useContext } from 'react'
 import * as d3 from 'd3'
 import { TpchContext } from '../../contexts/TpchContext'
 import '../../assets/stylesheets/Tpch.css'
+import Button from '@mui/material/Button'
 
-const CompareView = ({ files }) => {
+const CompareView = props => {
   const { selectedQuery, setSelectedQuery } = useContext(TpchContext)
+
+  const resultFiles = props.resultFiles
+  const explainFiles = props.explainFiles
 
   const barplotSvg = useRef(null)
   const selectedSvg = useRef(null)
+  const stackSvg = useRef(null)
 
   const width = document.body.clientWidth * 0.4
   const height = 300
@@ -18,8 +23,8 @@ const CompareView = ({ files }) => {
   const selectedHeight = 300
   const selectedMarginX = document.body.clientWidth * 0.1
 
-  const [contents, setContents] = useState([])
-  const [duration, setDuration] = useState([])
+  const [results, setResults] = useState([])
+  const [queryPlans, setQueryPlans] = useState([])
 
   function onMouseClick(e) {
     const selected = e.target.__data__
@@ -28,87 +33,231 @@ const CompareView = ({ files }) => {
 
   // darked/lighten a color
   function shadeColor(color, percent) {
-    var R = parseInt(color.substring(1, 3), 16)
-    var G = parseInt(color.substring(3, 5), 16)
-    var B = parseInt(color.substring(5, 7), 16)
+    var r = parseInt(color.substring(1, 3), 16)
+    var g = parseInt(color.substring(3, 5), 16)
+    var b = parseInt(color.substring(5, 7), 16)
 
-    R = parseInt((R * (100 + percent)) / 100)
-    G = parseInt((G * (100 + percent)) / 100)
-    B = parseInt((B * (100 + percent)) / 100)
+    r = parseInt((r * (100 + percent)) / 100)
+    g = parseInt((g * (100 + percent)) / 100)
+    b = parseInt((b * (100 + percent)) / 100)
 
-    R = R < 255 ? R : 255
-    G = G < 255 ? G : 255
-    B = B < 255 ? B : 255
+    r = r < 255 ? r : 255
+    g = g < 255 ? g : 255
+    b = b < 255 ? b : 255
 
-    var RR = R.toString(16).length === 1 ? '0' + R.toString(16) : R.toString(16)
-    var GG = G.toString(16).length === 1 ? '0' + G.toString(16) : G.toString(16)
-    var BB = B.toString(16).length === 1 ? '0' + B.toString(16) : B.toString(16)
+    var rr = r.toString(16).length === 1 ? '0' + r.toString(16) : r.toString(16)
+    var gg = g.toString(16).length === 1 ? '0' + g.toString(16) : g.toString(16)
+    var bb = b.toString(16).length === 1 ? '0' + b.toString(16) : b.toString(16)
 
-    return '#' + RR + GG + BB
+    return '#' + rr + gg + bb
   }
 
-  useEffect(() => {
-    if (files && files.length === 0) {
-      // 업로드 한 파일 없는 경우
-      setContents([])
-    } else if (files && files.length > 0) {
-      const fileContents = []
-
-      // create a FileReader for each file
-      files.forEach(file => {
-        const fileReader = new FileReader()
-
-        fileReader.onload = () => {
-          fileContents.push(fileReader.result)
-          setContents(fileContents)
-        }
-
-        // read the file as text
-        fileReader.readAsText(file)
-      })
+  // recursive function to traverse the nested structure
+  function traversePlan(node, result) {
+    result.push({
+      'Node Type': node['Node Type'],
+      Cost: node['Total Cost'] - node['Startup Cost'],
+    })
+    // check if 'children' property exists
+    if ('children' in node) {
+      // iterate over each child
+      for (const child of node.children) {
+        // recursively call traversePlan for each child
+        traversePlan(child, result)
+      }
     }
-  }, [files, setSelectedQuery])
+  }
 
-  /* input preprocessing */
+  /* process result files*/
   useEffect(() => {
+    const loadFiles = async () => {
+      if (resultFiles && resultFiles.length > 0) {
+        let resultContents = []
+
+        for (let i = 0; i < resultFiles.length; i++) {
+          const file = resultFiles[i]
+          const fileContent = await readFile(file)
+
+          // default: try PostgreSQL
+          let queries = parsePostgreSQL(fileContent, i)
+          // 실패 시 try MariaDB
+          if (queries.length === 0) queries = parseMariaDB(fileContent, i)
+
+          resultContents = resultContents.concat(queries)
+        }
+        setResults(resultContents)
+      } else {
+        // 업로드 한 파일 없는 경우
+        setResults([])
+      }
+    }
+    loadFiles()
+  }, [resultFiles])
+
+  const readFile = file => {
+    return new Promise(resolve => {
+      const fileReader = new FileReader()
+
+      fileReader.onload = () => {
+        resolve(fileReader.result)
+      }
+
+      // read the file as text
+      fileReader.readAsText(file)
+    })
+  }
+
+  const parsePostgreSQL = (content, fileIndex) => {
     const queryTimes = []
 
-    contents.forEach((content, fileIndex) => {
-      const regex = /Query (\d+) \*\*[\s\S]+?Time: (\d+\.\d+) ms/g
-      let match = regex.exec(contents)
+    const regex = /Query (\d+) \*\*[\s\S]+?Time: (\d+\.\d+) ms/g
+    let match = null
 
-      while (match !== null) {
-        const queryNumber = match[1]
-        const timeInSeconds = parseFloat(match[2]) / 1000
+    while ((match = regex.exec(content)) !== null) {
+      const queryNumber = match[1]
+      const duration = parseFloat(match[2]) / 1000
 
-        queryTimes.push({
-          queryNumber,
-          timeInSeconds,
-          fileIndex,
-        })
+      queryTimes.push({
+        queryNumber,
+        duration,
+        fileIndex,
+      })
+    }
 
-        match = regex.exec(content)
+    return queryTimes
+  }
+
+  const parseMariaDB = (content, fileIndex) => {
+    const queryTimes = []
+    const regex =
+      /Query (\d+) \*\*[\s\S]+?Query_ID\s*Duration\s*Query\s*\n(\d+)\s*(\d+\.\d+)/g
+    let match = null
+
+    while ((match = regex.exec(content)) !== null) {
+      const queryNumber = match[1]
+      const duration = parseFloat(match[3]) / 1000
+
+      queryTimes.push({
+        queryNumber,
+        duration,
+        fileIndex,
+      })
+    }
+
+    return queryTimes
+  }
+
+  /* process explain files */
+  useEffect(() => {
+    const loadFiles = async () => {
+      if (explainFiles && explainFiles.length > 0) {
+        const planContents = []
+
+        for (const file of explainFiles) {
+          const fileContent = await readFile(file)
+
+          // default: try PostgreSQL
+          let plans = extractPostgreSQL(fileContent)
+
+          planContents.push(plans)
+        }
+
+        setQueryPlans(planContents)
+      } else {
+        // 업로드 한 파일 없는 경우
+        setQueryPlans([])
       }
-    })
-    setDuration(queryTimes)
-  }, [contents])
+    }
+
+    loadFiles()
+  }, [explainFiles])
+
+  /* input preprocessing + query plan update */
+  const extractPostgreSQL = content => {
+    const regex = /\[(.*?)\](?=\s*\()/gs
+    let match = null
+    const plans = []
+
+    while ((match = regex.exec(content)) !== null) {
+      // extract plan and remove every "+"
+      let plan = match[1].replace(/\+/g, '')
+
+      // d3의 계층구조 따르기 위해 "Plans"를 "children"으로 대체
+      plan = plan.replace(/"Plans":/g, '"children":')
+
+      plans.push(JSON.parse(plan))
+    }
+
+    return plans
+  }
 
   /* 모든 query에 대한 bar chart */
   useEffect(() => {
     drawGroupedBarChart({
       chartSvg: barplotSvg,
-      data: duration,
+      data: results,
       click: onMouseClick,
     })
-  }, [duration])
+  }, [results])
 
   /* 선택한 query에 대한 bar chart */
   useEffect(() => {
     drawBarChart({
       chartSvg: selectedSvg,
-      data: duration,
+      data: results,
     })
+  }, [results])
+
+  /* 선택한 query에 대한 stacked bar chart */
+  useEffect(() => {
+    if (queryPlans.length > 0) {
+      drawStackedBarChart({
+        chartSvg: stackSvg,
+        data: queryPlans,
+      })
+    }
   })
+
+  function drawStackedBarChart(props) {
+    const { chartSvg, data } = props
+    const svg = d3.select(chartSvg.current)
+
+    svg.selectAll('*').remove()
+
+    // cost + node type array
+    const costResults = []
+
+    let i = 0
+    while (i < data.length) {
+      const cost = []
+      traversePlan(data[i][selectedQuery]['Plan'], cost)
+      costResults.push(cost)
+      i++
+    }
+
+    const stackedData = costResults.map(result => {
+      const obj = {}
+      result.forEach(entry => {
+        obj[entry['Node Type']] = entry['Cost']
+      })
+      return obj
+    })
+
+    // extract keys from the stacked data
+    const keys = Object.keys(stackedData[0])
+
+    // stack the data
+    const stack = d3.stack().keys(keys)(stackedData)
+
+    // map keys to the stacked data
+    stack.map((d, i) => {
+      d.map(d => {
+        d.key = keys[i]
+        return d
+      })
+      return d
+    })
+  }
 
   function drawGroupedBarChart(props) {
     const { chartSvg, data, click } = props
@@ -133,7 +282,7 @@ const CompareView = ({ files }) => {
 
     const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(data, d => d.timeInSeconds)])
+      .domain([0, d3.max(data, d => d.duration)])
       .nice()
       .rangeRound([height - marginY, marginY])
 
@@ -169,17 +318,15 @@ const CompareView = ({ files }) => {
       .data(([, d]) => d)
       .join('rect')
       .attr('x', d => xScale(d.fileIndex))
-      .attr('y', d => yScale(d.timeInSeconds))
+      .attr('y', d => yScale(d.duration))
       .attr('width', xScale.bandwidth())
-      .attr('height', d => height - yScale(d.timeInSeconds))
+      .attr('height', d => height - yScale(d.duration))
       .attr('fill', d => colorScale(d.fileIndex))
       .on('click', click)
       .on('mouseover', function (event, d) {
         tooltip
           .html(
-            `File Index: ${d.fileIndex}<br> Query Number: ${
-              d.queryNumber
-            }<br> Duration: ${d.timeInSeconds.toFixed(2)} sec`
+            `File Index: ${d.fileIndex}<br> Query Number: ${d.queryNumber}<br> Duration: ${d.duration} sec`
           )
           .style('visibility', 'visible')
         d3.select(this).attr('fill', d =>
@@ -230,7 +377,7 @@ const CompareView = ({ files }) => {
 
     const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(selectedData, entry => entry.timeInSeconds)])
+      .domain([0, d3.max(selectedData, entry => entry.duration)])
       .range([selectedHeight, 0])
 
     // create color scale for each bars in the group
@@ -264,16 +411,16 @@ const CompareView = ({ files }) => {
       .data(selectedData)
       .join('rect')
       .attr('x', d => xScale(d.fileIndex) + selectedMarginX)
-      .attr('y', d => yScale(d.timeInSeconds) + marginY)
+      .attr('y', d => yScale(d.duration) + marginY)
       .attr('width', xScale.bandwidth())
-      .attr('height', d => selectedHeight - yScale(d.timeInSeconds))
+      .attr('height', d => selectedHeight - yScale(d.duration))
       .attr('fill', d => colorScale(d.fileIndex))
   }
 
   return (
     <>
       <h1 className="title">Duration</h1>
-      {contents.length > 0 && (
+      {results.length > 0 && (
         <>
           <div className="chart-container">
             <svg
@@ -290,6 +437,14 @@ const CompareView = ({ files }) => {
                 width={selectedWidth + 2 * selectedMarginX}
                 height={selectedHeight + 2 * marginY}
               />
+              <Button variant="contained">Stacked Bar Chart</Button>
+              {queryPlans.length > 0 && (
+                <svg
+                  ref={stackSvg}
+                  width={selectedWidth + 2 * selectedMarginX}
+                  height={selectedHeight + 2 * marginY}
+                />
+              )}
             </div>
           )}
         </>
