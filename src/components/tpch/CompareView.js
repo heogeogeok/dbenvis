@@ -2,10 +2,15 @@ import { useRef, useEffect, useState, useContext } from "react";
 import * as d3 from "d3";
 import { TpchContext } from "../../contexts/TpchContext";
 import "../../assets/stylesheets/Tpch.css";
-import Button from "@mui/material/Button";
 import { Checkbox } from "@material-tailwind/react";
 
-import { parsePostgreSQL, parseMariaDB } from "./parseResult";
+import {
+  parsePostgreSQL,
+  parseMariaDB,
+  extractPostgreSQL,
+  traversePlan,
+  shadeColor,
+} from "./parseResult";
 
 const CompareView = (props) => {
   const { selectedQuery, setSelectedQuery, setDurations } =
@@ -37,6 +42,7 @@ const CompareView = (props) => {
   const [queryPlans, setQueryPlans] = useState([]);
 
   const [showLogScale, setShowLogScale] = useState(false);
+  const [showStackedBar, setShowStackedBar] = useState(false);
 
   function onMouseClick(e) {
     const selected = e.target.__data__;
@@ -47,45 +53,9 @@ const CompareView = (props) => {
     setShowLogScale((prev) => !prev);
   };
 
-  // darked/lighten a color
-  function shadeColor(color, percent) {
-    var r = parseInt(color.substring(1, 3), 16);
-    var g = parseInt(color.substring(3, 5), 16);
-    var b = parseInt(color.substring(5, 7), 16);
-
-    r = parseInt((r * (100 + percent)) / 100);
-    g = parseInt((g * (100 + percent)) / 100);
-    b = parseInt((b * (100 + percent)) / 100);
-
-    r = r < 255 ? r : 255;
-    g = g < 255 ? g : 255;
-    b = b < 255 ? b : 255;
-
-    var rr =
-      r.toString(16).length === 1 ? "0" + r.toString(16) : r.toString(16);
-    var gg =
-      g.toString(16).length === 1 ? "0" + g.toString(16) : g.toString(16);
-    var bb =
-      b.toString(16).length === 1 ? "0" + b.toString(16) : b.toString(16);
-
-    return "#" + rr + gg + bb;
-  }
-
-  // recursive function to traverse the nested structure
-  function traversePlan(node, result) {
-    result.push({
-      "Node Type": node["Node Type"],
-      Cost: node["Total Cost"] - node["Startup Cost"],
-    });
-    // check if 'children' property exists
-    if ("children" in node) {
-      // iterate over each child
-      for (const child of node.children) {
-        // recursively call traversePlan for each child
-        traversePlan(child, result);
-      }
-    }
-  }
+  const handleStackCheckboxChange = () => {
+    setShowStackedBar((prev) => !prev);
+  };
 
   /* process result files*/
   useEffect(() => {
@@ -115,6 +85,30 @@ const CompareView = (props) => {
     loadFiles();
   }, [resultFiles, setDurations]);
 
+  /* process explain files */
+  useEffect(() => {
+    const loadFiles = async () => {
+      if (explainFiles && explainFiles.length > 0) {
+        let planContents = [];
+
+        for (let i = 0; i < explainFiles.length; i++) {
+          const file = explainFiles[i];
+          const fileContent = await readFile(file);
+          // 일단 Postgres만
+          let plans = extractPostgreSQL(fileContent, i);
+
+          planContents = planContents.concat(plans);
+        }
+        setQueryPlans(planContents);
+      } else {
+        // 업로드 한 파일 없는 경우
+        setQueryPlans([]);
+      }
+    };
+
+    loadFiles();
+  }, [explainFiles]);
+
   const readFile = (file) => {
     return new Promise((resolve) => {
       const fileReader = new FileReader();
@@ -128,50 +122,6 @@ const CompareView = (props) => {
     });
   };
 
-  /* process explain files */
-  // useEffect(() => {
-  //   const loadFiles = async () => {
-  //     if (explainFiles && explainFiles.length > 0) {
-  //       const planContents = [];
-
-  //       for (const file of explainFiles) {
-  //         const fileContent = await readFile(file);
-
-  //         // default: try PostgreSQL
-  //         let plans = extractPostgreSQL(fileContent);
-
-  //         planContents.push(plans);
-  //       }
-
-  //       setQueryPlans(planContents);
-  //     } else {
-  //       // 업로드 한 파일 없는 경우
-  //       setQueryPlans([]);
-  //     }
-  //   };
-
-  //   loadFiles();
-  // }, [explainFiles]);
-
-  /* input preprocessing + query plan update */
-  const extractPostgreSQL = (content) => {
-    const regex = /\[(.*?)\](?=\s*\()/gs;
-    let match = null;
-    const plans = [];
-
-    while ((match = regex.exec(content)) !== null) {
-      // extract plan and remove every "+"
-      let plan = match[1].replace(/\+/g, "");
-
-      // d3의 계층구조 따르기 위해 "Plans"를 "children"으로 대체
-      plan = plan.replace(/"Plans":/g, '"children":');
-
-      plans.push(JSON.parse(plan));
-    }
-
-    return plans;
-  };
-
   /* 모든 query에 대한 bar chart */
   useEffect(() => {
     drawGroupedBarChart({
@@ -183,21 +133,20 @@ const CompareView = (props) => {
 
   /* 선택한 query에 대한 bar chart */
   useEffect(() => {
-    drawSelectedBarChart({
-      chartSvg: selectedSvg,
-      data: results,
-    });
-  }, [results, selectedQuery]);
-
-  /* 선택한 query에 대한 stacked bar chart */
-  useEffect(() => {
-    if (queryPlans.length > 0) {
+    if (showStackedBar) {
+      // if showStackedBar is true
       drawStackedBarChart({
-        chartSvg: stackSvg,
+        chartSvg: selectedSvg,
         data: queryPlans,
       });
+    } else {
+      // otherwise
+      drawSelectedBarChart({
+        chartSvg: selectedSvg,
+        data: results,
+      });
     }
-  });
+  }, [results, queryPlans, selectedQuery, showStackedBar]);
 
   function drawStackedBarChart(props) {
     const { chartSvg, data } = props;
@@ -207,37 +156,131 @@ const CompareView = (props) => {
 
     // cost + node type array
     const costResults = [];
+    const selectedData = data[selectedQuery];
 
-    let i = 0;
-    while (i < data.length) {
-      const cost = [];
-      traversePlan(data[i][selectedQuery]["Plan"], cost);
-      costResults.push(cost);
-      i++;
+    // TODO: 이 형식으로 처리되도록!
+    // const selectedData = data.filter(
+    //   (entry) => entry.queryNumber === selectedQuery + 1
+    // );
+
+    const cost = [];
+    if (selectedData && selectedData.plan && selectedData.plan.Plan) {
+      traversePlan(selectedData.plan.Plan, selectedData.fileIndex, cost);
+      costResults.push({ fileIndex: selectedData.fileIndex, costs: cost });
     }
 
-    const stackedData = costResults.map((result) => {
-      const obj = {};
-      result.forEach((entry) => {
-        obj[entry["Node Type"]] = entry["Cost"];
-      });
-      return obj;
-    });
-
     // extract keys from the stacked data
-    const keys = Object.keys(stackedData[0]);
+    const keys = Array.from(
+      new Set(
+        costResults.flatMap((result) =>
+          result.costs.map((entry) => entry["Node Type"])
+        )
+      )
+    );
+
+    // generate the stacked data
+    const stackedData = costResults.map((d) =>
+      d.costs.map((entry) => ({
+        fileIndex: d.fileIndex,
+        cost: entry["Cost"],
+        nodeType: entry["Node Type"],
+      }))
+    );
+
+    // create a stack generator
+    const stack = d3
+      .stack()
+      .keys(keys)
+      .order(d3.stackOrderNone)
+      .offset(d3.stackOffsetNone)
+      .value((d, key) => d.find((entry) => entry.nodeType === key)?.cost || 0);
 
     // stack the data
-    const stack = d3.stack().keys(keys)(stackedData);
+    const layers = stack(stackedData);
 
-    // map keys to the stacked data
-    stack.map((d, i) => {
-      d.map((d) => {
-        d.key = keys[i];
-        return d;
-      });
-      return d;
-    });
+    console.log(layers);
+    // set up scales
+    const xScale = d3
+      .scaleBand()
+      .domain(layers[0].map((d) => d.data.fileIndex))
+      .range([0, selectedWidth])
+      .align(0.5)
+      .padding(0.1);
+
+    // Calculate the maximum sum of values across all layers
+    const maxYValue = d3.max(layers, (layer) => d3.max(layer, (d) => d[1]));
+
+    // Set up the y-axis scale
+    const yScale = d3
+      .scaleLinear()
+      .domain([0, maxYValue])
+      .range([selectedHeight, 0]);
+
+    // create x and y axes
+    const xAxis = d3.axisBottom(xScale);
+    const yAxis = d3.axisLeft(yScale);
+
+    // draw x and y axes
+    svg
+      .append("g")
+      .attr("class", "x-axis")
+      .attr(
+        "transform",
+        `translate(${selectedMarginX}, ${selectedHeight + selectedMarginY})`
+      )
+      .transition()
+      .duration(1000)
+      .call(xAxis);
+
+    svg
+      .append("g")
+      .attr("class", "y-axis")
+      .attr("transform", `translate(${selectedMarginX}, ${selectedMarginY})`)
+      .transition()
+      .duration(1000)
+      .call(yAxis);
+
+    // set up color scale
+    const colorScale = d3
+      .scaleOrdinal()
+      .domain(keys)
+      .range(d3.schemeCategory10);
+
+    // create tooltip element
+    // const tooltip = d3
+    //   .select("body")
+    //   .append("div")
+    //   .attr("class", "bar-tooltip");
+
+    // draw the stacked bars
+    svg
+      .selectAll("rect")
+      .data(layers)
+      .enter()
+      .append("rect")
+      .attr("x", (d) => xScale(d[0].fileIndex) + selectedMarginX)
+      .attr("y", selectedHeight + selectedMarginY)
+      .attr("width", xScale.bandwidth())
+      .attr("height", 0)
+      .attr("fill", (d) => colorScale(d.key))
+      .transition()
+      .duration(1000)
+      .attr("y", (d) => yScale(d[0][1]) + selectedMarginY)
+      .attr("height", (d) => yScale(d[0][0]) - yScale(d[0][1]));
+
+    // .on("mouseover", function (event, d) {
+    //   tooltip.html(`${d}`).style("visibility", "visible");
+    //   d3.select(this).attr("fill", (d) => shadeColor(colorScale(d), -15));
+    // })
+    // .on("mousemove", function (e) {
+    //   tooltip
+    //     .style("top", e.pageY - 10 + "px")
+    //     .style("left", e.pageX + 10 + "px");
+    // })
+    // .on("mouseout", function () {
+    //   tooltip.html(``).style("visibility", "hidden");
+    //   d3.select(this).attr("fill", (d) => colorScale(d));
+    // })
   }
 
   function drawGroupedBarChart(props) {
@@ -506,14 +549,15 @@ const CompareView = (props) => {
                 width={selectedWidth + 2 * selectedMarginX}
                 height={selectedHeight + 2 * selectedMarginY}
               />
-              <Button variant="contained">Stacked Bar Chart</Button>
-              {queryPlans.length > 0 && (
-                <svg
-                  ref={stackSvg}
-                  width={selectedWidth + 2 * selectedMarginX}
-                  height={selectedHeight + 2 * selectedMarginY}
+              <div className="checkbox-container">
+                <Checkbox
+                  color="blue"
+                  className="h-4 w-4 rounded-full border-gray-900/20 bg-gray-900/10 transition-all hover:scale-105 hover:before:opacity-0"
+                  checked={showStackedBar}
+                  label={<p className="text">Stacked Bar Chart</p>}
+                  onClick={handleStackCheckboxChange}
                 />
-              )}
+              </div>
             </div>
           )}
         </>

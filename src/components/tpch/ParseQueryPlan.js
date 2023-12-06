@@ -4,7 +4,7 @@ import DurationCard from "./DurationCard";
 import { TpchContext } from "../../contexts/TpchContext";
 import { Card } from "@material-tailwind/react";
 
-import { parsePostgreSQL, parseMySQL } from "./parseExplain";
+import { parseExpPostgreSQL, parseExpMySQL } from "./parseExplain";
 
 function ParseQueryPlan({ files }) {
   const { selectedQuery, durations } = useContext(TpchContext);
@@ -19,9 +19,9 @@ function ParseQueryPlan({ files }) {
           const fileContent = await readFile(file);
 
           // default: try PostgreSQL
-          let plans = parsePostgreSQL(fileContent);
+          let plans = parseExpPostgreSQL(fileContent);
           // 실패 시 try MySQL
-          if (plans.length === 0) plans = parseMySQL(fileContent);
+          if (plans.length === 0) plans = parseExpMySQL(fileContent);
 
           planContents.push(plans);
         }
@@ -65,7 +65,7 @@ function ParseQueryPlan({ files }) {
                   </p>
                 </div>
               ) : null}
-              <Card key={index}>
+              <Card key={index} className="plan-card">
                 <DurationCard
                   duration={durations.find(
                     (duration) =>
@@ -75,7 +75,9 @@ function ParseQueryPlan({ files }) {
                 />
                 <QueryPlanView
                   key={index}
-                  width={(document.body.clientWidth * 0.45) / queryPlans.length}
+                  width={
+                    (document.body.clientWidth * 0.45 - 10) / queryPlans.length
+                  } // default padding 고려하여 -10
                   plan={plans[selectedQuery].Plan}
                 />
               </Card>

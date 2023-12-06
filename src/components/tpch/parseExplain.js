@@ -6,7 +6,7 @@
 /*
  * 1. PostgreSQL
  */
-export function parsePostgreSQL(content) {
+export function parseExpPostgreSQL(content) {
   const regex = /\[(.*?)\](?=\s*\()/gs;
   let match = null;
   const plans = [];
@@ -54,7 +54,7 @@ const scanTypes = [
   ["ALL", "Full Table Scan"],
 ];
 
-export function parseMySQL(content) {
+export function parseExpMySQL(content) {
   const regex = /EXPLAIN([\s\S]*?)Query_ID/g;
   let match = null;
   const plans = [];
