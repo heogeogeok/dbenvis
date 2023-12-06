@@ -1,6 +1,7 @@
 import ParseQueryPlan from "./ParseQueryPlan";
 import CompareView from "./CompareView";
 import "../../assets/stylesheets/Tpch.css";
+import "../../assets/stylesheets/QueryPlan.css";
 import { Card } from "@material-tailwind/react";
 
 function Tpch(props) {

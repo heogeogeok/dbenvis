@@ -8,7 +8,8 @@ import { Checkbox } from "@material-tailwind/react";
 import { parsePostgreSQL, parseMariaDB } from "./parseResult";
 
 const CompareView = (props) => {
-  const { selectedQuery, setSelectedQuery } = useContext(TpchContext);
+  const { selectedQuery, setSelectedQuery, setDurations } =
+    useContext(TpchContext);
 
   const resultFiles = props.resultFiles;
   const explainFiles = props.explainFiles;
@@ -104,13 +105,15 @@ const CompareView = (props) => {
           resultContents = resultContents.concat(queries);
         }
         setResults(resultContents);
+        setDurations(resultContents);
       } else {
         // 업로드 한 파일 없는 경우
         setResults([]);
+        setDurations([]);
       }
     };
     loadFiles();
-  }, [resultFiles]);
+  }, [resultFiles, setDurations]);
 
   const readFile = (file) => {
     return new Promise((resolve) => {
