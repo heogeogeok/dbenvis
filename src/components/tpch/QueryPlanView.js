@@ -57,8 +57,8 @@ const QueryPlanView = (props) => {
   const treeSvg = useRef(null);
 
   const width = props.width;
-  const height = 0.8 * document.body.clientHeight;
-  const marginY = 50;
+  const height = 0.7 * document.body.clientHeight;
+  const marginY = 30;
 
   const drawTree = useCallback(
     (data) => {

@@ -4,7 +4,7 @@
 }
 
 .title {
-  font-family: "NanumSquareEB";
+  font-family: 'NanumSquareEB';
   font-size: large;
   color: black;
   background-color: #f0f8ff;
@@ -13,8 +13,8 @@
   margin-top: 5px;
 }
 
-.text {
-  font-family: "NanumSquareB";
+text {
+  font-family: 'NanumSquareB';
   font-size: small;
 }
 
@@ -35,26 +35,26 @@
 }
 
 .x-axis {
-  font-family: "NanumSquareR";
+  font-family: 'NanumSquareR';
   font-size: small;
   color: black;
 }
 
 .y-axis {
-  font-family: "NanumSquareR";
+  font-family: 'NanumSquareR';
   font-size: x-small;
   color: black;
 }
 
 .legend-label {
-  font-family: "NanumSquareB";
+  font-family: 'NanumSquareB';
   font-size: small;
 }
 
 .bar-tooltip {
   position: absolute;
   visibility: hidden;
-  font-family: "NanumSquareB";
+  font-family: 'NanumSquareB';
   font-size: small;
   background: rgba(0, 0, 0, 0.6);
   border-radius: 4px;
