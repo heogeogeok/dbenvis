@@ -1,12 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import QueryPlanView from "./QueryPlanView";
+import DurationCard from "./DurationCard";
 import { TpchContext } from "../../contexts/TpchContext";
 import { Card } from "@material-tailwind/react";
 
 import { parsePostgreSQL, parseMySQL } from "./parseExplain";
 
 function ParseQueryPlan({ files }) {
-  const { selectedQuery } = useContext(TpchContext);
+  const { selectedQuery, durations } = useContext(TpchContext);
   const [queryPlans, setQueryPlans] = useState([]);
 
   useEffect(() => {
@@ -56,9 +57,22 @@ function ParseQueryPlan({ files }) {
           plans.length > 0 && plans[selectedQuery] ? (
             <div>
               {files[index] && files[index].name ? (
-                <h1 className="filename-title">{files[index].name}</h1>
+                <div className="filename-title">
+                  <p>
+                    {files[index].name.length > 80 / files.length
+                      ? `${files[index].name.slice(0, 80 / files.length)}...`
+                      : files[index].name}
+                  </p>
+                </div>
               ) : null}
               <Card key={index}>
+                <DurationCard
+                  duration={durations.find(
+                    (duration) =>
+                      duration.fileIndex === index &&
+                      duration.queryNumber === (selectedQuery + 1).toString()
+                  )}
+                />
                 <QueryPlanView
                   key={index}
                   width={(document.body.clientWidth * 0.45) / queryPlans.length}

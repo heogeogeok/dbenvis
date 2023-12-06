@@ -57,7 +57,7 @@ const LineChart = (props) => {
 
     // brush
     const brush = d3
-      .brush()
+      .brushX()
       .extent([
         [0, 0],
         [width, height],
@@ -97,27 +97,30 @@ const LineChart = (props) => {
 
     svg.append("g").call(brush);
 
+    // A function that set idleTimeOut to null
+    let idleTimeOut;
+    function idled() {
+      idleTimeOut = null;
+    }
+
     // A function that update the chart for given boundaries
     function updateChart(event) {
       // If no selection, back to initial coordinate. Otherwise, update X axis domain
-      let [[x0, y0], [x1, y1]] = event.selection;
-      let extentX = [x0, x1];
-      let extentY = [y0, y1];
+      let extent = event.selection;
 
-      if (!event) {
-        xScale.domain([
-          d3.min(data, (d) => d.time),
-          d3.max(data, (d) => d.time),
-        ]);
-        yScale.domain([d3.min(data, (d) => d.tps), d3.max(data, (d) => d.tps)]);
+      if (!extent) {
+        if (!idleTimeOut) return (idleTimeOut = setTimeout(idled, 350)); // This allows to wait a little bit
+        xScale.domain([4, 8]);
+        // xScale.domain([
+        //   d3.min(data, (d) => d.time),
+        //   d3.max(data, (d) => d.time),
+        // ]);
       } else {
-        xScale.domain([xScale.invert(extentX[0]), xScale.invert(extentX[1])]);
-        yScale.domain([yScale.invert(extentY[0]), yScale.invert(extentY[1])]);
+        xScale.domain([xScale.invert(extent[0]), xScale.invert(extent[1])]);
         svg.select(".brush").call(brush.move, null); // 브러시 영역 숨기기
       }
       // Update axis and circle position
       xAxis.transition().duration(1000).call(d3.axisBottom(xScale));
-      yAxis.transition().duration(1000).call(d3.axisLeft(yScale));
 
       // 무조건 function 방식으로 작성
       circle
@@ -152,9 +155,6 @@ const LineChart = (props) => {
       xScale.domain([d3.min(data, (d) => d.time), d3.max(data, (d) => d.time)]);
       xAxis.transition().call(d3.axisBottom(xScale));
 
-      yScale.domain([d3.min(data, (d) => d.tps), d3.max(data, (d) => d.tps)]);
-      yAxis.transition().call(d3.axisLeft(yScale));
-
       circle
         .transition()
         .attr("cx", function (d) {
@@ -164,20 +164,17 @@ const LineChart = (props) => {
           return yScale(d.tps);
         });
 
-      line
-        .select(".line")
-        .transition()
-        .attr(
-          "d",
-          d3
-            .line()
-            .x(function (d) {
-              return xScale(d.time);
-            })
-            .y(function (d) {
-              return yScale(d.tps);
-            })
-        );
+      line.transition().attr(
+        "d",
+        d3
+          .line()
+          .x(function (d) {
+            return xScale(d.time);
+          })
+          .y(function (d) {
+            return yScale(d.tps);
+          })
+      );
     });
   }
 

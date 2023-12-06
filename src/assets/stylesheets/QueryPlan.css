@@ -1,0 +1,63 @@
+.plan-container {
+  display: flex;
+  align-items: center;
+}
+
+.node-label {
+  font-family: "NanumSquareEB";
+  font-size: 14px;
+  background-color: white;
+}
+
+.relation-name {
+  font-family: "NanumSquareR";
+  font-size: 12px;
+}
+
+.node-tooltip {
+  position: absolute;
+  visibility: hidden;
+  font-family: "NanumSquareB";
+  font-size: small;
+  text-align: center;
+  border: 4px dashed #809fff;
+  background-color: white;
+  padding: 5px;
+}
+
+.filename-title {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+
+.filename-title p {
+  font-family: "NanumSquareB";
+  font-size: medium;
+  color: black;
+  margin: 0 20px;
+}
+
+.duration-card {
+  margin: 0 20px;
+  border: 2px solid #f0f8ff;
+}
+
+.duration-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.duration-card-header {
+  font-family: "NanumSquareB";
+  font-size: medium;
+  color: black;
+}
+
+.duration-card-content p {
+  font-family: "NanumSquareEB";
+  font-size: x-large;
+  color: black;
+}

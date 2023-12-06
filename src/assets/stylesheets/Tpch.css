@@ -18,24 +18,19 @@ text {
   font-size: small;
 }
 
-.filename-title {
-  font-family: 'NanumSquareB';
-  font-size: medium;
-  color: black;
-}
-
 .chart-container {
   padding-bottom: 10vh;
 }
 
-.plan-container {
+.legend-container {
   display: flex;
-  align-items: center;
+  justify-content: flex-end;
+  margin-top: 15px;
 }
 
 .checkbox-container {
   display: flex;
-  justify-content: end;
+  justify-content: flex-end;
   margin-right: 20px;
 }
 
@@ -51,15 +46,9 @@ text {
   color: black;
 }
 
-.node-label {
-  font-family: 'NanumSquareEB';
-  font-size: 14px;
-  background-color: white;
-}
-
-.relation-name {
-  font-family: 'NanumSquareR';
-  font-size: 12px;
+.legend-label {
+  font-family: 'NanumSquareB';
+  font-size: small;
 }
 
 .bar-tooltip {
@@ -70,16 +59,5 @@ text {
   background: rgba(0, 0, 0, 0.6);
   border-radius: 4px;
   color: #fff;
-  padding: 5px;
-}
-
-.node-tooltip {
-  position: absolute;
-  visibility: hidden;
-  font-family: 'NanumSquareB';
-  font-size: small;
-  text-align: center;
-  border: 4px dashed #809fff;
-  background-color: white;
   padding: 5px;
 }

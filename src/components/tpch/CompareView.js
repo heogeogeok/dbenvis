@@ -9,24 +9,30 @@ import { parsePostgreSQL, parseMariaDB } from './parseResult'
 import { type } from '@testing-library/user-event/dist/type'
 
 const CompareView = props => {
-  const { selectedQuery, setSelectedQuery } = useContext(TpchContext)
+  const { selectedQuery, setSelectedQuery, setDurations } =
+    useContext(TpchContext)
 
   const resultFiles = props.resultFiles
   const explainFiles = props.explainFiles
 
   const barplotSvg = useRef(null)
+  const legendSvg = useRef(null)
   const selectedSvg = useRef(null)
   const stackSvg = useRef(null)
 
   const width = document.body.clientWidth * 0.35
   const height = 0.35 * document.body.clientHeight
   const marginX = document.body.clientWidth * 0.02
-  const marginY = 15
+  const marginY = 10
 
   const selectedWidth = width / 2
   const selectedHeight = 0.3 * document.body.clientHeight
   const selectedMarginX = selectedWidth / 2
   const selectedMarginY = 30
+
+  const legendWidth = width / 4
+  const legendItemSize = 12
+  const legendMargin = 5
 
   const [results, setResults] = useState([])
   const [queryPlans, setQueryPlans] = useState([])
@@ -103,13 +109,15 @@ const CompareView = props => {
           resultContents = resultContents.concat(queries)
         }
         setResults(resultContents)
+        setDurations(resultContents)
       } else {
         // 업로드 한 파일 없는 경우
         setResults([])
+        setDurations([])
       }
     }
     loadFiles()
-  }, [resultFiles])
+  }, [resultFiles, setDurations])
 
   const readFile = file => {
     return new Promise(resolve => {
@@ -432,31 +440,41 @@ const CompareView = props => {
       .attr('height', d => height - yScale(d.duration) - marginY)
 
     // draw legend
-    const legend = svg
-      .selectAll('.legend')
-      .data(fileIndexes.values())
-      .enter()
+    const legend = d3.select(legendSvg.current)
+    legend.selectAll('*').remove()
+
+    // create legend items
+    legend
       .append('g')
-      .attr('class', 'legend')
-      .attr('transform', function (d, i) {
-        return 'translate(0,' + i * 20 + ')'
-      })
+      .selectAll()
+      .data(resultFiles)
+      .join('rect')
+      .attr('width', legendItemSize)
+      .attr('height', legendItemSize)
+      .attr('rx', 5)
+      .attr(
+        'transform',
+        (d, i) => `translate(0, ${(legendItemSize + legendMargin) * i})`
+      )
+      .style('fill', (d, idx) => colorScale(idx))
 
+    // append legend labels
     legend
-      .append('rect')
-      .attr('x', width + 18)
-      .attr('width', 18)
-      .attr('height', 18)
-      .style('fill', d => colorScale(d))
-
-    legend
+      .selectAll('text')
+      .data(resultFiles)
+      .enter()
       .append('text')
-      .attr('x', width + 40)
-      .attr('y', 9)
-      .attr('dy', '.35em')
-      .style('text-anchor', 'start')
-      .text(function (d) {
-        return resultFiles[d].name // Use resultFiles to get the name for each fileIndex
+      .attr('class', 'legend-label')
+      .attr('x', legendItemSize + legendMargin)
+      .attr(
+        'y',
+        (d, idx) => (legendItemSize + legendMargin) * idx + legendItemSize / 2
+      )
+      .attr('dy', '0.35em')
+      .text(d => {
+        // 파일 이름이 긴 경우 truncate
+        const label = d.name.length > 20 ? `${d.name.slice(0, 20)}...` : d.name
+        return label
       })
   }
 
@@ -490,9 +508,14 @@ const CompareView = props => {
       .range(d3.schemeCategory10)
 
     // create x and y axes
-    const xAxis = d3
-      .axisBottom(xScale)
-      .tickFormat(index => resultFiles[index].name)
+    const xAxis = d3.axisBottom(xScale).tickFormat(index => {
+      // 파일 이름이 긴 경우 truncate
+      const tick =
+        resultFiles[index].name.length > 45 / resultFiles.length
+          ? `${resultFiles[index].name.slice(0, 45 / resultFiles.length)}...`
+          : resultFiles[index].name
+      return tick
+    })
     const yAxis = d3.axisLeft(yScale)
 
     // draw x and y axes
@@ -537,6 +560,13 @@ const CompareView = props => {
       <h1 className="title">Duration</h1>
       {results.length > 0 && (
         <>
+          <div className="legend-container">
+            <svg
+              ref={legendSvg}
+              width={legendWidth}
+              height={(legendItemSize + legendMargin) * resultFiles.length}
+            />
+          </div>
           <div className="chart-container">
             <svg
               ref={barplotSvg}
