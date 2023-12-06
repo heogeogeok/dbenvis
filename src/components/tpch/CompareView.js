@@ -23,7 +23,6 @@ const CompareView = props => {
   const barplotSvg = useRef(null)
   const legendSvg = useRef(null)
   const selectedSvg = useRef(null)
-  const stackSvg = useRef(null)
 
   const width = document.body.clientWidth * 0.35
   const height = 0.35 * document.body.clientHeight
@@ -104,7 +103,6 @@ const CompareView = props => {
           planContents = planContents.concat(plans)
         }
         setQueryPlans(planContents)
-        console.log(queryPlans)
       } else {
         // 업로드 한 파일 없는 경우
         setQueryPlans([])
@@ -160,20 +158,24 @@ const CompareView = props => {
 
     svg.selectAll('*').remove()
 
-    // cost + node type array
+    // cost + nod array
     const costResults = []
-    const selectedData = data[selectedQuery]
 
-    // TODO: 이 형식으로 처리되도록!
-    // const selectedData = data.filter(
-    //   (entry) => entry.queryNumber === selectedQuery + 1
-    // );
+    const selectedData = data.filter(
+      entry => entry.queryNumber === selectedQuery + 1
+    )
 
-    const cost = []
-    if (selectedData && selectedData.plan && selectedData.plan.Plan) {
-      traversePlan(selectedData.plan.Plan, selectedData.fileIndex, cost)
-      costResults.push({ fileIndex: selectedData.fileIndex, costs: cost })
-    }
+    selectedData.forEach(entry => {
+      const cost = []
+
+      // Check if the current entry has plan and plan.Plan properties
+      if (entry.plan && entry.plan.Plan) {
+        traversePlan(entry.plan.Plan, entry.fileIndex, cost)
+
+        // Push the result to costResults array
+        costResults.push({ fileIndex: entry.fileIndex, costs: cost })
+      }
+    })
 
     // extract keys from the stacked data
     const keys = Array.from(
@@ -204,7 +206,6 @@ const CompareView = props => {
     // stack the data
     const layers = stack(stackedData)
 
-    console.log(layers)
     // set up scales
     const xScale = d3
       .scaleBand()
