@@ -58,7 +58,11 @@ function ParseQueryPlan({ files }) {
             <div>
               {files[index] && files[index].name ? (
                 <div className="filename-title">
-                  <p>{files[index].name}</p>
+                  <p>
+                    {files[index].name.length > 80 / files.length
+                      ? `${files[index].name.slice(0, 80 / files.length)}...`
+                      : files[index].name}
+                  </p>
                 </div>
               ) : null}
               <Card key={index}>
