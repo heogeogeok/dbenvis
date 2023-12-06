@@ -4,6 +4,7 @@ import BarChart from "./BarChart";
 
 const ParseResult = ({ files }) => {
   const [queryResults, setQueryResults] = useState([]);
+  const [avgTps, setAvgTps] = useState();
 
   useEffect(() => {
     const loadFiles = async () => {
@@ -13,7 +14,7 @@ const ParseResult = ({ files }) => {
         for (const file of files) {
           const fileContent = await readFile(file);
           const results = extractResults(fileContent);
-          const avgTps = extractAvgTps(fileContent);
+          setAvgTps(extractAvgTps(fileContent));
 
           fileContents.push({ results, avgTps });
         }
@@ -84,6 +85,12 @@ const ParseResult = ({ files }) => {
     }
   };
 
+  // ** Callback ** //
+  const handleCallbackAvgTps = (childData) => {
+    setAvgTps(childData);
+    console.log(childData);
+  };
+
   return (
     <div>
       {/* <Card> */}
@@ -98,9 +105,8 @@ const ParseResult = ({ files }) => {
                 width={0.3 * document.documentElement.clientWidth}
                 margin={0.03 * document.documentElement.clientWidth}
                 queryResults={results.results}
-                avgTps={results.avgTps}
+                parentCallbackAvgTps={handleCallbackAvgTps}
                 files={files}
-                name={files.name}
               />
             ))}
           </div>

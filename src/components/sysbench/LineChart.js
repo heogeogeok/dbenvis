@@ -9,8 +9,15 @@ const LineChart = (props) => {
   const margin = props.margin;
 
   const queryResults = props.queryResults;
-  const avgTps = props.avgTps;
+  // const avgTps = props.avgTps;
   const files = props.files;
+
+  const [avgTps, setAvgTps] = useState(props.avgTps);
+
+  const triggerAvgTps = (brushed) => {
+    setAvgTps(brushed);
+    props.parentCallbackAvgTps(brushed);
+  };
 
   function drawLineChart(props) {
     const { chartSvg, data, files } = props;
@@ -55,6 +62,16 @@ const LineChart = (props) => {
       .style("font", "14px times")
       .text("TPS");
 
+    const clip = svg
+      .append("defs")
+      .append("svg:clipPath")
+      .attr("id", "clip")
+      .append("svg:rect")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("x", 0)
+      .attr("y", 0);
+
     // brush
     const brush = d3
       .brushX()
@@ -82,6 +99,7 @@ const LineChart = (props) => {
 
     // draw line
     const line = svg
+      .append("g")
       .append("path")
       .datum(data)
       .attr("fill", "none")
@@ -106,18 +124,37 @@ const LineChart = (props) => {
     // A function that update the chart for given boundaries
     function updateChart(event) {
       // If no selection, back to initial coordinate. Otherwise, update X axis domain
-      let extent = event.selection;
+      const extent = event.selection;
 
       if (!extent) {
         if (!idleTimeOut) return (idleTimeOut = setTimeout(idled, 350)); // This allows to wait a little bit
-        xScale.domain([4, 8]);
-        // xScale.domain([
-        //   d3.min(data, (d) => d.time),
-        //   d3.max(data, (d) => d.time),
-        // ]);
+        xScale.domain([
+          xScale([d3.min(data, (d) => d.time)]),
+          xScale(d3.max(data, (d) => d.time)),
+        ]);
+        svg.classed("selected", false);
       } else {
         xScale.domain([xScale.invert(extent[0]), xScale.invert(extent[1])]);
         svg.select(".brush").call(brush.move, null); // 브러시 영역 숨기기
+
+        // filtering brushed data
+        const brushedData = data.filter((d) => {
+          return (
+            xScale.invert(extent[0]) <= d.time &&
+            d.time <= xScale.invert(extent[1])
+          );
+        });
+
+        svg.classed("selected", (d) => brushedData.includes(d));
+        d3.selectAll(".scatterplot-point").classed("selected", false);
+
+        console.log(brushedData);
+        brushedData.forEach((d) => {
+          d3.selectAll(`.scatterplot-point-${data.indexOf(d)}`).classed(
+            "selected",
+            true
+          );
+        });
       }
       // Update axis and circle position
       xAxis.transition().duration(1000).call(d3.axisBottom(xScale));
@@ -148,7 +185,7 @@ const LineChart = (props) => {
             })
         );
 
-      svg.select(".brush").remove();
+      // svg.select(".brush").remove();
     }
     // If user double click, reinitialize the chart
     svg.on("dblclick", function () {
