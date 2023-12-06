@@ -3,7 +3,7 @@ import QueryPlanView from "./QueryPlanView";
 import { TpchContext } from "../../contexts/TpchContext";
 import { Card } from "@material-tailwind/react";
 
-import { parsePostgreSQL, parseMySQL } from "./parse";
+import { parsePostgreSQL, parseMySQL } from "./parseExplain";
 
 function ParseQueryPlan({ files }) {
   const { selectedQuery } = useContext(TpchContext);
@@ -54,13 +54,18 @@ function ParseQueryPlan({ files }) {
       <div className="plan-container">
         {queryPlans.map((plans, index) =>
           plans.length > 0 && plans[selectedQuery] ? (
-            <Card key={index}>
-              <QueryPlanView
-                key={index}
-                width={(document.body.clientWidth * 0.5) / queryPlans.length}
-                plan={plans[selectedQuery].Plan}
-              />
-            </Card>
+            <div>
+              {files[index] && files[index].name ? (
+                <h1 className="filename-title">{files[index].name}</h1>
+              ) : null}
+              <Card key={index}>
+                <QueryPlanView
+                  key={index}
+                  width={(document.body.clientWidth * 0.45) / queryPlans.length}
+                  plan={plans[selectedQuery].Plan}
+                />
+              </Card>
+            </div>
           ) : null
         )}
       </div>
