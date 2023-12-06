@@ -28,6 +28,12 @@
   padding-bottom: 10vh;
 }
 
+.legend-container {
+  display: flex;
+  justify-content: end;
+  margin-top: 15px;
+}
+
 .plan-container {
   display: flex;
   align-items: center;
@@ -49,6 +55,11 @@
   font-family: "NanumSquareR";
   font-size: x-small;
   color: black;
+}
+
+.legend-label {
+  font-family: "NanumSquareB";
+  font-size: small;
 }
 
 .node-label {
