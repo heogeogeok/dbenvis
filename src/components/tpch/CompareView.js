@@ -213,50 +213,13 @@ const CompareView = props => {
     if (queryPlans.length > 0) {
       drawStackedBarChart({
         chartSvg: stackSvg,
-        data: queryPlans,
       })
     }
   })
 
   function drawStackedBarChart(props) {
-    const { chartSvg, data } = props
+    const { chartSvg } = props
     const svg = d3.select(chartSvg.current)
-
-    svg.selectAll('*').remove()
-
-    // cost + node type array
-    const costResults = []
-
-    let i = 0
-    while (i < data.length) {
-      const cost = []
-      traversePlan(data[i][selectedQuery]['Plan'], cost)
-      costResults.push(cost)
-      i++
-    }
-
-    const stackedData = costResults.map(result => {
-      const obj = {}
-      result.forEach(entry => {
-        obj[entry['Node Type']] = entry['Cost']
-      })
-      return obj
-    })
-
-    // extract keys from the stacked data
-    const keys = Object.keys(stackedData[0])
-
-    // stack the data
-    const stack = d3.stack().keys(keys)(stackedData)
-
-    // map keys to the stacked data
-    stack.map((d, i) => {
-      d.map(d => {
-        d.key = keys[i]
-        return d
-      })
-      return d
-    })
   }
 
   function drawGroupedBarChart(props) {
@@ -438,13 +401,11 @@ const CompareView = props => {
                 height={selectedHeight + 2 * marginY}
               />
               <Button variant="contained">Stacked Bar Chart</Button>
-              {queryPlans.length > 0 && (
-                <svg
-                  ref={stackSvg}
-                  width={selectedWidth + 2 * selectedMarginX}
-                  height={selectedHeight + 2 * marginY}
-                />
-              )}
+              <svg
+                ref={stackSvg}
+                width={selectedWidth + 2 * selectedMarginX}
+                height={selectedHeight + 2 * marginY}
+              />
             </div>
           )}
         </>
