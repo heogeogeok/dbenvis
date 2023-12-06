@@ -12,74 +12,74 @@ import {
   shadeColor,
 } from "./parseResult";
 
-const CompareView = props => {
+const CompareView = (props) => {
   const { selectedQuery, setSelectedQuery, setDurations } =
-    useContext(TpchContext)
+    useContext(TpchContext);
 
-  const resultFiles = props.resultFiles
-  const explainFiles = props.explainFiles
+  const resultFiles = props.resultFiles;
+  const explainFiles = props.explainFiles;
 
-  const barplotSvg = useRef(null)
-  const legendSvg = useRef(null)
-  const selectedSvg = useRef(null)
-  const stackSvg = useRef(null)
+  const barplotSvg = useRef(null);
+  const legendSvg = useRef(null);
+  const selectedSvg = useRef(null);
+  const stackSvg = useRef(null);
 
-  const width = document.body.clientWidth * 0.35
-  const height = 0.35 * document.body.clientHeight
-  const marginX = document.body.clientWidth * 0.02
-  const marginY = 10
+  const width = document.body.clientWidth * 0.35;
+  const height = 0.35 * document.body.clientHeight;
+  const marginX = document.body.clientWidth * 0.02;
+  const marginY = 10;
 
-  const selectedWidth = width / 2
-  const selectedHeight = 0.3 * document.body.clientHeight
-  const selectedMarginX = selectedWidth / 2
-  const selectedMarginY = 30
+  const selectedWidth = width / 2;
+  const selectedHeight = 0.3 * document.body.clientHeight;
+  const selectedMarginX = selectedWidth / 2;
+  const selectedMarginY = 30;
 
-  const legendWidth = width / 4
-  const legendItemSize = 12
-  const legendMargin = 5
+  const legendWidth = width / 4;
+  const legendItemSize = 12;
+  const legendMargin = 5;
 
-  const [results, setResults] = useState([])
-  const [queryPlans, setQueryPlans] = useState([])
+  const [results, setResults] = useState([]);
+  const [queryPlans, setQueryPlans] = useState([]);
 
   const [showLogScale, setShowLogScale] = useState(false);
   const [showStackedBar, setShowStackedBar] = useState(false);
 
   function onMouseClick(e) {
-    const selected = e.target.__data__
-    if (selected) setSelectedQuery(selected.queryNumber - 1)
+    const selected = e.target.__data__;
+    if (selected) setSelectedQuery(selected.queryNumber - 1);
   }
 
   const handleCheckboxChange = () => {
-    setShowLogScale(prev => !prev)
-  }
+    setShowLogScale((prev) => !prev);
+  };
 
   const handleStackCheckboxChange = () => {
-    setShowStackedBar(prev => !prev)
-  }
+    setShowStackedBar((prev) => !prev);
+  };
 
   /* process result files*/
   useEffect(() => {
     const loadFiles = async () => {
       if (resultFiles && resultFiles.length > 0) {
-        let resultContents = []
+        let resultContents = [];
 
         for (let i = 0; i < resultFiles.length; i++) {
-          const file = resultFiles[i]
-          const fileContent = await readFile(file)
+          const file = resultFiles[i];
+          const fileContent = await readFile(file);
 
           // default: try PostgreSQL
-          let queries = parsePostgreSQL(fileContent, i)
+          let queries = parsePostgreSQL(fileContent, i);
           // 실패 시 try MariaDB
-          if (queries.length === 0) queries = parseMariaDB(fileContent, i)
+          if (queries.length === 0) queries = parseMariaDB(fileContent, i);
 
-          resultContents = resultContents.concat(queries)
+          resultContents = resultContents.concat(queries);
         }
-        setResults(resultContents)
-        setDurations(resultContents)
+        setResults(resultContents);
+        setDurations(resultContents);
       } else {
         // 업로드 한 파일 없는 경우
-        setResults([])
-        setDurations([])
+        setResults([]);
+        setDurations([]);
       }
     };
     loadFiles();
@@ -109,13 +109,13 @@ const CompareView = props => {
     loadFiles();
   }, [explainFiles]);
 
-  const readFile = file => {
-    return new Promise(resolve => {
-      const fileReader = new FileReader()
+  const readFile = (file) => {
+    return new Promise((resolve) => {
+      const fileReader = new FileReader();
 
       fileReader.onload = () => {
-        resolve(fileReader.result)
-      }
+        resolve(fileReader.result);
+      };
 
       // read the file as text
       fileReader.readAsText(file);
@@ -128,8 +128,8 @@ const CompareView = props => {
       chartSvg: barplotSvg,
       data: results,
       click: onMouseClick,
-    })
-  }, [results, showLogScale])
+    });
+  }, [results, showLogScale]);
 
   /* 선택한 query에 대한 bar chart */
   useEffect(() => {
@@ -150,10 +150,10 @@ const CompareView = props => {
   }, [results, queryPlans, selectedQuery, showStackedBar]);
 
   function drawStackedBarChart(props) {
-    const { chartSvg, data } = props
-    const svg = d3.select(chartSvg.current)
+    const { chartSvg, data } = props;
+    const svg = d3.select(chartSvg.current);
 
-    svg.selectAll('*').remove()
+    svg.selectAll("*").remove();
 
     // cost + node type array
     const costResults = [];
@@ -285,229 +285,232 @@ const CompareView = props => {
   }
 
   function drawGroupedBarChart(props) {
-    const { chartSvg, data, click } = props
-    const fileIndexes = new Set(data.map(d => d.fileIndex))
+    const { chartSvg, data, click } = props;
+    const fileIndexes = new Set(data.map((d) => d.fileIndex));
 
-    const svg = d3.select(chartSvg.current)
-    svg.selectAll('*').remove()
+    const svg = d3.select(chartSvg.current);
+    svg.selectAll("*").remove();
 
     // create scales for x and y
     const xGroupScale = d3
       .scaleBand()
-      .domain(new Set(data.map(d => d.queryNumber)))
+      .domain(new Set(data.map((d) => d.queryNumber)))
       .rangeRound([marginX, width - marginX])
-      .paddingInner(0.1)
+      .paddingInner(0.1);
 
     const xScale = d3
       .scaleBand()
       .domain(fileIndexes)
       .rangeRound([0, xGroupScale.bandwidth()])
-      .padding(0.1)
+      .padding(0.1);
 
-    let yScale
+    let yScale;
     if (showLogScale) {
       yScale = d3
         .scaleLog()
-        .domain([0.01, d3.max(data, d => d.duration)])
+        .domain([0.01, d3.max(data, (d) => d.duration)])
         .nice()
-        .rangeRound([height - marginY, marginY])
+        .rangeRound([height - marginY, marginY]);
     } else {
       yScale = d3
         .scaleLinear()
-        .domain([0, d3.max(data, d => d.duration)])
+        .domain([0, d3.max(data, (d) => d.duration)])
         .nice()
-        .rangeRound([height - marginY, marginY])
+        .rangeRound([height - marginY, marginY]);
     }
 
     // create color scale for each bars in the group
     const colorScale = d3
       .scaleOrdinal()
       .domain(fileIndexes)
-      .range(d3.schemeCategory10)
+      .range(d3.schemeCategory10);
 
     // create x and y axes
-    const xAxis = d3.axisBottom(xGroupScale)
-    const yAxis = d3.axisLeft(yScale)
+    const xAxis = d3.axisBottom(xGroupScale);
+    const yAxis = d3.axisLeft(yScale);
 
     // draw x and y axes
     svg
-      .append('g')
-      .attr('class', 'x-axis')
-      .attr('transform', `translate(0, ${height})`)
+      .append("g")
+      .attr("class", "x-axis")
+      .attr("transform", `translate(0, ${height})`)
       .transition()
       .duration(1000)
-      .call(xAxis)
+      .call(xAxis);
 
     svg
-      .append('g')
-      .attr('class', 'y-axis')
-      .attr('transform', `translate(${marginX}, ${marginY})`)
+      .append("g")
+      .attr("class", "y-axis")
+      .attr("transform", `translate(${marginX}, ${marginY})`)
       .transition()
       .duration(1000)
-      .call(yAxis)
+      .call(yAxis);
 
     // create tooltip element
-    const tooltip = d3.select('body').append('div').attr('class', 'bar-tooltip')
+    const tooltip = d3
+      .select("body")
+      .append("div")
+      .attr("class", "bar-tooltip");
 
     // draw bars with tooltip
     svg
-      .append('g')
+      .append("g")
       .selectAll()
-      .data(d3.group(data, d => d.queryNumber))
-      .join('g')
+      .data(d3.group(data, (d) => d.queryNumber))
+      .join("g")
       .attr(
-        'transform',
+        "transform",
         ([queryNumber]) => `translate(${xGroupScale(queryNumber)}, 0)`
       )
       .selectAll()
       .data(([, d]) => d)
-      .join('rect')
-      .attr('x', d => xScale(d.fileIndex))
-      .attr('y', height)
-      .attr('width', xScale.bandwidth())
-      .attr('height', 0)
-      .attr('fill', d => colorScale(d.fileIndex))
-      .on('click', click)
-      .on('mouseover', function (event, d) {
+      .join("rect")
+      .attr("x", (d) => xScale(d.fileIndex))
+      .attr("y", height)
+      .attr("width", xScale.bandwidth())
+      .attr("height", 0)
+      .attr("fill", (d) => colorScale(d.fileIndex))
+      .on("click", click)
+      .on("mouseover", function (event, d) {
         tooltip
           .html(
             `File Name: ${resultFiles[d.fileIndex].name}<br> Query Number: ${
               d.queryNumber
             }<br> Duration: ${d.duration.toFixed(3)} sec`
           )
-          .style('visibility', 'visible')
-        d3.select(this).attr('fill', d =>
+          .style("visibility", "visible");
+        d3.select(this).attr("fill", (d) =>
           shadeColor(colorScale(d.fileIndex), -15)
-        )
+        );
       })
-      .on('mousemove', function (e) {
+      .on("mousemove", function (e) {
         tooltip
-          .style('top', e.pageY - 10 + 'px')
-          .style('left', e.pageX + 10 + 'px')
+          .style("top", e.pageY - 10 + "px")
+          .style("left", e.pageX + 10 + "px");
       })
-      .on('mouseout', function () {
-        tooltip.html(``).style('visibility', 'hidden')
-        d3.select(this).attr('fill', d => colorScale(d.fileIndex))
+      .on("mouseout", function () {
+        tooltip.html(``).style("visibility", "hidden");
+        d3.select(this).attr("fill", (d) => colorScale(d.fileIndex));
       })
       .transition()
       .duration(1000)
-      .attr('y', d => yScale(d.duration) + marginY)
-      .attr('height', d => height - yScale(d.duration) - marginY)
+      .attr("y", (d) => yScale(d.duration) + marginY)
+      .attr("height", (d) => height - yScale(d.duration) - marginY);
 
     // draw legend
-    const legend = d3.select(legendSvg.current)
-    legend.selectAll('*').remove()
+    const legend = d3.select(legendSvg.current);
+    legend.selectAll("*").remove();
 
     // create legend items
     legend
-      .append('g')
+      .append("g")
       .selectAll()
       .data(resultFiles)
-      .join('rect')
-      .attr('width', legendItemSize)
-      .attr('height', legendItemSize)
-      .attr('rx', 5)
+      .join("rect")
+      .attr("width", legendItemSize)
+      .attr("height", legendItemSize)
+      .attr("rx", 5)
       .attr(
-        'transform',
+        "transform",
         (d, i) => `translate(0, ${(legendItemSize + legendMargin) * i})`
       )
-      .style('fill', (d, idx) => colorScale(idx))
+      .style("fill", (d, idx) => colorScale(idx));
 
     // append legend labels
     legend
-      .selectAll('text')
+      .selectAll("text")
       .data(resultFiles)
       .enter()
-      .append('text')
-      .attr('class', 'legend-label')
-      .attr('x', legendItemSize + legendMargin)
+      .append("text")
+      .attr("class", "legend-label")
+      .attr("x", legendItemSize + legendMargin)
       .attr(
-        'y',
+        "y",
         (d, idx) => (legendItemSize + legendMargin) * idx + legendItemSize / 2
       )
-      .attr('dy', '0.35em')
-      .text(d => {
+      .attr("dy", "0.35em")
+      .text((d) => {
         // 파일 이름이 긴 경우 truncate
-        const label = d.name.length > 20 ? `${d.name.slice(0, 20)}...` : d.name
-        return label
-      })
+        const label = d.name.length > 20 ? `${d.name.slice(0, 20)}...` : d.name;
+        return label;
+      });
   }
 
   function drawSelectedBarChart(props) {
-    const { chartSvg, data } = props
-    const svg = d3.select(chartSvg.current)
+    const { chartSvg, data } = props;
+    const svg = d3.select(chartSvg.current);
 
-    svg.selectAll('*').remove() // clear
+    svg.selectAll("*").remove(); // clear
 
     const selectedData = data.filter(
-      entry => entry.queryNumber === (selectedQuery + 1).toString()
-    )
+      (entry) => entry.queryNumber === (selectedQuery + 1).toString()
+    );
 
     // create scales for x and y
     const xScale = d3
       .scaleBand()
-      .domain(selectedData.map(entry => entry.fileIndex))
+      .domain(selectedData.map((entry) => entry.fileIndex))
       .range([0, selectedWidth])
       .align(0.5)
-      .padding(0.1)
+      .padding(0.1);
 
     const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(selectedData, entry => entry.duration)])
-      .range([selectedHeight, 0])
+      .domain([0, d3.max(selectedData, (entry) => entry.duration)])
+      .range([selectedHeight, 0]);
 
     // create color scale for each bars in the group
     const colorScale = d3
       .scaleOrdinal()
-      .domain(selectedData.map(entry => entry.fileIndex))
-      .range(d3.schemeCategory10)
+      .domain(selectedData.map((entry) => entry.fileIndex))
+      .range(d3.schemeCategory10);
 
     // create x and y axes
-    const xAxis = d3.axisBottom(xScale).tickFormat(index => {
+    const xAxis = d3.axisBottom(xScale).tickFormat((index) => {
       // 파일 이름이 긴 경우 truncate
       const tick =
         resultFiles[index].name.length > 45 / resultFiles.length
           ? `${resultFiles[index].name.slice(0, 45 / resultFiles.length)}...`
-          : resultFiles[index].name
-      return tick
-    })
-    const yAxis = d3.axisLeft(yScale)
+          : resultFiles[index].name;
+      return tick;
+    });
+    const yAxis = d3.axisLeft(yScale);
 
     // draw x and y axes
     svg
-      .append('g')
-      .attr('class', 'x-axis')
+      .append("g")
+      .attr("class", "x-axis")
       .attr(
-        'transform',
+        "transform",
         `translate(${selectedMarginX}, ${selectedHeight + selectedMarginY})`
       )
       .transition()
       .duration(1000)
-      .call(xAxis)
+      .call(xAxis);
 
     svg
-      .append('g')
-      .attr('class', 'y-axis')
-      .attr('transform', `translate(${selectedMarginX}, ${selectedMarginY})`)
+      .append("g")
+      .attr("class", "y-axis")
+      .attr("transform", `translate(${selectedMarginX}, ${selectedMarginY})`)
       .transition()
       .duration(1000)
-      .call(yAxis)
+      .call(yAxis);
 
     // draw bars
     svg
-      .append('g')
+      .append("g")
       .selectAll()
       .data(selectedData)
-      .join('rect')
-      .attr('x', d => xScale(d.fileIndex) + selectedMarginX)
-      .attr('y', selectedHeight + selectedMarginY) // transition: 초기 y position 맨 아래에
-      .attr('width', xScale.bandwidth())
-      .attr('height', 0) // transition: 초기 height 0
-      .attr('fill', d => colorScale(d.fileIndex))
+      .join("rect")
+      .attr("x", (d) => xScale(d.fileIndex) + selectedMarginX)
+      .attr("y", selectedHeight + selectedMarginY) // transition: 초기 y position 맨 아래에
+      .attr("width", xScale.bandwidth())
+      .attr("height", 0) // transition: 초기 height 0
+      .attr("fill", (d) => colorScale(d.fileIndex))
       .transition()
       .duration(1000)
-      .attr('y', d => yScale(d.duration) + selectedMarginY) // transition: final y position
-      .attr('height', d => selectedHeight - yScale(d.duration)) // transition: final height
+      .attr("y", (d) => yScale(d.duration) + selectedMarginY) // transition: final y position
+      .attr("height", (d) => selectedHeight - yScale(d.duration)); // transition: final height
   }
 
   return (
@@ -556,13 +559,12 @@ const CompareView = props => {
                   onClick={handleStackCheckboxChange}
                 />
               </div>
-              </div>
             </div>
           )}
         </>
       )}
     </>
-  )
-}
+  );
+};
 
-export default CompareView
+export default CompareView;
