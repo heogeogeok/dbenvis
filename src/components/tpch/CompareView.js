@@ -226,7 +226,8 @@ const CompareView = props => {
       if (entry.plan && entry.plan.Plan) {
         if (entry.plan.Plan['Total Cost'])
           traversePostgreSQL(entry.plan.Plan, cost)
-        else if (entry.plan.Plan.cost_info) traverseMySQL(entry.plan.Plan, cost)
+        else if (entry.plan.Plan.cost_info)
+          traverseMySQL(entry.plan.Plan.children[0], cost)
 
         stackedData.push(cost)
       }
