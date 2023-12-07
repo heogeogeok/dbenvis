@@ -9,8 +9,7 @@ import {
   parseMariaDB,
   extractPostgreSQL,
   extractMySQL,
-  traversePostgreSQL,
-  traverseMySQL,
+  traversePlan,
   shadeColor,
 } from "./parseResult";
 

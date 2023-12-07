@@ -166,6 +166,7 @@ const QueryPlanView = (props) => {
       var tooltip = d3
         .select("body")
         .append("div")
+        .attr("id", "tooltip")
         .attr("class", "node-tooltip");
 
       nodes
@@ -186,6 +187,7 @@ const QueryPlanView = (props) => {
 
   useEffect(() => {
     d3.select(treeSvg.current).selectAll("*").remove(); // clear
+    d3.select("body").selectAll("#tooltip").remove();
     drawTree(props.plan);
   }, [props, drawTree]);
 

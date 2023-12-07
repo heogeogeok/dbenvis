@@ -1,4 +1,4 @@
-import * as d3 from 'd3'
+import * as d3 from "d3";
 
 export function parsePostgreSQL(content, fileIndex) {
   const queryTimes = [];
@@ -138,9 +138,8 @@ export function extractMySQL(content, fileIndex) {
       plan: jsonPlan,
       fileIndex,
     });
-    })
 
-    i++
+    i++;
   }
 
   return plans;
