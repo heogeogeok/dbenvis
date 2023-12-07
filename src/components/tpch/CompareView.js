@@ -9,7 +9,8 @@ import {
   parseMariaDB,
   extractPostgreSQL,
   extractMySQL,
-  traversePlan,
+  traversePostgreSQL,
+  traverseMySQL,
   shadeColor,
 } from './parseResult'
 
@@ -71,6 +72,7 @@ const CompareView = props => {
           let queries = parsePostgreSQL(fileContent, i)
           // 실패 시 try MariaDB
           if (queries.length === 0) queries = parseMariaDB(fileContent, i)
+          // 또 실패하면 try MySQL
 
           resultContents = resultContents.concat(queries)
         }
@@ -167,12 +169,11 @@ const CompareView = props => {
 
     selectedData.forEach(entry => {
       const cost = []
-
-      // Check if the current entry has plan and plan.Plan properties
       if (entry.plan && entry.plan.Plan) {
-        traversePlan(entry.plan.Plan, entry.fileIndex, cost)
-
-        // Push the result to costResults array
+        if (entry.plan.Plan['Total Cost'])
+          traversePostgreSQL(entry.plan.Plan, entry.fileIndex, cost)
+        else if (entry.plan.Plan['cost_info'])
+          traverseMySQL(entry.plan.Plan, entry.fileIndex, cost)
         costResults.push({ fileIndex: entry.fileIndex, costs: cost })
       }
     })
@@ -214,10 +215,10 @@ const CompareView = props => {
       .align(0.5)
       .padding(0.1)
 
-    // Calculate the maximum sum of values across all layers
+    // calculate the maximum sum of values across all layers
     const maxYValue = d3.max(layers, layer => d3.max(layer, d => d[1]))
 
-    // Set up the y-axis scale
+    // set up the y-axis scale
     const yScale = d3
       .scaleLinear()
       .domain([0, maxYValue])
@@ -252,19 +253,23 @@ const CompareView = props => {
 
     // draw the stacked bars
     svg
-      .selectAll('rect')
+      .selectAll('g')
       .data(layers)
       .enter()
+      .append('g')
+      .selectAll('rect')
+      .data(d => d)
+      .enter()
       .append('rect')
-      .attr('x', d => xScale(d[0].fileIndex) + selectedMarginX)
+      .attr('x', d => xScale(d.fileIndex) + selectedMarginX)
       .attr('y', selectedHeight + selectedMarginY)
       .attr('width', xScale.bandwidth())
       .attr('height', 0)
       .attr('fill', d => colorScale(d.key))
       .transition()
       .duration(1000)
-      .attr('y', d => yScale(d[0][1]) + selectedMarginY)
-      .attr('height', d => yScale(d[0][0]) - yScale(d[0][1]))
+      .attr('y', d => yScale(d[1]) + selectedMarginY)
+      .attr('height', d => yScale(d[0]) - yScale(d[1]))
   }
 
   function drawGroupedBarChart(props) {

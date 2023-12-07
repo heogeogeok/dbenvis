@@ -1,3 +1,5 @@
+import * as d3 from 'd3'
+
 export function parsePostgreSQL(content, fileIndex) {
   const queryTimes = []
 
@@ -136,6 +138,8 @@ export function extractMySQL(content, fileIndex) {
       plan: jsonPlan,
       fileIndex,
     })
+
+    i++
   }
 
   return plans
@@ -227,18 +231,38 @@ function childrenToArray(obj) {
 }
 
 // recursive function to traverse the nested structure
-export function traversePlan(node, fileIndex, result) {
+export function traversePostgreSQL(node, fileIndex, result) {
   result.push({
     'Node Type': node['Node Type'],
     Cost: node['Total Cost'] - node['Startup Cost'],
     fileIndex: fileIndex,
   })
-  // check if 'children' property exists
   if ('children' in node) {
-    // iterate over each child
     for (const child of node.children) {
-      // recursively call traversePlan for each child
-      traversePlan(child, fileIndex, result)
+      traversePostgreSQL(child, fileIndex, result)
+    }
+  }
+}
+
+export function traverseMySQL(node, fileIndex, result) {
+  // Extract cost information from the node
+  const cost = Object.entries(node['cost_info'] || {})
+    .filter(([key]) => key.includes('cost'))
+    .map(([_, value]) => parseFloat(value) || 0)
+
+  // Push the result to the array
+  result.push({
+    'Node Type': node['Node Type'],
+    Cost: d3.sum(cost),
+    fileIndex: fileIndex,
+  })
+
+  // Check if 'children' property exists
+  if ('children' in node) {
+    // Iterate over each child
+    for (const child of node.children) {
+      // Recursively call traverseMySQL for each child
+      traverseMySQL(child, fileIndex, result)
     }
   }
 }
