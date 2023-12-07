@@ -195,7 +195,19 @@ const CompareView = props => {
 
     // create stack with relevant data
     const stack = d3.stack().keys(keys)(stackedData)
-    const yMax = d3.max(stack, layer => d3.max(layer, d => d[1]))
+
+    // calculate the sum of values for each group
+    const groupSums = stack[0].map((_, i) =>
+      d3.sum(stack.map(layer => layer[i][1] - layer[i][0]))
+    )
+
+    // normalize the data
+    stack.forEach(layer => {
+      layer.forEach((d, i) => {
+        d[0] = d[0] / groupSums[i]
+        d[1] = d[1] / groupSums[i]
+      })
+    })
 
     // set up scales
     const xScale = d3
@@ -205,7 +217,7 @@ const CompareView = props => {
       .align(0.5)
       .padding(0.1)
 
-    const yScale = d3.scaleLinear().domain([0, yMax]).range([selectedHeight, 0])
+    const yScale = d3.scaleLinear().domain([0, 1]).range([selectedHeight, 0])
 
     // create x and y axes
     const xAxis = d3.axisBottom(xScale).tickFormat(index => {
@@ -217,7 +229,7 @@ const CompareView = props => {
       return tick
     })
 
-    const yAxis = d3.axisLeft(yScale)
+    const yAxis = d3.axisLeft(yScale).tickFormat(d3.format('.0%'))
 
     // draw x and y axes
     svg
