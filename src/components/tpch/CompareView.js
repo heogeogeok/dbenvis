@@ -9,7 +9,8 @@ import {
   parseMariaDB,
   extractPostgreSQL,
   extractMySQL,
-  traversePlan,
+  traversePostgreSQL,
+  traverseMySQL,
   shadeColor,
 } from "./parseResult";
 
@@ -71,6 +72,7 @@ const CompareView = (props) => {
           let queries = parsePostgreSQL(fileContent, i);
           // 실패 시 try MariaDB
           if (queries.length === 0) queries = parseMariaDB(fileContent, i);
+          // 또 실패하면 try MySQL
 
           resultContents = resultContents.concat(queries);
         }
