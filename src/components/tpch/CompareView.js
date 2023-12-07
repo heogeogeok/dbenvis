@@ -303,11 +303,6 @@ const CompareView = props => {
       .duration(1000)
       .call(yAxis)
 
-    // set up color scale
-    const colorScale = d3.scaleOrdinal().domain(keys).range(d3.schemeCategory10)
-
-    console.log(stack)
-
     // create stack rect
     const rect = svg
       .selectAll()
