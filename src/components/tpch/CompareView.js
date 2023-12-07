@@ -14,6 +14,58 @@ import {
   traverseMySQL,
 } from './parseResult'
 
+const barColor = d3
+  .scaleOrdinal()
+  .domain([
+    'Limit',
+    'Aggregate',
+    'Gather',
+    'Gather Merge',
+    'Group',
+    'Sort',
+    'Order',
+    'Seq Scan',
+    'Index Scan',
+    'Index Only Scan',
+    'Full Index Scan',
+    'Full Table Scan',
+    'Unique Key Lookup',
+    'Non-Unique Key Lookup',
+    'Bitmap Heap Scan',
+    'Bitmap Index Scan',
+    'Nested Loop',
+    'Hash Join',
+    'Merge Join',
+    'Attached Subqueries',
+    'Hash',
+    'Materialize',
+  ])
+  .range([
+    '#fbb4ae',
+    '#b3cde3',
+    '#b3cde3',
+    '#b3cde3',
+    '#b3cde3',
+    '#ccebc5',
+    '#ccebc5',
+    '#decbe4',
+    '#decbe4',
+    '#decbe4',
+    '#decbe4',
+    '#decbe4',
+    '#decbe4',
+    '#decbe4',
+    '#decbe4',
+    '#decbe4',
+    '#fed9a6',
+    '#fed9a6',
+    '#fed9a6',
+    '#ffffcc',
+    '#e5d8bd',
+    '#fddaec',
+    '#f2f2f2',
+  ])
+
 const CompareView = props => {
   const { selectedQuery, setSelectedQuery, setDurations } =
     useContext(TpchContext)
@@ -264,7 +316,7 @@ const CompareView = props => {
       .append('g')
       .attr('transform', `translate(${selectedMarginX}, ${selectedMarginY})`)
       .attr('fill', function (d) {
-        return colorScale(d.key)
+        return barColor(d.key)
       })
 
     // stack rect for each data value
@@ -306,7 +358,7 @@ const CompareView = props => {
       .attr('width', 12)
       .attr('height', 12)
       .attr('fill', function (d, i) {
-        return colorScale(i)
+        return barColor(d)
       })
 
     legend
