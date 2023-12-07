@@ -232,8 +232,7 @@ function childrenToArray(obj) {
   return obj;
 }
 
-// recursive function to traverse the nested structure
-export function traversePlan(node, result) {
+export function traversePostgreSQL(node, result) {
   const nodeType = node["Node Type"];
   const cost = node["Total Cost"] - node["Startup Cost"];
 
@@ -241,7 +240,23 @@ export function traversePlan(node, result) {
 
   if (node.children) {
     for (const child of node.children) {
-      traversePlan(child, result);
+      traversePostgreSQL(child, result);
+    }
+  }
+}
+export function traverseMySQL(node, result) {
+  const nodeType = node["Node Type"];
+
+  // extract cost information from the node
+  const cost = Object.entries(node["cost_info"] || {})
+    .filter(([key]) => key.includes("cost"))
+    .map(([_, value]) => parseFloat(value) || 0);
+
+  result[nodeType] = (result[nodeType] || 0) + cost;
+
+  if (node.children) {
+    for (const child of node.children) {
+      traverseMySQL(child, result);
     }
   }
 }

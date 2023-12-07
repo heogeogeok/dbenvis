@@ -9,8 +9,9 @@ import {
   parseMariaDB,
   extractPostgreSQL,
   extractMySQL,
-  traversePlan,
+  traversePostgreSQL,
   shadeColor,
+  traverseMySQL,
 } from "./parseResult";
 
 const CompareView = (props) => {
@@ -69,9 +70,12 @@ const CompareView = (props) => {
 
           // default: try PostgreSQL
           let queries = parsePostgreSQL(fileContent, i);
+
           // 실패 시 try MariaDB
           if (queries.length === 0) queries = parseMariaDB(fileContent, i);
+
           // 또 실패하면 try MySQL
+          // if (queries.length === 0) queries = parseMySQL(fileContent, i);
 
           resultContents = resultContents.concat(queries);
         }
@@ -168,7 +172,11 @@ const CompareView = (props) => {
       const cost = { fileIndex: entry.fileIndex };
 
       if (entry.plan && entry.plan.Plan) {
-        traversePlan(entry.plan.Plan, cost);
+        if (entry.plan.Plan["Total Cost"])
+          traversePostgreSQL(entry.plan.Plan, cost);
+        else if (entry.plan.Plan.cost_info)
+          traverseMySQL(entry.plan.Plan, cost);
+
         stackedData.push(cost);
       }
     });
@@ -204,7 +212,15 @@ const CompareView = (props) => {
       .range([selectedHeight, 0]);
 
     // create x and y axes
-    const xAxis = d3.axisBottom(xScale);
+    const xAxis = d3.axisBottom(xScale).tickFormat((index) => {
+      // 파일 이름이 긴 경우 truncate
+      const tick =
+        explainFiles[index].name.length > 45 / explainFiles.length
+          ? `${explainFiles[index].name.slice(0, 45 / explainFiles.length)}...`
+          : explainFiles[index].name;
+      return tick;
+    });
+
     const yAxis = d3.axisLeft(yScale);
 
     // draw x and y axes
