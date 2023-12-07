@@ -253,23 +253,19 @@ const CompareView = props => {
 
     // draw the stacked bars
     svg
-      .selectAll('g')
+      .selectAll('rect')
       .data(layers)
       .enter()
-      .append('g')
-      .selectAll('rect')
-      .data(d => d)
-      .enter()
       .append('rect')
-      .attr('x', d => xScale(d.fileIndex) + selectedMarginX)
+      .attr('x', d => xScale(d[0].fileIndex) + selectedMarginX)
       .attr('y', selectedHeight + selectedMarginY)
       .attr('width', xScale.bandwidth())
       .attr('height', 0)
       .attr('fill', d => colorScale(d.key))
       .transition()
       .duration(1000)
-      .attr('y', d => yScale(d[1]) + selectedMarginY)
-      .attr('height', d => yScale(d[0]) - yScale(d[1]))
+      .attr('y', d => yScale(d[0][1]) + selectedMarginY)
+      .attr('height', d => yScale(d[0][0]) - yScale(d[0][1]))
   }
 
   function drawGroupedBarChart(props) {
