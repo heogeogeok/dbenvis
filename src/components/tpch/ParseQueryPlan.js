@@ -17,7 +17,10 @@ function ParseQueryPlan({ files }) {
   const { selectedQuery, durations } = useContext(TpchContext)
   const [queryPlans, setQueryPlans] = useState([])
   const [selectedCheckbox, setSelectedCheckbox] = useState('Both')
+  const [selectedValue, setSelectedValue] = useState('none')
+
   const options = [
+    { value: 'none', label: 'none' },
     { value: 'cost', label: 'Cost' },
     { value: 'row', label: 'Row' },
   ]
@@ -29,7 +32,7 @@ function ParseQueryPlan({ files }) {
   }
 
   const handleSelectionChange = selectedOption => {
-    console.log('Selected Option:', selectedOption)
+    setSelectedValue(selectedOption.value)
   }
 
   useEffect(() => {
@@ -85,7 +88,11 @@ function ParseQueryPlan({ files }) {
     <div>
       <h1 className="title">Query Plan</h1>
       <div>
-        <Select options={options} onChange={handleSelectionChange} />
+        <Select
+          options={options}
+          defaultValue={options[0]}
+          onChange={handleSelectionChange}
+        />
         <FormControlLabel
           control={
             <Checkbox
@@ -146,6 +153,7 @@ function ParseQueryPlan({ files }) {
                     (document.body.clientWidth * 0.45 - 10) / queryPlans.length
                   } // default padding 고려하여 -10
                   plan={plans[selectedQuery].Plan}
+                  selectedOption={selectedValue}
                 />
               </Card>
             </div>

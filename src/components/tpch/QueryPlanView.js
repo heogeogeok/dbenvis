@@ -96,7 +96,7 @@ const QueryPlanView = props => {
   const marginY = 30
 
   const drawTree = useCallback(
-    (data, checkbox) => {
+    (data, checkbox, optionValue) => {
       const treeLayout = d3.tree().size([width, height])
 
       // data를 d3의 계층 구조로 바꾸어주기
@@ -122,11 +122,60 @@ const QueryPlanView = props => {
         return 0
       })
 
+      // # of rows 계산
+      const rows = treeData.links().map(link => {
+        if (link.target.data['Plan Rows']) {
+          // PostgreSQL
+          return link.target.data['Plan Rows']
+        } else if (link.target.data.cost_info) {
+          // MySQL
+          const rows = Object.entries(link.target.data || {})
+            .filter(([key]) => key.includes('rows'))
+            .map(([_, value]) => value || 0)
+
+          return d3.sum(rows)
+        }
+
+        return 0
+      })
+
       // scale for stroke width
       const strokeWidthScale = d3
         .scaleLinear()
         .domain([d3.min(cost), d3.max(cost)])
         .range([1, 8])
+
+      // Existing logic for node width
+      const getNodeWidth = (type, length) => {
+        return (type?.length || length || 0) * 9
+      }
+
+      // Calculate nodeSize and maxNodeSize based on the maximum width of nodes
+      const calculateNodeSize = () => {
+        const types = ['MySQL', 'PostgreSQL', 'Both'] // Add other types if needed
+        const lengths = types.map(type => {
+          return getNodeWidth(type, 1) // Set a default length for each type
+        })
+
+        const maxNodeWidth = Math.max(...lengths)
+        const nodeSize = maxNodeWidth / 9 // Assuming 9 is the constant multiplier
+
+        const maxNodeSize = Math.min(maxNodeWidth, maxNodeWidth * 9)
+
+        return { nodeSize, maxNodeSize }
+      }
+
+      const { nodeSize, maxNodeSize } = calculateNodeSize()
+
+      const costScale = d3
+        .scaleLinear()
+        .domain([d3.min(cost), d3.max(cost)])
+        .range([nodeSize, maxNodeSize])
+
+      const rowScale = d3
+        .scaleLinear()
+        .domain([d3.min(rows), d3.max(rows)])
+        .range([nodeSize, maxNodeSize])
 
       const svg = d3
         .select(treeSvg.current)
@@ -166,23 +215,28 @@ const QueryPlanView = props => {
       nodes
         .append('rect')
         .attr('fill', d => nodeColor(d.data['Node Type']))
-        .attr('width', d => {
-          let nodeType = d.data['Node Type']
-          let mysqlLength = mysqlMapping[nodeType]?.length || 0
-          let postgresLength =
-            (postgresMapping && postgresMapping[nodeType]?.length) || 0
-
-          if (checkbox === 'MySQL') {
-            return (mysqlLength || nodeType?.length || 0) * 9
-          } else if (checkbox === 'PostgreSQL') {
-            return (postgresLength || nodeType?.length || 0) * 9
-          } else if (checkbox === 'Both') {
-            return (nodeType?.length || 0) * 9
+        .attr('width', (d, i) => {
+          if (optionValue === 'cost') {
+            return costScale(cost[i])
+          } else if (optionValue === 'row') {
+            return rowScale(rows[i])
           } else {
-            return 0
+            let nodeType = d.data['Node Type']
+            let mysqlLength = mysqlMapping[nodeType]?.length || 0
+            let postgresLength =
+              (postgresMapping && postgresMapping[nodeType]?.length) || 0
+
+            if (checkbox === 'MySQL') {
+              return (mysqlLength || nodeType?.length || 0) * 9
+            } else if (checkbox === 'PostgreSQL') {
+              return (postgresLength || nodeType?.length || 0) * 9
+            } else if (checkbox === 'Both') {
+              return (nodeType?.length || 0) * 9
+            } else {
+              return 0
+            }
           }
         })
-
         .attr('height', d =>
           d.data['Relation Name'] || d.data.table_name ? 40 : 25
         )
@@ -261,7 +315,7 @@ const QueryPlanView = props => {
   useEffect(() => {
     d3.select(treeSvg.current).selectAll('*').remove() // clear
     d3.select('body').selectAll('#tooltip').remove()
-    drawTree(props.plan, props.checkbox)
+    drawTree(props.plan, props.checkbox, props.selectedOption)
   }, [props, drawTree])
 
   function tooltipContent(d) {
