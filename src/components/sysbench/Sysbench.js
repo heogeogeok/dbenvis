@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { SysbenchContext } from "../../contexts/SysbenchContext";
 import LineChart from "./LineChart";
 import BarChart from "./BarChart";
 import "../../assets/stylesheets/Sysbench.css";
 
-const Sysbench = (props) => {
-  const files = props.files;
+const Sysbench = ({ files }) => {
+  const { setAvgTps } = useContext(SysbenchContext);
 
   const [queryResults, setQueryResults] = useState([]);
-  const [avgTps, setAvgTps] = useState([]);
 
   useEffect(() => {
     const loadFiles = async () => {
@@ -103,7 +103,6 @@ const Sysbench = (props) => {
                 fileIndex={index}
                 files={files}
                 queryResults={results.results}
-                avgTps={avgTps[index]}
               />
             ))}
           </div>
@@ -111,7 +110,7 @@ const Sysbench = (props) => {
       </div>
       <div className="chart-container">
         <h1 className="title">Compare View</h1>
-        {queryResults.length > 0 && <BarChart files={files} avgTps={avgTps} />}
+        {queryResults.length > 0 && <BarChart files={files} />}
       </div>
     </div>
   );

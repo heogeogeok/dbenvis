@@ -1,18 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useContext } from "react";
+import { SysbenchContext } from "../../contexts/SysbenchContext";
 import * as d3 from "d3";
-import BarChart from "./BarChart";
 import TpsCard from "./TpsCard";
 
 const LineChart = (props) => {
   const { fileIndex, files, queryResults } = props;
+  const { avgTps, setAvgTps } = useContext(SysbenchContext);
+
   const lineplotSvg = useRef(null);
 
   const width =
     (0.8 * document.documentElement.clientWidth) / props.files.length;
   const height = 0.4 * document.documentElement.clientHeight;
   const margin = 0.03 * document.documentElement.clientWidth;
-
-  const [avgTps, setAvgTps] = useState(0);
 
   function drawLineChart(props) {
     const { chartSvg, data, files } = props;
@@ -210,15 +210,12 @@ const LineChart = (props) => {
   }
 
   useEffect(() => {
-    setAvgTps(props.avgTps);
     drawLineChart({
       chartSvg: lineplotSvg,
       data: queryResults,
       files: files,
     });
   }, [lineplotSvg, queryResults, files]);
-
-  console.log(avgTps);
 
   return (
     <div>
@@ -231,7 +228,7 @@ const LineChart = (props) => {
           </p>
         </div>
       ) : null}
-      <TpsCard tps={avgTps} />
+      <TpsCard tps={avgTps[fileIndex]} />
       <svg
         id="line-chart"
         ref={lineplotSvg}

@@ -1,8 +1,10 @@
+import { useRef, useEffect, useContext } from "react";
+import { SysbenchContext } from "../../contexts/SysbenchContext";
 import * as d3 from "d3";
-import { useRef, useEffect } from "react";
 
-const BarChart = (props) => {
-  const { files, avgTps } = props;
+const BarChart = ({ files }) => {
+  const { avgTps } = useContext(SysbenchContext);
+
   const barplotSvg = useRef(null);
 
   const width = document.body.clientWidth * 0.3;
