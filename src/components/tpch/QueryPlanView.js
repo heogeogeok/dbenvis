@@ -136,9 +136,14 @@ const QueryPlanView = props => {
             .map(([_, value]) => value || 0)
 
           return d3.sum(rows)
+        } else if (link.target.data['r_total_time_ms']) {
+          // MariaDB
+          return link.target.data['rows']
         }
         return 0
       })
+
+      console.log(rows)
 
       // scale for stroke width
       const strokeWidthScale = d3
