@@ -34,6 +34,29 @@ text {
   margin-right: 20px;
 }
 
+.control-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+.control-panel-metric {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 5vw;
+}
+.control-panel-term {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.control-panel p {
+  font-family: 'NanumSquareB';
+  font-size: medium;
+  color: black;
+}
+
 .x-axis {
   font-family: 'NanumSquareR';
   font-size: small;

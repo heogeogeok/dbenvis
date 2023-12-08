@@ -121,7 +121,6 @@ const QueryPlanView = props => {
           // MariaDB
           return link.target.data['r_total_time_ms']
         }
-
         return 0
       })
 
@@ -138,7 +137,6 @@ const QueryPlanView = props => {
 
           return d3.sum(rows)
         }
-
         return 0
       })
 
@@ -147,6 +145,16 @@ const QueryPlanView = props => {
         .scaleLinear()
         .domain([d3.min(cost), d3.max(cost)])
         .range([1, 8])
+
+      const rowScale = d3
+        .scaleLinear()
+        .domain([d3.min(rows), d3.max(rows)])
+        .range([10, 25])
+
+      const costScale = d3
+        .scaleLinear()
+        .domain([d3.min(cost), d3.max(cost)])
+        .range([10, 25])
 
       const svg = d3
         .select(treeSvg.current)
@@ -184,78 +192,17 @@ const QueryPlanView = props => {
         .attr('transform', d => `translate(${d.x}, ${d.y})`)
 
       nodes
-        .append('rect')
+        .append('circle')
+        .transition()
+        .duration(1000)
         .attr('fill', d => nodeColor(d.data['Node Type']))
-        .attr('width', (d, i) => {
-          let nodeType = d.data['Node Type']
-          let mysqlLength = mysqlMapping[nodeType]?.length || 0
-          let postgresLength =
-            (postgresMapping && postgresMapping[nodeType]?.length) || 0
-
-          const nodeSize = Math.max(
-            ((mysqlLength || nodeType?.length || 0) * 9) / 2,
-            ((postgresLength || nodeType?.length || 0) * 9) / 2,
-            ((nodeType?.length || 0) * 9) / 2
-          )
-
-          const maxNodeSize = Math.max(
-            (mysqlLength || nodeType?.length || 0) * 9 * 2,
-            (postgresLength || nodeType?.length || 0) * 9 * 2,
-            (nodeType?.length || 0) * 9 * 2,
-            0
-          )
-          const costScale = d3
-            .scaleLinear()
-            .domain([d3.min(cost), d3.max(cost)])
-            .range([nodeSize, maxNodeSize])
-          const rowScale = d3
-            .scaleLinear()
-            .domain([d3.min(rows), d3.max(rows)])
-            .range([nodeSize, maxNodeSize])
-
+        .attr('r', (d, i) => {
           if (optionValue === 'cost') {
-            return costScale(cost[i])
+            return costScale(cost[i - 1])
           } else if (optionValue === 'row') {
-            return rowScale(rows[i])
+            return rowScale(rows[i - 1])
           } else {
-            const nodeType = d.data['Node Type']
-            const mysqlLength = mysqlMapping[nodeType]?.length || 0
-            const postgresLength =
-              (postgresMapping && postgresMapping[nodeType]?.length) || 0
-
-            if (checkbox === 'MySQL') {
-              return (mysqlLength || nodeType?.length || 0) * 9
-            } else if (checkbox === 'PostgreSQL') {
-              return (postgresLength || nodeType?.length || 0) * 9
-            } else if (checkbox === 'Both') {
-              return (nodeType?.length || 0) * 9
-            } else {
-              return 0
-            }
-          }
-        })
-        .attr('height', d =>
-          d.data['Relation Name'] || d.data.table_name ? 40 : 25
-        )
-        .attr('rx', 5)
-        .attr('transform', d => {
-          let nodeType = d.data['Node Type']
-          let mysqlLength = mysqlMapping[nodeType]?.length || 0
-          let postgresLength =
-            (postgresMapping && postgresMapping[nodeType]?.length) || 0
-
-          if (checkbox === 'MySQL') {
-            return `translate(${
-              (-mysqlLength * 9) / 2 || (-nodeType?.length * 9) / 2 || 0
-            }, -10)`
-          } else if (checkbox === 'PostgreSQL') {
-            return `translate(${
-              (-postgresLength * 9) / 2 || (-nodeType?.length * 9) / 2 || 0
-            }, -10)`
-          } else if (checkbox === 'Both') {
-            return `translate(${(-nodeType?.length * 9) / 2 || 0}, -10)`
-          } else {
-            return ''
+            return 20
           }
         })
 

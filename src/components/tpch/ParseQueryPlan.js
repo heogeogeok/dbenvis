@@ -87,43 +87,49 @@ function ParseQueryPlan({ files }) {
   return (
     <div>
       <h1 className="title">Query Plan</h1>
-      <div>
-        <Select
-          options={options}
-          defaultValue={options[0]}
-          onChange={handleSelectionChange}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={selectedCheckbox === 'PostgreSQL'}
-              onChange={handleCheckboxChange}
-              value="PostgreSQL"
-            />
-          }
-          label="PostgreSQL"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={selectedCheckbox === 'MySQL'}
-              onChange={handleCheckboxChange}
-              value="MySQL"
-            />
-          }
-          label="MySQL"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              defaultChecked
-              checked={selectedCheckbox === 'Both'}
-              onChange={handleCheckboxChange}
-              value="Both"
-            />
-          }
-          label="Both"
-        />
+      <div className="control-panel">
+        <div className="control-panel-metric">
+          <p>Select Metric:</p>
+          <Select
+            options={options}
+            defaultValue={options[0]}
+            onChange={handleSelectionChange}
+          />
+        </div>
+        <div className="control-panel-term">
+          <p>Select Term: </p>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={selectedCheckbox === 'PostgreSQL'}
+                onChange={handleCheckboxChange}
+                value="PostgreSQL"
+              />
+            }
+            label="PostgreSQL"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={selectedCheckbox === 'MySQL'}
+                onChange={handleCheckboxChange}
+                value="MySQL"
+              />
+            }
+            label="MySQL"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                defaultChecked
+                checked={selectedCheckbox === 'Both'}
+                onChange={handleCheckboxChange}
+                value="Both"
+              />
+            }
+            label="Both"
+          />
+        </div>
       </div>
       <div className="plan-container">
         {queryPlans.map((plans, index) =>
