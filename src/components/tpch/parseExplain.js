@@ -230,8 +230,6 @@ export function parseExpMariaDB(content) {
     jsonPlan = JSON.parse(jsonString);
     jsonPlan = childrenToArray(jsonPlan);
 
-    console.log(jsonPlan);
-
     plans.push(jsonPlan);
   }
 
