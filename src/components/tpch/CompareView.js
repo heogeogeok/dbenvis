@@ -12,6 +12,8 @@ import {
   traversePostgreSQL,
   shadeColor,
   traverseMySQL,
+  extractMariaDB,
+  traverseMariaDB,
 } from './parseResult'
 
 const barColor = d3
@@ -151,12 +153,15 @@ const CompareView = props => {
 
           // default: try PostgreSQL
           let plans = extractPostgreSQL(fileContent, i)
-          // 실패 시 try MariaDB
+          // 실패 시 try MySQL
           if (plans.length === 0) plans = extractMySQL(fileContent, i)
+          // 실패 시 try MariaDB
+          if (plans.length === 0) plans = extractMariaDB(fileContent, i)
 
           planContents = planContents.concat(plans)
         }
         setQueryPlans(planContents)
+        console.log(queryPlans)
       } else {
         // 업로드 한 파일 없는 경우
         setQueryPlans([])
@@ -225,10 +230,14 @@ const CompareView = props => {
           traversePostgreSQL(entry.plan.Plan, cost)
         else if (entry.plan.Plan.cost_info)
           traverseMySQL(entry.plan.Plan.children[0], cost)
+        else if (entry.plan.Plan['r_total_time_ms'])
+          traverseMariaDB(entry.plan.Plan.children[0], cost)
 
         stackedData.push(cost)
       }
     })
+
+    console.log(stackedData)
 
     // store relevant keys
     const keys = stackedData.reduce((allKeys, entry) => {

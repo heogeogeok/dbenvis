@@ -5,6 +5,7 @@ import { TpchContext } from '../../contexts/TpchContext'
 import { Card } from '@material-tailwind/react'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
+import Select from 'react-select'
 
 import {
   parseExpPostgreSQL,
@@ -16,12 +17,19 @@ function ParseQueryPlan({ files }) {
   const { selectedQuery, durations } = useContext(TpchContext)
   const [queryPlans, setQueryPlans] = useState([])
   const [selectedCheckbox, setSelectedCheckbox] = useState('Both')
-
+  const options = [
+    { value: 'cost', label: 'Cost' },
+    { value: 'row', label: 'Row' },
+  ]
   const handleCheckboxChange = event => {
     const selectedValue = event.target.value
     setSelectedCheckbox(prevSelected =>
       prevSelected === selectedValue ? null : selectedValue
     )
+  }
+
+  const handleSelectionChange = selectedOption => {
+    console.log('Selected Option:', selectedOption)
   }
 
   useEffect(() => {
@@ -77,6 +85,7 @@ function ParseQueryPlan({ files }) {
     <div>
       <h1 className="title">Query Plan</h1>
       <div>
+        <Select options={options} onChange={handleSelectionChange} />
         <FormControlLabel
           control={
             <Checkbox
