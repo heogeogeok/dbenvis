@@ -53,6 +53,39 @@ const nodeColor = d3
     '#f2f2f2',
   ])
 
+const mysqlMapping = {
+  Limit: 'Limit',
+  Aggregate: 'Group',
+  Gather: 'Gather',
+  'Gather Merge': 'Gather Merge',
+  Sort: 'Order',
+  'Seq Scan': 'Full Table Scan',
+  'Index Scan': 'Key Lookup',
+  'Index Only Scan': 'Key Lookup',
+  'Bitmap Heap Scan': 'Bitmap Heap Scan',
+  'Bitmap Index Scan': 'Bitmap Index Scan',
+  'Nested Loop': 'Nested Loop',
+  'Hash Join': 'Hash Join',
+  'Merge Join': 'Hash Join',
+  'Attached Subqueries': 'Attached Subqueries',
+  Hash: 'Hash',
+  Materialize: 'Materialize',
+}
+
+const postgresMapping = {
+  Limit: 'Limit',
+  Group: 'Aggregate',
+  Order: 'Sort',
+  'Full Table Scan': 'Seq Scan',
+  'Unique Key Lookup': 'Index Scan',
+  'Non-Unique Key Lookup': 'Index Scan',
+  'Nested Loop': 'Nested Loop',
+  'Hash Join': 'Hash Join',
+  'Attached Subqueries': 'Attached Subqueries',
+  Hash: 'Hash',
+  Materialize: 'Materialize',
+}
+
 const QueryPlanView = props => {
   const treeSvg = useRef(null)
 
@@ -61,7 +94,7 @@ const QueryPlanView = props => {
   const marginY = 30
 
   const drawTree = useCallback(
-    data => {
+    (data, checkbox) => {
       const treeLayout = d3.tree().size([width, height])
 
       // data를 d3의 계층 구조로 바꾸어주기
@@ -131,14 +164,43 @@ const QueryPlanView = props => {
       nodes
         .append('rect')
         .attr('fill', d => nodeColor(d.data['Node Type']))
-        .attr('width', d => d.data['Node Type'].length * 9)
+        .attr('width', d => {
+          if (checkbox === 'MySQL')
+            return (
+              mysqlMapping[d.data['Node Type']].length * 9 ||
+              d.data['Node Type'].length * 9
+            )
+          else if (checkbox === 'PostgreSQL')
+            return (
+              postgresMapping[d.data['Node Type']].length * 9 ||
+              d.data['Node Type'].length * 9
+            )
+          else if (checkbox === 'Both') return d.data['Node Type'].length * 9
+          else return 0
+        })
+
         .attr('height', d =>
           d.data['Relation Name'] || d.data.table_name ? 40 : 25
         )
         .attr('rx', 5)
         .attr('transform', d => {
-          let x = d.data['Node Type'].length * 9
-          return `translate(${-x / 2}, -10)`
+          if (checkbox === 'MySQL')
+            return `translate(${
+              -(
+                mysqlMapping[d.data['Node Type']].length * 9 ||
+                d.data['Node Type'].length * 9
+              ) / 2
+            }, -10)`
+          else if (checkbox === 'PostgreSQL')
+            return `translate(${
+              -(
+                postgresMapping[d.data['Node Type']].length * 9 ||
+                d.data['Node Type'].length * 9
+              ) / 2
+            }, -10)`
+          else if (checkbox === 'Both')
+            return `translate(${(-d.data['Node Type'].length * 9) / 2}, -10)`
+          else return ''
         })
 
       // append "Node Type" as node label
@@ -146,7 +208,13 @@ const QueryPlanView = props => {
         .append('text')
         .attr('dy', 7)
         .attr('text-anchor', 'middle')
-        .text(d => d.data['Node Type'])
+        .text(d => {
+          if (checkbox === 'MySQL')
+            return mysqlMapping[d.data['Node Type']] || d.data['Node Type']
+          else if (checkbox === 'Both') return d.data['Node Type']
+          else if (checkbox === 'PostgreSQL')
+            return postgresMapping[d.data['Node Type']] || d.data['Node Type']
+        })
 
       // append "Relation Name" or "table_name"
       nodes
@@ -188,7 +256,7 @@ const QueryPlanView = props => {
   useEffect(() => {
     d3.select(treeSvg.current).selectAll('*').remove() // clear
     d3.select('body').selectAll('#tooltip').remove()
-    drawTree(props.plan)
+    drawTree(props.plan, props.checkbox)
   }, [props, drawTree])
 
   function tooltipContent(d) {
