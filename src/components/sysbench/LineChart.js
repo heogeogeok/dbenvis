@@ -1,23 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
+import BarChart from "./BarChart";
+import TpsCard from "./TpsCard";
 
 const LineChart = (props) => {
+  const { fileIndex, files, queryResults } = props;
   const lineplotSvg = useRef(null);
 
-  const width = props.width;
+  const width =
+    (0.8 * document.documentElement.clientWidth) / props.files.length;
   const height = 0.4 * document.documentElement.clientHeight;
-  const margin = props.margin;
+  const margin = 0.03 * document.documentElement.clientWidth;
+  console.log(props.avgTps);
+  const [avgTps, setAvgTps] = useState(0);
 
-  const queryResults = props.queryResults;
-  // const avgTps = props.avgTps;
-  const files = props.files;
-
-  const [avgTps, setAvgTps] = useState(props.avgTps);
-
-  const triggerAvgTps = (brushed) => {
-    setAvgTps(brushed);
-    props.parentCallbackAvgTps(brushed);
-  };
+  // const triggerAvgTps = (brushed) => {
+  //   setAvgTps(brushed);
+  //   props.parentCallbackAvgTps(brushed);
+  // };
 
   function drawLineChart(props) {
     const { chartSvg, data, files } = props;
@@ -148,7 +148,6 @@ const LineChart = (props) => {
         svg.classed("selected", (d) => brushedData.includes(d));
         d3.selectAll(".scatterplot-point").classed("selected", false);
 
-        console.log(brushedData);
         brushedData.forEach((d) => {
           d3.selectAll(`.scatterplot-point-${data.indexOf(d)}`).classed(
             "selected",
@@ -216,6 +215,7 @@ const LineChart = (props) => {
   }
 
   useEffect(() => {
+    setAvgTps(props.avgTps);
     drawLineChart({
       chartSvg: lineplotSvg,
       data: queryResults,
@@ -223,17 +223,26 @@ const LineChart = (props) => {
     });
   }, [lineplotSvg, queryResults, files]);
 
+  console.log(avgTps);
+
   return (
     <div>
-      <div>
-        <p className="subTitle"> Avg. TPS: {avgTps} </p>
-        <svg
-          id="dataviz_basicZoom"
-          ref={lineplotSvg}
-          width={width}
-          height={height}
-        ></svg>
-      </div>
+      {files[fileIndex] && files[fileIndex].name ? (
+        <div className="filename-title">
+          <p>
+            {files[fileIndex].name.length > 80 / files.length
+              ? `${files[fileIndex].name.slice(0, 80 / files.length)}...`
+              : files[fileIndex].name}
+          </p>
+        </div>
+      ) : null}
+      <TpsCard tps={avgTps} />
+      <svg
+        id="line-chart"
+        ref={lineplotSvg}
+        width={width}
+        height={height}
+      ></svg>
     </div>
   );
 };
