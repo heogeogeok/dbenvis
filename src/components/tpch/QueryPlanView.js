@@ -167,18 +167,20 @@ const QueryPlanView = props => {
         .append('rect')
         .attr('fill', d => nodeColor(d.data['Node Type']))
         .attr('width', d => {
-          if (checkbox === 'MySQL')
-            return (
-              mysqlMapping[d.data['Node Type']].length * 9 ||
-              d.data['Node Type'].length * 9
-            )
-          else if (checkbox === 'PostgreSQL')
-            return (
-              postgresMapping[d.data['Node Type']].length * 9 ||
-              d.data['Node Type'].length * 9
-            )
-          else if (checkbox === 'Both') return d.data['Node Type'].length * 9
-          else return 0
+          let nodeType = d.data['Node Type']
+          let mysqlLength = mysqlMapping[nodeType]?.length || 0
+          let postgresLength =
+            (postgresMapping && postgresMapping[nodeType]?.length) || 0
+
+          if (checkbox === 'MySQL') {
+            return (mysqlLength || nodeType?.length || 0) * 9
+          } else if (checkbox === 'PostgreSQL') {
+            return (postgresLength || nodeType?.length || 0) * 9
+          } else if (checkbox === 'Both') {
+            return (nodeType?.length || 0) * 9
+          } else {
+            return 0
+          }
         })
 
         .attr('height', d =>
@@ -186,23 +188,24 @@ const QueryPlanView = props => {
         )
         .attr('rx', 5)
         .attr('transform', d => {
-          if (checkbox === 'MySQL')
+          let nodeType = d.data['Node Type']
+          let mysqlLength = mysqlMapping[nodeType]?.length || 0
+          let postgresLength =
+            (postgresMapping && postgresMapping[nodeType]?.length) || 0
+
+          if (checkbox === 'MySQL') {
             return `translate(${
-              -(
-                mysqlMapping[d.data['Node Type']].length * 9 ||
-                d.data['Node Type'].length * 9
-              ) / 2
+              (-mysqlLength * 9) / 2 || (-nodeType?.length * 9) / 2 || 0
             }, -10)`
-          else if (checkbox === 'PostgreSQL')
+          } else if (checkbox === 'PostgreSQL') {
             return `translate(${
-              -(
-                postgresMapping[d.data['Node Type']].length * 9 ||
-                d.data['Node Type'].length * 9
-              ) / 2
+              (-postgresLength * 9) / 2 || (-nodeType?.length * 9) / 2 || 0
             }, -10)`
-          else if (checkbox === 'Both')
-            return `translate(${(-d.data['Node Type'].length * 9) / 2}, -10)`
-          else return ''
+          } else if (checkbox === 'Both') {
+            return `translate(${(-nodeType?.length * 9) / 2 || 0}, -10)`
+          } else {
+            return ''
+          }
         })
 
       // append "Node Type" as node label
