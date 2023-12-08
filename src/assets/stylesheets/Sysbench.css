@@ -1,24 +1,46 @@
 .sysbench-container {
   display: flex;
-  flex-direction: "row";
+  flex-direction: column;
+  width: 80vw;
   padding-left: 5px;
+}
+
+.line-chart-container {
+  display: flex;
 }
 
 .title {
   font-family: "NanumSquareEB";
   font-size: large;
   color: black;
-  padding: 5px;
+  background-color: #f0f8ff;
+  border-radius: 20px;
+  padding: 10px;
+  margin-top: 5px;
+
+  text-align: center;
 }
 
-.subTitle {
-  font-family: "NanumSquareEB";
-  font-size: small;
+.tps-card {
+  margin: 0 20px;
+  border: 2px solid #f0f8ff;
+}
+
+.tps-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.tps-card-header {
+  font-family: "NanumSquareB";
+  font-size: medium;
   color: black;
-  padding: 5px;
 }
 
-.chart-container {
-  padding: 0;
-  margin: 0.5rem 0.5rem;
+.tps-card-content p {
+  font-family: "NanumSquareEB";
+  font-size: x-large;
+  color: black;
 }
