@@ -4,7 +4,7 @@ import * as d3 from "d3";
 import TpsCard from "./TpsCard";
 
 const LineChart = (props) => {
-  const { fileIndex, files, queryResults } = props;
+  const { fileIndex, files, queryResults, initAvgTps } = props;
   const { avgTps, setAvgTps } = useContext(SysbenchContext);
 
   const lineplotSvg = useRef(null);
@@ -66,7 +66,7 @@ const LineChart = (props) => {
       .append("clipPath")
       .attr("id", "clip")
       .append("rect")
-      .attr("width", width - margin)
+      .attr("width", width - 2 * margin)
       .attr("height", height - margin)
       .attr("x", margin)
       .attr("y", margin);
@@ -103,26 +103,27 @@ const LineChart = (props) => {
       const extent = event.selection;
 
       if (extent) {
+        // filter brushed data
+        const brushedData = queryResults.filter((d) => {
+          return (
+            xScale.invert(extent[0]) <= d.time &&
+            d.time <= xScale.invert(extent[1])
+          );
+        });
+
+        // 새로운 average TPS 계산
+        const newAvgTps = [...avgTps];
+        let sum = 0;
+        brushedData.forEach((d) => {
+          sum += d.tps;
+        });
+
+        newAvgTps[fileIndex] = sum / brushedData.length;
+        setAvgTps(newAvgTps);
+
         xScale.domain([xScale.invert(extent[0]), xScale.invert(extent[1])]);
+
         svg.select(".brush").call(brush.move, null); // 브러시 영역 숨기기
-
-        // // filter brushed data
-        // const brushedData = queryResults.filter((d) => {
-        //   return (
-        //     xScale.invert(extent[0]) <= d.time &&
-        //     d.time <= xScale.invert(extent[1])
-        //   );
-        // });
-
-        // svg.classed("selected", (d) => brushedData.includes(d));
-        // d3.selectAll(".scatterplot-point").classed("selected", false);
-
-        // brushedData.forEach((d) => {
-        //   d3.selectAll(`.scatterplot-point-${queryResults.indexOf(d)}`).classed(
-        //     "selected",
-        //     true
-        //   );
-        // });
       }
 
       // update axis
@@ -147,6 +148,8 @@ const LineChart = (props) => {
 
     // reinitialize the chart on double click
     svg.on("dblclick", function () {
+      setAvgTps(initAvgTps);
+
       xScale.domain([
         d3.min(queryResults, (d) => d.time),
         d3.max(queryResults, (d) => d.time),
@@ -165,7 +168,7 @@ const LineChart = (props) => {
           })
       );
     });
-  });
+  }, []);
 
   return (
     <div>

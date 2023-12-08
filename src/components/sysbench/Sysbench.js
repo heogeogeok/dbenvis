@@ -5,7 +5,8 @@ import BarChart from "./BarChart";
 import "../../assets/stylesheets/Sysbench.css";
 
 const Sysbench = ({ files }) => {
-  const { setAvgTps } = useContext(SysbenchContext);
+  const { avgTps, setAvgTps } = useContext(SysbenchContext);
+  const initAvgTps = [...avgTps];
 
   const [queryResults, setQueryResults] = useState([]);
 
@@ -103,6 +104,7 @@ const Sysbench = ({ files }) => {
                 fileIndex={index}
                 files={files}
                 queryResults={results.results}
+                initAvgTps={initAvgTps}
               />
             ))}
           </div>
