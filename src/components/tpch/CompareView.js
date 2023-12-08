@@ -161,7 +161,6 @@ const CompareView = props => {
           planContents = planContents.concat(plans)
         }
         setQueryPlans(planContents)
-        console.log(queryPlans)
       } else {
         // 업로드 한 파일 없는 경우
         setQueryPlans([])
@@ -236,8 +235,6 @@ const CompareView = props => {
         stackedData.push(cost)
       }
     })
-
-    console.log(stackedData)
 
     // store relevant keys
     const keys = stackedData.reduce((allKeys, entry) => {
