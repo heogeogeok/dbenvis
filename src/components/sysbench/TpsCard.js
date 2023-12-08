@@ -6,7 +6,7 @@ function TpsCard(props) {
       <Card className="tps-card">
         <div className="tps-card-content">
           <h1 className="tps-card-header">Average TPS</h1>
-          <p>{props.tps}</p>
+          <p>{props.tps.toFixed(2)}</p>
         </div>
       </Card>
     );

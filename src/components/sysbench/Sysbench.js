@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { SysbenchContext } from "../../contexts/SysbenchContext";
 import LineChart from "./LineChart";
 import BarChart from "./BarChart";
 import "../../assets/stylesheets/Sysbench.css";
 
-const Sysbench = (props) => {
-  const files = props.files;
+const Sysbench = ({ files }) => {
+  const { avgTps, setAvgTps } = useContext(SysbenchContext);
+  const initAvgTps = [...avgTps];
 
   const [queryResults, setQueryResults] = useState([]);
-  const [avgTps, setAvgTps] = useState([]);
 
   useEffect(() => {
     const loadFiles = async () => {
@@ -33,7 +34,7 @@ const Sysbench = (props) => {
     };
 
     loadFiles();
-  }, [files]);
+  }, [files, setAvgTps]);
 
   const readFile = (file) => {
     return new Promise((resolve) => {
@@ -66,12 +67,12 @@ const Sysbench = (props) => {
       match = line.match(regex);
 
       if (match) {
-        const [_, time, thds, tps, qps, lat, err] = match;
+        // const [_, time, thds, tps, qps, lat, err] = match;
         results.push({
-          time: parseInt(time),
-          tps: parseFloat(tps),
-          qps: parseFloat(qps),
-          lat: parseFloat(lat),
+          time: parseInt(match[1]),
+          tps: parseFloat(match[3]),
+          qps: parseFloat(match[4]),
+          lat: parseFloat(match[5]),
         });
       }
     }
@@ -103,7 +104,7 @@ const Sysbench = (props) => {
                 fileIndex={index}
                 files={files}
                 queryResults={results.results}
-                avgTps={avgTps[index]}
+                initAvgTps={initAvgTps}
               />
             ))}
           </div>
@@ -111,7 +112,7 @@ const Sysbench = (props) => {
       </div>
       <div className="chart-container">
         <h1 className="title">Compare View</h1>
-        {queryResults.length > 0 && <BarChart files={files} avgTps={avgTps} />}
+        {queryResults.length > 0 && <BarChart files={files} />}
       </div>
     </div>
   );

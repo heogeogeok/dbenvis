@@ -4,6 +4,7 @@ import Sidebar from "./Sidebar";
 import Tpch from "./tpch/Tpch";
 import Sysbench from "./sysbench/Sysbench";
 import TpchContextProvider from "../contexts/TpchContext";
+import SysbenchContextProvider from "../contexts/SysbenchContext";
 import "../App.css";
 
 function Layout() {
@@ -17,19 +18,21 @@ function Layout() {
       <Header />
       <div className="main-container">
         <TpchContextProvider>
-          <Sidebar
-            selected={selected}
-            setSelected={setSelected}
-            resultFiles={resultFiles}
-            setResultFiles={setResultFiles}
-            explainFiles={explainFiles}
-            setExplainFiles={setExplainFiles}
-          />
+          <SysbenchContextProvider>
+            <Sidebar
+              selected={selected}
+              setSelected={setSelected}
+              resultFiles={resultFiles}
+              setResultFiles={setResultFiles}
+              explainFiles={explainFiles}
+              setExplainFiles={setExplainFiles}
+            />
 
-          {selected === "TPC-H" && (
-            <Tpch resultFiles={resultFiles} explainFiles={explainFiles} />
-          )}
-          {selected === "sysbench" && <Sysbench files={resultFiles} />}
+            {selected === "TPC-H" && (
+              <Tpch resultFiles={resultFiles} explainFiles={explainFiles} />
+            )}
+            {selected === "sysbench" && <Sysbench files={resultFiles} />}
+          </SysbenchContextProvider>
         </TpchContextProvider>
       </div>
     </div>
