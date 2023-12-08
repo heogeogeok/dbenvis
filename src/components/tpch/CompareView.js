@@ -43,8 +43,8 @@ const barColor = d3
   .range([
     '#fbb4ae',
     '#b3cde3',
-    '#b3cde3',
-    '#b3cde3',
+    '#818589',
+    '#818589',
     '#b3cde3',
     '#ccebc5',
     '#ccebc5',
@@ -226,7 +226,8 @@ const CompareView = props => {
       if (entry.plan && entry.plan.Plan) {
         if (entry.plan.Plan['Total Cost'])
           traversePostgreSQL(entry.plan.Plan, cost)
-        else if (entry.plan.Plan.cost_info) traverseMySQL(entry.plan.Plan, cost)
+        else if (entry.plan.Plan.cost_info)
+          traverseMySQL(entry.plan.Plan.children[0], cost)
 
         stackedData.push(cost)
       }
