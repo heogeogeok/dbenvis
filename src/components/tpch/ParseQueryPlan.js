@@ -25,10 +25,7 @@ function ParseQueryPlan({ files }) {
     { value: 'row', label: 'Row' },
   ]
   const handleCheckboxChange = event => {
-    const selectedValue = event.target.value
-    setSelectedCheckbox(prevSelected =>
-      prevSelected === selectedValue ? null : selectedValue
-    )
+    setSelectedCheckbox(event.target.value)
   }
 
   const handleSelectionChange = selectedOption => {
