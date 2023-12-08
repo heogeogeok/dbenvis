@@ -43,8 +43,8 @@ const barColor = d3
   .range([
     '#fbb4ae',
     '#b3cde3',
-    '#b3cde3',
-    '#b3cde3',
+    '#818589',
+    '#818589',
     '#b3cde3',
     '#ccebc5',
     '#ccebc5',
