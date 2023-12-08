@@ -33,7 +33,7 @@ const Sysbench = ({ files }) => {
     };
 
     loadFiles();
-  }, [files]);
+  }, [files, setAvgTps]);
 
   const readFile = (file) => {
     return new Promise((resolve) => {
@@ -66,12 +66,12 @@ const Sysbench = ({ files }) => {
       match = line.match(regex);
 
       if (match) {
-        const [_, time, thds, tps, qps, lat, err] = match;
+        // const [_, time, thds, tps, qps, lat, err] = match;
         results.push({
-          time: parseInt(time),
-          tps: parseFloat(tps),
-          qps: parseFloat(qps),
-          lat: parseFloat(lat),
+          time: parseInt(match[1]),
+          tps: parseFloat(match[3]),
+          qps: parseFloat(match[4]),
+          lat: parseFloat(match[5]),
         });
       }
     }

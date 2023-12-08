@@ -89,7 +89,7 @@ const BarChart = ({ files }) => {
       .duration(1000)
       .attr("y", (d) => yScale(d) + marginY) // transition: final y position
       .attr("height", (d) => height - yScale(d)); // transition: final height
-  }, [files, avgTps]);
+  });
 
   return (
     <div>

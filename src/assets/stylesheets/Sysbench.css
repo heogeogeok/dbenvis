@@ -5,6 +5,10 @@
   padding-left: 5px;
 }
 
+.chart-container {
+  padding: 0;
+}
+
 .line-chart-container {
   display: flex;
 }
