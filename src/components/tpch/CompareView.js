@@ -126,9 +126,6 @@ const CompareView = props => {
           // 실패 시 try MariaDB
           if (queries.length === 0) queries = parseMariaDB(fileContent, i)
 
-          // 또 실패하면 try MySQL
-          // if (queries.length === 0) queries = parseMySQL(fileContent, i);
-
           resultContents = resultContents.concat(queries)
         }
         setResults(resultContents)
