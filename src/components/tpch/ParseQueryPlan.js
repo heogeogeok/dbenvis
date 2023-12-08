@@ -4,7 +4,11 @@ import DurationCard from "./DurationCard";
 import { TpchContext } from "../../contexts/TpchContext";
 import { Card } from "@material-tailwind/react";
 
-import { parseExpPostgreSQL, parseExpMySQL } from "./parseExplain";
+import {
+  parseExpPostgreSQL,
+  parseExpMySQL,
+  parseExpMariaDB,
+} from "./parseExplain";
 
 function ParseQueryPlan({ files }) {
   const { selectedQuery, durations } = useContext(TpchContext);
@@ -20,8 +24,18 @@ function ParseQueryPlan({ files }) {
 
           // default: try PostgreSQL
           let plans = parseExpPostgreSQL(fileContent);
-          // 실패 시 try MySQL
-          if (plans.length === 0) plans = parseExpMySQL(fileContent);
+
+          // 실패 시
+          if (plans.length === 0) {
+            const regex = /cost_info/;
+            if (regex.test(fileContent)) {
+              // run MySQL
+              plans = parseExpMySQL(fileContent);
+            } else {
+              // run MariaDB
+              plans = parseExpMariaDB(fileContent);
+            }
+          }
 
           planContents.push(plans);
         }
