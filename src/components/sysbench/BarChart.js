@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 
 const BarChart = (props) => {
   const { files, avgTps } = props;

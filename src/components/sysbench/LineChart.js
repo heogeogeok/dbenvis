@@ -11,13 +11,8 @@ const LineChart = (props) => {
     (0.8 * document.documentElement.clientWidth) / props.files.length;
   const height = 0.4 * document.documentElement.clientHeight;
   const margin = 0.03 * document.documentElement.clientWidth;
-  console.log(props.avgTps);
-  const [avgTps, setAvgTps] = useState(0);
 
-  // const triggerAvgTps = (brushed) => {
-  //   setAvgTps(brushed);
-  //   props.parentCallbackAvgTps(brushed);
-  // };
+  const [avgTps, setAvgTps] = useState(0);
 
   function drawLineChart(props) {
     const { chartSvg, data, files } = props;
