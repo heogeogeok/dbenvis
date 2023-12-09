@@ -307,6 +307,9 @@ const CompareView = props => {
       .duration(1000)
       .call(yAxis)
 
+    // create tooltip element
+    const tooltip = d3.select('body').append('div').attr('class', 'bar-tooltip')
+
     // create stack rect
     const rect = svg
       .selectAll()
@@ -316,6 +319,25 @@ const CompareView = props => {
       .attr('transform', `translate(${selectedMarginX}, ${selectedMarginY})`)
       .attr('fill', function (d) {
         return barColor(d.key)
+      })
+      .on('mouseover', function (event, d) {
+        tooltip
+          .html(
+            `Operator: ${d.key}<br> Cost: ${(
+              yScale(d[0][0]) - yScale(d[0][1])
+            ).toFixed(2)}`
+          )
+          .style('visibility', 'visible')
+        d3.select(this).attr('fill', d => shadeColor(barColor(d.key), -15))
+      })
+      .on('mousemove', function (e) {
+        tooltip
+          .style('top', e.pageY - 10 + 'px')
+          .style('left', e.pageX + 10 + 'px')
+      })
+      .on('mouseout', function () {
+        tooltip.html(``).style('visibility', 'hidden')
+        d3.select(this).attr('fill', d => barColor(d.key))
       })
 
     // stack rect for each data value
