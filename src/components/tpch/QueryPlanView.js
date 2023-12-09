@@ -143,8 +143,6 @@ const QueryPlanView = props => {
         return 0
       })
 
-      console.log(rows)
-
       // scale for stroke width
       const strokeWidthScale = d3
         .scaleLinear()
