@@ -90,17 +90,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 5px 10px;
 }
 
 .duration-card-header {
   font-family: "NanumSquareB";
-  font-size: medium;
+  font-size: small;
   color: black;
 }
 
 .duration-card-content p {
   font-family: "NanumSquareEB";
-  font-size: x-large;
+  font-size: large;
   color: black;
 }

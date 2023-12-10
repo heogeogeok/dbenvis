@@ -36,7 +36,7 @@ const CompareView = (props) => {
 
   const width = document.body.clientWidth * 0.35;
   const height = 270;
-  const marginX = document.body.clientWidth * 0.02;
+  const marginX = 50;
   const marginY = 10;
 
   const selectedWidth = width / 2;

@@ -6,7 +6,7 @@ function DurationCard(props) {
       <Card className="duration-card">
         <div className="duration-card-content">
           <h1 className="duration-card-header">Duration</h1>
-          <p>{props.duration.duration.toFixed(3)} sec</p>
+          <p>{props.duration.duration.toFixed(1)} sec</p>
         </div>
       </Card>
     );
