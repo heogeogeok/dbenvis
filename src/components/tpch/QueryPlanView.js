@@ -76,6 +76,7 @@ const QueryPlanView = (props) => {
     .range([10, 30]);
 
   const drawTree = (term) => {
+    // create tree
     const svg = d3
       .select(treeSvg.current)
       .append("svg")
@@ -90,65 +91,14 @@ const QueryPlanView = (props) => {
       )
       .append("g");
 
-    svg
-      .selectAll("path")
-      .data(root.links())
-      .enter()
-      .append("path")
-      .attr("d", diagonal)
+    // create links
+    const gLink = svg
+      .append("g")
       .attr("fill", "none")
       .attr("stroke", "lightgrey");
 
     // create nodes
-    const nodes = svg
-      .selectAll("g")
-      .data(treeData.descendants())
-      .enter()
-      .append("g")
-      .attr("transform", (d) => `translate(${d.x}, ${d.y})`);
-
-    nodes
-      .append("circle")
-      .transition()
-      .duration(1000)
-      .attr("fill", (d) => nodeColor(d.data["Node Type"]))
-      .attr("r", (d, idx) => {
-        if (selectedMetric === "cost") {
-          return cost[idx - 1] ? costScale(cost[idx - 1]) : 10;
-        } else if (selectedMetric === "rows") {
-          return rows[idx - 1] ? rowScale(rows[idx - 1]) : 10;
-        } else {
-          return 15;
-        }
-      });
-
-    // append "Node Type" as node label
-    nodes
-      .append("text")
-      .attr("id", "node-type")
-      .attr("text-anchor", "start")
-      .text((d) => {
-        if (term === "PostgreSQL")
-          return MySqlToPostgres[d.data["Node Type"]] || d.data["Node Type"];
-        else if (term === "MariaDB / MySQL")
-          return PostgresToMySQL[d.data["Node Type"]] || d.data["Node Type"];
-        else return d.data["Node Type"];
-      });
-
-    // append "Relation Name" or "table_name"
-    nodes
-      .append("text")
-      .attr("id", "relation-name")
-      .attr("class", "relation-name")
-      .attr("dy", 12)
-      .attr("text-anchor", "start")
-      .text((d) =>
-        d.data["Relation Name"]
-          ? d.data["Relation Name"].toUpperCase()
-          : d.data.table_name
-          ? d.data.table_name.toUpperCase()
-          : null
-      );
+    const gNode = svg.append("g");
 
     // create tooltip
     var tooltip = d3
@@ -157,18 +107,134 @@ const QueryPlanView = (props) => {
       .attr("id", "tooltip")
       .attr("class", "node-tooltip");
 
-    nodes
-      .on("mouseover", function (event, d) {
-        tooltip.html(tooltipContent(d)).style("visibility", "visible");
-      })
-      .on("mousemove", function (event) {
-        tooltip
-          .style("top", event.pageY - 50 + "px")
-          .style("left", event.pageX + 10 + "px");
-      })
-      .on("mouseout", function () {
-        tooltip.style("visibility", "hidden");
+    function update(event, source) {
+      const nodes = root.descendants().reverse();
+      const links = root.links();
+      const transition = svg.transition().duration(500);
+
+      // update nodes
+      const node = gNode.selectAll("g").data(nodes, (d) => d.id);
+
+      // enter any new nodes at the parent's previous position.
+      const nodeEnter = node
+        .enter()
+        .append("g")
+        .attr("transform", (d) => `translate(${source.x0},${source.y0})`)
+        .attr("fill-opacity", 0)
+        .attr("stroke-opacity", 0)
+        .on("click", (event, d) => {
+          d.children = d.children ? null : d._children;
+          update(event, d);
+        });
+
+      // append circles
+      nodeEnter
+        .append("circle")
+        .attr("fill", (d) => nodeColor(d.data["Node Type"]))
+        .attr("r", (d, idx) => {
+          if (selectedMetric === "cost") {
+            return cost[idx - 1] ? costScale(cost[idx - 1]) : 10;
+          } else if (selectedMetric === "rows") {
+            return rows[idx - 1] ? rowScale(rows[idx - 1]) : 10;
+          } else {
+            return 15;
+          }
+        });
+
+      // append node type
+      nodeEnter
+        .append("text")
+        .attr("id", "node-type")
+        .attr("text-anchor", "start")
+        .text((d) => {
+          if (term === "PostgreSQL")
+            return MySqlToPostgres[d.data["Node Type"]] || d.data["Node Type"];
+          else if (term === "MariaDB / MySQL")
+            return PostgresToMySQL[d.data["Node Type"]] || d.data["Node Type"];
+          else return d.data["Node Type"];
+        });
+
+      // append relation name
+      nodeEnter
+        .append("text")
+        .attr("id", "relation-name")
+        .attr("class", "relation-name")
+        .attr("dy", 12)
+        .attr("text-anchor", "start")
+        .text((d) =>
+          d.data["Relation Name"]
+            ? d.data["Relation Name"].toUpperCase()
+            : d.data.table_name
+            ? d.data.table_name.toUpperCase()
+            : null
+        );
+
+      nodeEnter
+        .on("mouseover", function (event, d) {
+          tooltip.html(tooltipContent(d)).style("visibility", "visible");
+        })
+        .on("mousemove", function (event) {
+          tooltip
+            .style("top", event.pageY - 50 + "px")
+            .style("left", event.pageX + 10 + "px");
+        })
+        .on("mouseout", function () {
+          tooltip.style("visibility", "hidden");
+        });
+
+      const nodeUpdate = node
+        .merge(nodeEnter)
+        .transition(transition)
+        .attr("transform", (d) => `translate(${d.x},${d.y})`)
+        .attr("fill-opacity", 1)
+        .attr("stroke-opacity", 1);
+
+      const nodeExit = node
+        .exit()
+        .transition(transition)
+        .remove()
+        .attr("transform", (d) => `translate(${source.x},${source.y})`)
+        .attr("fill-opacity", 0)
+        .attr("stroke-opacity", 0);
+
+      // update links
+      const link = gLink.selectAll("path").data(links, (d) => d.target.id);
+
+      // enter any new links at the parent's previous position.
+      const linkEnter = link
+        .enter()
+        .append("path")
+        .attr("d", (d) => {
+          const o = { x: source.x0, y: source.y0 };
+          return diagonal({ source: o, target: o });
+        });
+
+      link.merge(linkEnter).transition(transition).attr("d", diagonal);
+
+      link
+        .exit()
+        .transition(transition)
+        .remove()
+        .attr("d", (d) => {
+          const o = { x: source.x, y: source.y };
+          return diagonal({ source: o, target: o });
+        });
+
+      root.eachBefore((d) => {
+        d.x0 = d.x;
+        d.y0 = d.y;
       });
+    }
+
+    root.x0 = dy / 2;
+    root.y0 = 0;
+
+    root.descendants().forEach((d, i) => {
+      d.id = i;
+      d._children = d.children;
+    });
+
+    update(null, root);
   };
 
   const updateTree = (term) => {
