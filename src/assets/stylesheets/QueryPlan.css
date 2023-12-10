@@ -60,12 +60,27 @@
 .node-tooltip {
   position: absolute;
   visibility: hidden;
-  font-family: "NanumSquareB";
-  font-size: small;
-  text-align: center;
-  border: 4px dashed #809fff;
+  font-family: "NanumSquareR";
+  font-size: 12px;
+  border: 1px dashed #809fff;
   background-color: white;
   padding: 5px;
+}
+
+.tooltip-table td {
+  border: 1px solid lightgrey;
+  padding: 0 5px;
+}
+
+.tooltip-table td:first-child {
+  border-left: none;
+  font-family: "NanumSquareB";
+}
+
+.tooltip-table td:last-child {
+  border-right: none;
+  word-wrap: break-word;
+  max-width: 200px;
 }
 
 .filename-title {

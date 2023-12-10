@@ -158,10 +158,10 @@ const QueryPlanView = (props) => {
       .on("mouseover", function (event, d) {
         tooltip.html(tooltipContent(d)).style("visibility", "visible");
       })
-      .on("mousemove", function (e) {
+      .on("mousemove", function (event) {
         tooltip
-          .style("top", e.pageY - 30 + "px")
-          .style("left", e.pageX + 10 + "px");
+          .style("top", event.pageY - 50 + "px")
+          .style("left", event.pageX + 10 + "px");
       })
       .on("mouseout", function () {
         tooltip.style("visibility", "hidden");
@@ -208,41 +208,83 @@ const QueryPlanView = (props) => {
     updateTree(props.term, props.metric);
   }, [props.term, props.metric]);
 
+  function expandNode(nodeElem) {
+    d3.select(nodeElem).html((d) => {
+      const keyValuePairs = Object.entries(d.data);
+      let detail;
+      keyValuePairs.map(([key, value]) => {
+        detail += `${key}: ${value} `;
+      });
+
+      return detail;
+    });
+  }
+
   function tooltipContent(d) {
-    let content = `Node Type: ${d.data["Node Type"]}`;
+    let content = `<table class="tooltip-table"><tr><td>Node Type</td><td>${d.data["Node Type"]}</td></tr>`;
 
-    if (d.data["Total Cost"]) {
-      // PostgreSQL
-      if (d.data["Relation Name"]) {
-        content += `<br>Relation Name: ${d.data[
-          "Relation Name"
-        ].toUpperCase()}`;
+    if (d.data["Node Type"] !== "Limit") {
+      if (d.data["Total Cost"]) {
+        // PostgreSQL
+        if (d.data["Relation Name"]) {
+          content += `<tr><td>Relation Name</td><td>${d.data[
+            "Relation Name"
+          ].toUpperCase()}</td></tr>`;
+        }
+
+        content += `<tr><td>Cost</td><td>${(
+          d.data["Total Cost"] - d.data["Startup Cost"]
+        ).toFixed(2)}</td></tr>`;
+
+        content += `<tr><td>Plan Rows</td><td>${d.data["Plan Rows"]}</td></tr>`;
+        content += `<tr><td>Plan Width</td><td>${d.data["Plan Width"]}</td></tr>`;
+      } else if (d.data["cost_info"]) {
+        // MySQL
+        if (d.data["table_name"]) {
+          content += `<tr><td>Relation Name</td><td>${d.data[
+            "table_name"
+          ].toUpperCase()}</td></tr>`;
+        }
+
+        const totalCost = Object.entries(d.data.cost_info || {})
+          .filter(([key]) => key.includes("cost"))
+          .map(([_, value]) => parseFloat(value) || 0);
+
+        content += `<tr><td>Cost</td><td>${d3
+          .sum(totalCost)
+          .toFixed(2)}</td></tr>`;
+      } else if (d.data["r_total_time_ms"]) {
+        // MariaDB
+        if (d.data["table_name"]) {
+          content += `<tr><td>Relation Name</td><td>${d.data[
+            "table_name"
+          ].toUpperCase()}</td></tr>`;
+        }
+
+        content += `<tr><td>Cost</td><td>${d.data["r_total_time_ms"].toFixed(
+          2
+        )}</td></tr>`;
       }
-
-      content += `<br>Cost: ${(
-        d.data["Total Cost"] - d.data["Startup Cost"]
-      ).toFixed(2)}<br>Plan Rows: ${d.data["Plan Rows"]}<br>Plan Width: ${
-        d.data["Plan Width"]
-      }`;
-    } else if (d.data["cost_info"]) {
-      // MySQL
-      if (d.data["table_name"]) {
-        content += `<br>Relation Name: ${d.data["table_name"].toUpperCase()}`;
-      }
-
-      const totalCost = Object.entries(d.data.cost_info || {})
-        .filter(([key]) => key.includes("cost"))
-        .map(([_, value]) => parseFloat(value) || 0);
-
-      content += `<br>Cost: ${d3.sum(totalCost).toFixed(2)}`;
-    } else if (d.data["r_total_time_ms"]) {
-      // MariaDB
-      if (d.data["table_name"]) {
-        content += `<br>Relation Name: ${d.data["table_name"].toUpperCase()}`;
-      }
-
-      content += `<br>Cost: ${d.data["r_total_time_ms"].toFixed(2)}`;
     }
+
+    const keyValuePairs = Object.entries(d.data).filter(
+      (key) =>
+        ![
+          "children",
+          "Node Type",
+          "table_name",
+          "cost_info",
+          "Total Cost",
+          "Startup Cost",
+          "r_total_time_ms",
+        ].includes(key[0])
+    );
+
+    content += keyValuePairs
+      .map(([key, value]) => `<tr><td>${key}</td><td>${value}</td></tr>`)
+      .join("");
+
+    content += `</table>`;
 
     return content;
   }
