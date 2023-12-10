@@ -91,3 +91,33 @@ export function retrieveCost(node, result) {
     }
   }
 }
+
+export function retrieveRows(node, result) {
+  const nodeType = node["Node Type"];
+  let rows;
+
+  if (node["Plan Rows"]) {
+    // PostgreSQL
+    rows = node["Plan Rows"];
+  } else if (node["cost_info"]) {
+    // MySQL
+    rows = d3.sum(
+      Object.entries(node || {})
+        .filter(([key]) => key.includes("rows"))
+        .map(([_, value]) => value || 0)
+    );
+  } else if (node["r_total_time_ms"]) {
+    // MariaDB
+    rows = node["rows"];
+  } else {
+    rows = 0;
+  }
+
+  result[nodeType] = (result[nodeType] || 0) + rows;
+
+  if (node.children) {
+    for (const child of node.children) {
+      retrieveRows(child, result);
+    }
+  }
+}

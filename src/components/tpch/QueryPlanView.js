@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import * as d3 from "d3";
 import { nodeColor, PostgresToMySQL, MySqlToPostgres } from "./mapping";
+import { TpchContext } from "../../contexts/TpchContext";
 
 const QueryPlanView = (props) => {
+  const { selectedMetric } = useContext(TpchContext);
+
   const treeSvg = useRef(null);
 
   const width = props.width;
@@ -30,7 +33,7 @@ const QueryPlanView = (props) => {
     } else if (link.target.data["cost_info"]) {
       // MySQL
       return d3.sum(
-        Object.entries(link.target.data.cost_info || {})
+        Object.entries(link.target.data["cost_info"] || {})
           .filter(([key]) => key.includes("cost"))
           .map(([_, value]) => parseFloat(value) || 0)
       );
@@ -72,7 +75,7 @@ const QueryPlanView = (props) => {
     .domain([d3.min(cost), d3.max(cost)])
     .range([10, 30]);
 
-  const drawTree = (term, metric) => {
+  const drawTree = (term) => {
     const svg = d3
       .select(treeSvg.current)
       .append("svg")
@@ -110,9 +113,9 @@ const QueryPlanView = (props) => {
       .duration(1000)
       .attr("fill", (d) => nodeColor(d.data["Node Type"]))
       .attr("r", (d, idx) => {
-        if (metric === "cost") {
+        if (selectedMetric === "cost") {
           return cost[idx - 1] ? costScale(cost[idx - 1]) : 10;
-        } else if (metric === "rows") {
+        } else if (selectedMetric === "rows") {
           return rows[idx - 1] ? rowScale(rows[idx - 1]) : 10;
         } else {
           return 15;
@@ -168,7 +171,7 @@ const QueryPlanView = (props) => {
       });
   };
 
-  const updateTree = (term, metric) => {
+  const updateTree = (term) => {
     const svg = d3.select(treeSvg.current);
 
     // update nodes
@@ -177,9 +180,9 @@ const QueryPlanView = (props) => {
       .transition()
       .duration(1000)
       .attr("r", (d, idx) => {
-        if (metric === "cost") {
+        if (selectedMetric === "cost") {
           return cost[idx - 1] ? costScale(cost[idx - 1]) : 10;
-        } else if (metric === "rows") {
+        } else if (selectedMetric === "rows") {
           return rows[idx - 1] ? rowScale(rows[idx - 1]) : 10;
         } else {
           return 15;
@@ -201,24 +204,12 @@ const QueryPlanView = (props) => {
 
   useEffect(() => {
     d3.select(treeSvg.current).selectAll("*").remove(); // clear
-    drawTree(props.term, props.metric);
+    drawTree(props.term);
   }, [props.plan]);
 
   useEffect(() => {
-    updateTree(props.term, props.metric);
-  }, [props.term, props.metric]);
-
-  function expandNode(nodeElem) {
-    d3.select(nodeElem).html((d) => {
-      const keyValuePairs = Object.entries(d.data);
-      let detail;
-      keyValuePairs.map(([key, value]) => {
-        detail += `${key}: ${value} `;
-      });
-
-      return detail;
-    });
-  }
+    updateTree(props.term);
+  }, [props.term, selectedMetric]);
 
   function tooltipContent(d) {
     let content = `<table class="tooltip-table"><tr><td>Node Type</td><td>${d.data["Node Type"]}</td></tr>`;

@@ -8,9 +8,19 @@ const TpchContextProvider = (props) => {
   // 각 파일의 각 쿼리의 duration
   const [durations, setDurations] = useState([]);
 
+  // 시각화 할 metric
+  const [selectedMetric, setselectedMetric] = useState("none");
+
   return (
     <TpchContext.Provider
-      value={{ selectedQuery, setSelectedQuery, durations, setDurations }}
+      value={{
+        selectedQuery,
+        setSelectedQuery,
+        durations,
+        setDurations,
+        selectedMetric,
+        setselectedMetric,
+      }}
     >
       {props.children}
     </TpchContext.Provider>

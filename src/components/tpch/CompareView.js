@@ -14,10 +14,11 @@ import {
   parseDurPostgreSQL,
   parseDurMariaDB,
   retrieveCost,
+  retrieveRows,
 } from "./parseDuration";
 
 const CompareView = (props) => {
-  const { selectedQuery, setSelectedQuery, setDurations } =
+  const { selectedQuery, setSelectedQuery, setDurations, selectedMetric } =
     useContext(TpchContext);
 
   const resultFiles = props.resultFiles;
@@ -164,7 +165,7 @@ const CompareView = (props) => {
         data: results,
       });
     }
-  }, [results, queryPlans, selectedQuery, showStackedBar]);
+  }, [results, queryPlans, selectedQuery, selectedMetric, showStackedBar]);
 
   function drawGroupedBarChart(props) {
     const { chartSvg, data, click } = props;
@@ -409,12 +410,15 @@ const CompareView = (props) => {
     const stackedData = [];
 
     selectedData.forEach((entry) => {
-      const cost = { fileIndex: entry.fileIndex };
+      const result = { fileIndex: entry.fileIndex };
 
       if (entry.plan && entry.plan.Plan) {
-        retrieveCost(entry.plan.Plan, cost);
-        stackedData.push(cost);
+        if (selectedMetric === "cost") retrieveCost(entry.plan.Plan, result);
+        else if (selectedMetric === "rows")
+          retrieveRows(entry.plan.Plan, result);
+        else retrieveCost(entry.plan.Plan, result);
       }
+      stackedData.push(result);
     });
 
     // store relevant keys
@@ -494,7 +498,7 @@ const CompareView = (props) => {
       .append("div")
       .attr("class", "bar-tooltip");
 
-    let costPercentage;
+    let metricPercentage;
 
     // create stack rect
     const rect = svg
@@ -505,9 +509,14 @@ const CompareView = (props) => {
       .attr("transform", `translate(${selectedMarginX}, ${selectedMarginY})`)
       .attr("fill", (d) => nodeColor(d.key))
       .on("mouseover mousemove", function (event, d) {
-        tooltip
-          .html(`Operator: ${d.key}<br> Cost: ${costPercentage}`)
-          .style("visibility", "visible");
+        if (selectedMetric === "rows")
+          tooltip
+            .html(`Operator: ${d.key}<br> Rows: ${metricPercentage}`)
+            .style("visibility", "visible");
+        else
+          tooltip
+            .html(`Operator: ${d.key}<br> Cost: ${metricPercentage}`)
+            .style("visibility", "visible");
       });
 
     // stack rect for each data value
@@ -533,7 +542,7 @@ const CompareView = (props) => {
       .selectAll("rect")
       .data((d) => d)
       .on("mouseover", function (event, d) {
-        costPercentage = (d[1] - d[0]).toLocaleString("en-US", {
+        metricPercentage = (d[1] - d[0]).toLocaleString("en-US", {
           style: "percent",
           minimumFractionDigits: 2,
         });
@@ -634,7 +643,7 @@ const CompareView = (props) => {
                   {showStackedBar ? (
                     <p className="text">Show Duration Bar</p>
                   ) : (
-                    <p className="text">Show Cost Percentage</p>
+                    <p className="text">Show Metric Percentage</p>
                   )}
                 </Button>
               </div>

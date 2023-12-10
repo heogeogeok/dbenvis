@@ -16,11 +16,11 @@ import {
 } from "./parseExplain";
 
 function ParseQueryPlan({ files }) {
-  const { selectedQuery, durations } = useContext(TpchContext);
+  const { selectedQuery, durations, setselectedMetric } =
+    useContext(TpchContext);
 
   const [queryPlans, setQueryPlans] = useState([]);
   const [selectedTerm, setselectedTerm] = useState("Default");
-  const [selectedMetric, setselectedMetric] = useState("none");
 
   const options = [
     { value: "none", label: "none" },
@@ -147,7 +147,6 @@ function ParseQueryPlan({ files }) {
                   } // default padding 고려하여 -10
                   plan={plans[selectedQuery].Plan}
                   term={selectedTerm}
-                  metric={selectedMetric}
                 />
               </Card>
             </div>
