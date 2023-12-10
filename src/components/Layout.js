@@ -14,7 +14,7 @@ function Layout() {
   const [explainFiles, setExplainFiles] = useState([]);
 
   return (
-    <div className="container">
+    <div>
       <Header />
       <div className="main-container">
         <TpchContextProvider>
@@ -27,7 +27,6 @@ function Layout() {
               explainFiles={explainFiles}
               setExplainFiles={setExplainFiles}
             />
-
             {selected === "TPC-H" && (
               <Tpch resultFiles={resultFiles} explainFiles={explainFiles} />
             )}

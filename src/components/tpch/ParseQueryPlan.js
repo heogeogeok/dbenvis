@@ -1,133 +1,124 @@
-import { useContext, useEffect, useState } from 'react'
-import QueryPlanView from './QueryPlanView'
-import DurationCard from './DurationCard'
-import { TpchContext } from '../../contexts/TpchContext'
-import { Card } from '@material-tailwind/react'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Checkbox from '@mui/material/Checkbox'
-import Select from 'react-select'
+import { useContext, useEffect, useState } from "react";
+import QueryPlanView from "./QueryPlanView";
+import DurationCard from "./DurationCard";
+import { TpchContext } from "../../contexts/TpchContext";
+import { Card } from "@material-tailwind/react";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Select from "react-select";
+
+import "../../assets/stylesheets/Tpch.css";
 
 import {
   parseExpPostgreSQL,
   parseExpMySQL,
   parseExpMariaDB,
-} from './parseExplain'
+} from "./parseExplain";
 
 function ParseQueryPlan({ files }) {
-  const { selectedQuery, durations } = useContext(TpchContext)
-  const [queryPlans, setQueryPlans] = useState([])
-  const [selectedCheckbox, setSelectedCheckbox] = useState('Both')
-  const [selectedValue, setSelectedValue] = useState('none')
+  const { selectedQuery, durations } = useContext(TpchContext);
+
+  const [queryPlans, setQueryPlans] = useState([]);
+  const [selectedTerm, setselectedTerm] = useState("Default");
+  const [selectedMetric, setselectedMetric] = useState("none");
 
   const options = [
-    { value: 'none', label: 'none' },
-    { value: 'cost', label: 'Cost' },
-    { value: 'row', label: 'Row' },
-  ]
-  const handleCheckboxChange = event => {
-    setSelectedCheckbox(event.target.value)
-  }
+    { value: "none", label: "none" },
+    { value: "cost", label: "Cost" },
+    { value: "rows", label: "Rows" },
+  ];
 
-  const handleSelectionChange = selectedOption => {
-    setSelectedValue(selectedOption.value)
-  }
+  const handleCheckboxChange = (event) => {
+    setselectedTerm(event.target.value);
+  };
+
+  const handleSelectionChange = (selectedOption) => {
+    setselectedMetric(selectedOption.value);
+  };
 
   useEffect(() => {
     const loadFiles = async () => {
       if (files && files.length > 0) {
-        const planContents = []
+        const planContents = [];
 
         for (const file of files) {
-          const fileContent = await readFile(file)
+          const fileContent = await readFile(file);
 
           // default: try PostgreSQL
-          let plans = parseExpPostgreSQL(fileContent)
+          let plans = parseExpPostgreSQL(fileContent, false, null);
 
           // 실패 시
           if (plans.length === 0) {
-            const regex = /cost_info/
+            const regex = /cost_info/;
             if (regex.test(fileContent)) {
               // run MySQL
-              plans = parseExpMySQL(fileContent)
+              plans = parseExpMySQL(fileContent, false, null);
             } else {
               // run MariaDB
-              plans = parseExpMariaDB(fileContent)
+              plans = parseExpMariaDB(fileContent, false, null);
             }
           }
 
-          planContents.push(plans)
+          if (plans.length !== 0) planContents.push(plans); // explain 실패 시 저장하지 않음
         }
 
-        setQueryPlans(planContents)
+        setQueryPlans(planContents);
       } else {
         // 업로드 한 파일 없는 경우
-        setQueryPlans([])
+        setQueryPlans([]);
       }
-    }
+    };
 
-    loadFiles()
-  }, [files])
+    loadFiles();
+  }, [files]);
 
-  const readFile = file => {
-    return new Promise(resolve => {
-      const fileReader = new FileReader()
+  const readFile = (file) => {
+    return new Promise((resolve) => {
+      const fileReader = new FileReader();
 
       fileReader.onload = () => {
-        resolve(fileReader.result)
-      }
+        resolve(fileReader.result);
+      };
 
       // read the file as text
-      fileReader.readAsText(file)
-    })
-  }
+      fileReader.readAsText(file);
+    });
+  };
 
   return (
     <div>
-      <h1 className="title">Query Plan</h1>
+      <p className="title">Query Plan Visualization</p>
       <div className="control-panel">
         <div className="control-panel-metric">
-          <p>Select Metric:</p>
+          <p>Metric:</p>
           <Select
             options={options}
             defaultValue={options[0]}
             onChange={handleSelectionChange}
+            className="control-panel-options"
           />
         </div>
         <div className="control-panel-term">
-          <p>Select Term: </p>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectedCheckbox === 'PostgreSQL'}
-                onChange={handleCheckboxChange}
-                value="PostgreSQL"
-              />
-            }
-            label="PostgreSQL"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectedCheckbox === 'MySQL'}
-                onChange={handleCheckboxChange}
-                value="MySQL"
-              />
-            }
-            label="MySQL"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                defaultChecked
-                checked={selectedCheckbox === 'Both'}
-                onChange={handleCheckboxChange}
-                value="Both"
-              />
-            }
-            label="Both"
-          />
+          <p>Terminology:</p>
+          {["Default", "PostgreSQL", "MariaDB / MySQL"].map((checkboxValue) => (
+            <FormControlLabel
+              key={checkboxValue}
+              control={
+                <Checkbox
+                  checked={selectedTerm === checkboxValue}
+                  onChange={handleCheckboxChange}
+                  value={checkboxValue}
+                  size="small"
+                />
+              }
+              label={
+                <div className={"control-panel-options"}>{checkboxValue}</div>
+              }
+            />
+          ))}
         </div>
       </div>
+      <hr />
       <div className="plan-container">
         {queryPlans.map((plans, index) =>
           plans.length > 0 && plans[selectedQuery] ? (
@@ -141,22 +132,22 @@ function ParseQueryPlan({ files }) {
                   </p>
                 </div>
               ) : null}
-              <Card key={index} className="plan-card">
+              <Card key={index}>
                 <DurationCard
                   duration={durations.find(
-                    duration =>
+                    (duration) =>
                       duration.fileIndex === index &&
                       duration.queryNumber === (selectedQuery + 1).toString()
                   )}
                 />
                 <QueryPlanView
-                  checkbox={selectedCheckbox}
                   key={index}
                   width={
                     (document.body.clientWidth * 0.45 - 10) / queryPlans.length
                   } // default padding 고려하여 -10
                   plan={plans[selectedQuery].Plan}
-                  selectedOption={selectedValue}
+                  term={selectedTerm}
+                  metric={selectedMetric}
                 />
               </Card>
             </div>
@@ -164,7 +155,7 @@ function ParseQueryPlan({ files }) {
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default ParseQueryPlan
+export default ParseQueryPlan;
