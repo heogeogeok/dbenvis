@@ -2,7 +2,7 @@ import { useRef, useEffect, useState, useContext } from "react";
 import * as d3 from "d3";
 import { TpchContext } from "../../contexts/TpchContext";
 import "../../assets/stylesheets/Tpch.css";
-import { Checkbox } from "@material-tailwind/react";
+import { Checkbox, Button } from "@material-tailwind/react";
 
 import { shadeColor, nodeColor, legendOpColor, mapOpLegend } from "./mapping";
 import {
@@ -625,14 +625,18 @@ const CompareView = (props) => {
                 />
                 <svg ref={stackedLegendSvg} width={legendWidth} />
               </div>
-              <div className="checkbox-container">
-                <Checkbox
+              <div className="button-container">
+                <Button
+                  size="sm"
                   color="blue"
-                  className="h-4 w-4 rounded-full border-gray-900/20 bg-gray-900/10 transition-all hover:scale-105 hover:before:opacity-0"
-                  checked={showStackedBar}
-                  label={<p className="text">Show Stacked Bar Chart</p>}
                   onClick={handleStackCheckboxChange}
-                />
+                >
+                  {showStackedBar ? (
+                    <p className="text">Show Duration Bar</p>
+                  ) : (
+                    <p className="text">Show Cost Percentage</p>
+                  )}
+                </Button>
               </div>
             </div>
           )}
