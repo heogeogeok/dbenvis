@@ -5,8 +5,8 @@ import BarChart from "./BarChart";
 import "../../assets/stylesheets/Sysbench.css";
 
 const Sysbench = ({ files }) => {
-  const { avgTps, setAvgTps } = useContext(SysbenchContext);
-  const initAvgTps = [...avgTps];
+  const { avgMetric, setAvgMetric } = useContext(SysbenchContext);
+  const initAvgMetric = [...avgMetric];
 
   const [queryResults, setQueryResults] = useState([]);
 
@@ -14,27 +14,30 @@ const Sysbench = ({ files }) => {
     const loadFiles = async () => {
       if (files && files.length > 0) {
         const fileContents = [];
-        const avgTpsValues = [];
+        const avgValues = [];
 
+        let index = 0;
         for (const file of files) {
           const fileContent = await readFile(file);
           const results = extractResults(fileContent);
 
           fileContents.push({ results });
-          avgTpsValues.push(extractAvgTps(fileContent));
+          extractAvg(index, fileContent, avgValues);
+
+          index++;
         }
 
         setQueryResults(fileContents);
-        setAvgTps(avgTpsValues);
+        setAvgMetric(avgValues);
       } else {
         // 업로드 한 파일 없는 경우
         setQueryResults([]);
-        setAvgTps([]);
+        setAvgMetric([]);
       }
     };
 
     loadFiles();
-  }, [files, setAvgTps]);
+  }, [files, setAvgMetric]);
 
   const readFile = (file) => {
     return new Promise((resolve) => {
@@ -79,17 +82,49 @@ const Sysbench = ({ files }) => {
     return results;
   };
 
-  const extractAvgTps = (content) => {
-    const regex = /transactions:\s+\d+\s+\(([\d.]+)\s+per sec.\)/;
-    const match = content.match(regex);
+  const extractAvg = (index, content, result) => {
+    // tps
+    let regex = /transactions:\s+\d+\s+\(([\d.]+)\s+per sec.\)/;
+    let match = content.match(regex);
+    const tps = parseFloat(match[1]);
 
-    if (match) {
-      const transactionsPerSec = parseFloat(match[1]); // per sec 값 추출
-      return transactionsPerSec;
-    } else {
-      console.error("Unable to extract average from the content");
-      return null;
-    }
+    // qps
+    regex = /queries:\s+\d+\s+\(([\d.]+)\s+per sec.\)/;
+    match = content.match(regex);
+    const qps = parseFloat(match[1]);
+
+    // latency
+    regex =
+      /Latency \(ms\):\s+min:\s+([\d.]+)\s+avg:\s+([\d.]+)\s+max:\s+([\d.]+)\s+99th percentile:\s+([\d.]+)\s+sum:\s+([\d.]+)/;
+    match = content.match(regex);
+
+    const lat = {
+      min: parseFloat(match[1]),
+      avg: parseFloat(match[2]),
+      max: parseFloat(match[3]),
+      percentile99: parseFloat(match[4]),
+      sum: parseFloat(match[5]),
+    };
+
+    // queries performed
+    regex =
+      /queries performed:\s+read:\s+(\d+)\s+write:\s+(\d+)\s+other:\s+(\d+)\s+total:\s+(\d+)/;
+    match = content.match(regex);
+
+    const queries = {
+      read: parseInt(match[1]),
+      write: parseInt(match[2]),
+      other: parseInt(match[3]),
+      total: parseInt(match[4]),
+    };
+
+    result.push({
+      index,
+      tps,
+      qps,
+      lat,
+      queries,
+    });
   };
 
   return (
@@ -104,7 +139,7 @@ const Sysbench = ({ files }) => {
                 fileIndex={index}
                 files={files}
                 queryResults={results.results}
-                initAvgTps={initAvgTps}
+                initAvgMetric={initAvgMetric}
               />
             ))}
           </div>
@@ -112,7 +147,7 @@ const Sysbench = ({ files }) => {
       </div>
       <div className="chart-container">
         <h1 className="title">Compare View</h1>
-        <BarChart files={files} />
+        {queryResults.length > 0 && <BarChart files={files} />}
       </div>
     </div>
   );

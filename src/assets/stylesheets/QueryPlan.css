@@ -15,37 +15,6 @@
   margin: 10px 0;
 }
 
-.control-panel {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 5px 0;
-}
-
-.control-panel-metric {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-right: 20px;
-}
-
-.control-panel-term {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.control-panel p {
-  font-family: "NanumSquareEB";
-  font-size: 14px;
-  margin-right: 10px;
-}
-
-.control-panel-options {
-  font-family: "NanumSquareB";
-  font-size: 14px;
-}
-
 .node-label {
   font-family: "NanumSquareEB";
   font-size: 14px;

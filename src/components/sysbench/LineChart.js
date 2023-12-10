@@ -4,15 +4,29 @@ import * as d3 from "d3";
 import TpsCard from "./TpsCard";
 
 const LineChart = (props) => {
-  const { fileIndex, files, queryResults, initAvgTps } = props;
-  const { avgTps, setAvgTps } = useContext(SysbenchContext);
+  const { fileIndex, files, queryResults, initAvgMetric } = props;
+  const { avgMetric, setAvgMetric, selectedMetric } =
+    useContext(SysbenchContext);
 
   const lineplotSvg = useRef(null);
 
   const width =
     (0.8 * document.documentElement.clientWidth) / props.files.length;
-  const height = 0.4 * document.documentElement.clientHeight;
+  const height = 350;
   const margin = 0.03 * document.documentElement.clientWidth;
+
+  function getMetricValue(d) {
+    switch (selectedMetric) {
+      case "tps":
+        return d.tps;
+      case "qps":
+        return d.qps;
+      case "lat":
+        return d.lat;
+      default:
+        return d.tps;
+    }
+  }
 
   useEffect(() => {
     const svg = d3.select(lineplotSvg.current);
@@ -30,8 +44,8 @@ const LineChart = (props) => {
     const yScale = d3
       .scaleLinear()
       .domain([
-        d3.min(queryResults, (d) => d.tps),
-        d3.max(queryResults, (d) => d.tps),
+        d3.min(queryResults, (d) => getMetricValue(d)),
+        d3.max(queryResults, (d) => getMetricValue(d)),
       ])
       .range([height - margin, margin]);
 
@@ -56,13 +70,13 @@ const LineChart = (props) => {
       .attr("transform", `translate(0, ${height - margin})`)
       .call(d3.axisBottom(xScale));
 
-    const yAxis = svg
+    svg
       .append("g")
       .attr("transform", `translate(${margin}, 0)`)
       .call(d3.axisLeft(yScale));
 
     // add clippath - 선이 밖으로 빠져나오지 않게 해주는 역할
-    var clip = svg
+    svg
       .append("clipPath")
       .attr("id", "clip")
       .append("rect")
@@ -85,7 +99,7 @@ const LineChart = (props) => {
         d3
           .line()
           .x((d) => xScale(d.time))
-          .y((d) => yScale(d.tps))
+          .y((d) => yScale(getMetricValue(d)))
       );
 
     // add brush
@@ -111,15 +125,21 @@ const LineChart = (props) => {
           );
         });
 
-        // 새로운 average TPS 계산
-        const newAvgTps = [...avgTps];
+        // 새로운 average 계산
+        const newAvgMetric = [...avgMetric];
         let sum = 0;
         brushedData.forEach((d) => {
-          sum += d.tps;
+          sum += getMetricValue(d);
         });
 
-        newAvgTps[fileIndex] = sum / brushedData.length;
-        setAvgTps(newAvgTps);
+        if (selectedMetric === "tps")
+          newAvgMetric[fileIndex].tps = sum / brushedData.length;
+        else if (selectedMetric === "qps")
+          newAvgMetric[fileIndex].qps = sum / brushedData.length;
+        else if (selectedMetric === "lat")
+          newAvgMetric[fileIndex].lat.percentile99 = sum / brushedData.length;
+
+        setAvgMetric(newAvgMetric);
 
         xScale.domain([xScale.invert(extent[0]), xScale.invert(extent[1])]);
 
@@ -141,14 +161,14 @@ const LineChart = (props) => {
               return xScale(d.time);
             })
             .y(function (d) {
-              return yScale(d.tps);
+              return yScale(getMetricValue(d));
             })
         );
     }
 
     // reinitialize the chart on double click
     svg.on("dblclick", function () {
-      setAvgTps(initAvgTps);
+      setAvgMetric(initAvgMetric);
 
       xScale.domain([
         d3.min(queryResults, (d) => d.time),
@@ -164,11 +184,11 @@ const LineChart = (props) => {
             return xScale(d.time);
           })
           .y(function (d) {
-            return yScale(d.tps);
+            return yScale(getMetricValue(d));
           })
       );
     });
-  }, []);
+  }, [selectedMetric]);
 
   return (
     <div>
@@ -181,7 +201,7 @@ const LineChart = (props) => {
           </p>
         </div>
       ) : null}
-      <TpsCard tps={avgTps[fileIndex]} />
+      <TpsCard average={avgMetric[fileIndex]} metric={selectedMetric} />
       <svg ref={lineplotSvg} width={width} height={height}></svg>
     </div>
   );

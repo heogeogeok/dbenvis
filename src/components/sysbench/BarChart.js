@@ -2,9 +2,17 @@ import { useRef, useEffect, useContext } from "react";
 import { SysbenchContext } from "../../contexts/SysbenchContext";
 import * as d3 from "d3";
 import { shadeColor } from "../tpch/mapping";
+import Select from "react-select";
 
 const BarChart = ({ files }) => {
-  const { avgTps } = useContext(SysbenchContext);
+  const { avgMetric, selectedMetric, setselectedMetric } =
+    useContext(SysbenchContext);
+
+  const options = [
+    { value: "tps", label: "TPS" },
+    { value: "qps", label: "QPS" },
+    { value: "lat", label: "Latency" },
+  ];
 
   const barplotSvg = useRef(null);
 
@@ -13,6 +21,23 @@ const BarChart = ({ files }) => {
   const marginX = document.body.clientWidth * 0.25;
   const marginY = 30;
 
+  function getMetricValue(d) {
+    switch (selectedMetric) {
+      case "tps":
+        return d.tps;
+      case "qps":
+        return d.qps;
+      case "lat":
+        return d.lat.percentile99;
+      default:
+        return d.tps;
+    }
+  }
+
+  const handleSelectionChange = (selectedOption) => {
+    setselectedMetric(selectedOption.value);
+  };
+
   useEffect(() => {
     const svg = d3.select(barplotSvg.current);
     svg.selectAll("*").remove(); // clear
@@ -20,20 +45,20 @@ const BarChart = ({ files }) => {
     // create scales for x and y
     const xScale = d3
       .scaleBand()
-      .domain(avgTps.map((entry, index) => index))
+      .domain(avgMetric.map((entry, index) => index))
       .range([0, width])
       .align(0.5)
       .padding(0.1);
 
     const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(avgTps)])
+      .domain([0, d3.max(avgMetric, (d) => getMetricValue(d))])
       .range([height, 0]);
 
     // create color scale for each bars in the group
     const colorScale = d3
       .scaleOrdinal()
-      .domain(avgTps.map((entry, index) => index))
+      .domain(avgMetric.map((entry, index) => index))
       .range([
         "#7fc97f",
         "#beaed4",
@@ -84,23 +109,23 @@ const BarChart = ({ files }) => {
     svg
       .append("g")
       .selectAll()
-      .data(avgTps.map((d, index) => ({ tps: d, fileIndex: index })))
+      .data(avgMetric)
       .join("rect")
-      .attr("x", (d) => xScale(d.fileIndex) + marginX)
+      .attr("x", (d) => xScale(d.index) + marginX)
       .attr("y", height + marginY) // transition: 초기 y position 맨 아래에
       .attr("width", xScale.bandwidth())
       .attr("height", 0) // transition: 초기 height 0
-      .attr("fill", (d) => colorScale(d.fileIndex))
+      .attr("fill", (d) => colorScale(d.index))
       .on("mouseover", function (event, d) {
         tooltip
           .html(
-            `File Name: ${files[d.fileIndex].name}<br>avgTps: ${d.tps.toFixed(
+            `Average TPS: ${d.tps.toFixed(2)}<br>Average QPS: ${d.qps.toFixed(
               2
-            )}`
+            )}<br>Average Latency: ${d.lat.percentile99.toFixed(2)}`
           )
           .style("visibility", "visible");
         d3.select(this).attr("fill", (d) =>
-          shadeColor(colorScale(d.fileIndex), -15)
+          shadeColor(colorScale(d.index), -15)
         );
       })
       .on("mousemove", function (e) {
@@ -110,16 +135,27 @@ const BarChart = ({ files }) => {
       })
       .on("mouseout", function () {
         tooltip.html(``).style("visibility", "hidden");
-        d3.select(this).attr("fill", (d) => colorScale(d.fileIndex));
+        d3.select(this).attr("fill", (d) => colorScale(d.index));
       })
       .transition()
       .duration(1000)
-      .attr("y", (d) => yScale(d.tps) + marginY) // transition: final y position
-      .attr("height", (d) => height - yScale(d.tps)); // transition: final height
+      .attr("y", (d) => yScale(getMetricValue(d)) + marginY) // transition: final y position
+      .attr("height", (d) => height - yScale(getMetricValue(d))); // transition: final height
   });
 
   return (
     <div>
+      <div className="control-panel justify-start ml-8">
+        <div className="control-panel-metric">
+          <p>Choose Metric:</p>
+          <Select
+            options={options}
+            defaultValue={options[0]}
+            onChange={handleSelectionChange}
+            className="control-panel-options"
+          />
+        </div>
+      </div>
       <svg
         ref={barplotSvg}
         width={width + 2 * marginX}
