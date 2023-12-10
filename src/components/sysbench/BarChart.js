@@ -1,6 +1,7 @@
 import { useRef, useEffect, useContext } from "react";
 import { SysbenchContext } from "../../contexts/SysbenchContext";
 import * as d3 from "d3";
+import { shadeColor } from "../tpch/parseResult";
 
 const BarChart = ({ files }) => {
   const { avgTps } = useContext(SysbenchContext);
@@ -74,21 +75,47 @@ const BarChart = ({ files }) => {
       .duration(1000)
       .call(yAxis);
 
+    const tooltip = d3
+      .select("body")
+      .append("div")
+      .attr("class", "bar-tooltip");
+
     // draw bars
     svg
       .append("g")
       .selectAll()
-      .data(avgTps)
+      .data(avgTps.map((d, index) => ({ tps: d, fileIndex: index })))
       .join("rect")
-      .attr("x", (d, index) => xScale(index) + marginX)
+      .attr("x", (d) => xScale(d.fileIndex) + marginX)
       .attr("y", height + marginY) // transition: 초기 y position 맨 아래에
       .attr("width", xScale.bandwidth())
       .attr("height", 0) // transition: 초기 height 0
-      .attr("fill", (d, index) => colorScale(index))
+      .attr("fill", (d) => colorScale(d.fileIndex))
+      .on("mouseover", function (event, d) {
+        tooltip
+          .html(
+            `File Name: ${files[d.fileIndex].name}<br>avgTps: ${d.tps.toFixed(
+              2
+            )}`
+          )
+          .style("visibility", "visible");
+        d3.select(this).attr("fill", (d) =>
+          shadeColor(colorScale(d.fileIndex), -15)
+        );
+      })
+      .on("mousemove", function (e) {
+        tooltip
+          .style("top", e.pageY + 10 + "px")
+          .style("left", e.pageX + 10 + "px");
+      })
+      .on("mouseout", function () {
+        tooltip.html(``).style("visibility", "hidden");
+        d3.select(this).attr("fill", (d) => colorScale(d.fileIndex));
+      })
       .transition()
       .duration(1000)
-      .attr("y", (d) => yScale(d) + marginY) // transition: final y position
-      .attr("height", (d) => height - yScale(d)); // transition: final height
+      .attr("y", (d) => yScale(d.tps) + marginY) // transition: final y position
+      .attr("height", (d) => height - yScale(d.tps)); // transition: final height
   });
 
   return (

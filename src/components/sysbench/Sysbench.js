@@ -112,7 +112,7 @@ const Sysbench = ({ files }) => {
       </div>
       <div className="chart-container">
         <h1 className="title">Compare View</h1>
-        {queryResults.length > 0 && <BarChart files={files} />}
+        <BarChart files={files} />
       </div>
     </div>
   );
