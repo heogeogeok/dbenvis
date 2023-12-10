@@ -6,15 +6,15 @@ import { Checkbox } from "@material-tailwind/react";
 
 import { shadeColor, nodeColor } from "./mapping";
 import {
-  parsePostgreSQL,
-  parseMariaDB,
-  extractPostgreSQL,
-  extractMySQL,
-  traversePostgreSQL,
-  traverseMySQL,
-  extractMariaDB,
-  traverseMariaDB,
-} from "./parseResult";
+  parseExpPostgreSQL,
+  parseExpMySQL,
+  parseExpMariaDB,
+} from "./parseExplain";
+import {
+  parseDurPostgreSQL,
+  parseDurMariaDB,
+  retrieveCost,
+} from "./parseDuration";
 
 const CompareView = (props) => {
   const { selectedQuery, setSelectedQuery, setDurations } =
@@ -35,12 +35,12 @@ const CompareView = (props) => {
   const stackedLegendSvg = useRef(null);
 
   const width = document.body.clientWidth * 0.35;
-  const height = 250;
+  const height = 270;
   const marginX = document.body.clientWidth * 0.02;
   const marginY = 10;
 
   const selectedWidth = width / 2;
-  const selectedHeight = 300;
+  const selectedHeight = 270;
   const selectedMarginX = showStackedBar
     ? selectedWidth / 5
     : selectedWidth / 2;
@@ -74,10 +74,10 @@ const CompareView = (props) => {
           const fileContent = await readFile(file);
 
           // default: try PostgreSQL
-          let queries = parsePostgreSQL(fileContent, i);
+          let queries = parseDurPostgreSQL(fileContent, i);
 
           // 실패 시 try MariaDB
-          if (queries.length === 0) queries = parseMariaDB(fileContent, i);
+          if (queries.length === 0) queries = parseDurMariaDB(fileContent, i);
 
           resultContents = resultContents.concat(queries);
         }
@@ -103,11 +103,19 @@ const CompareView = (props) => {
           const fileContent = await readFile(file);
 
           // default: try PostgreSQL
-          let plans = extractPostgreSQL(fileContent, i);
-          // 실패 시 try MySQL
-          if (plans.length === 0) plans = extractMySQL(fileContent, i);
-          // 실패 시 try MariaDB
-          if (plans.length === 0) plans = extractMariaDB(fileContent, i);
+          let plans = parseExpPostgreSQL(fileContent, true, i);
+
+          // 실패 시
+          if (plans.length === 0) {
+            const regex = /cost_info/;
+            if (regex.test(fileContent)) {
+              // run MySQL
+              plans = parseExpMySQL(fileContent, true, i);
+            } else {
+              // run MariaDB
+              plans = parseExpMariaDB(fileContent, true, i);
+            }
+          }
 
           planContents = planContents.concat(plans);
         }
@@ -399,17 +407,12 @@ const CompareView = (props) => {
     );
 
     const stackedData = [];
+
     selectedData.forEach((entry) => {
       const cost = { fileIndex: entry.fileIndex };
 
       if (entry.plan && entry.plan.Plan) {
-        if (entry.plan.Plan["Total Cost"])
-          traversePostgreSQL(entry.plan.Plan, cost);
-        else if (entry.plan.Plan.cost_info)
-          traverseMySQL(entry.plan.Plan.children[0], cost);
-        else if (entry.plan.Plan["r_total_time_ms"])
-          traverseMariaDB(entry.plan.Plan.children[0], cost);
-
+        retrieveCost(entry.plan.Plan, cost);
         stackedData.push(cost);
       }
     });
@@ -570,10 +573,7 @@ const CompareView = (props) => {
         (d, idx) => (legendItemSize + legendMargin) * idx + legendItemSize / 2
       )
       .attr("dy", "0.35em")
-      .text((d) => {
-        console.log(d);
-        return d;
-      });
+      .text((d) => d);
   }
 
   return (
@@ -620,7 +620,7 @@ const CompareView = (props) => {
                   color="blue"
                   className="h-4 w-4 rounded-full border-gray-900/20 bg-gray-900/10 transition-all hover:scale-105 hover:before:opacity-0"
                   checked={showStackedBar}
-                  label={<p className="text">Stacked Bar Chart</p>}
+                  label={<p className="text">Show Stacked Bar Chart</p>}
                   onClick={handleStackCheckboxChange}
                 />
               </div>

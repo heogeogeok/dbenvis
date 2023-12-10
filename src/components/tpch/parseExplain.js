@@ -1,28 +1,7 @@
 /*
- * parse.js: EXPLAIN 결과 전처리
+ * parseExplain.js: EXPLAIN 결과 전처리
  * 데이터베이스마다 함수 추가하는 방식으로 구현 가능
  */
-
-/*
- * 1. PostgreSQL
- */
-export function parseExpPostgreSQL(content) {
-  const regex = /\[(.*?)\](?=\s*\()/gs;
-  let match = null;
-  const plans = [];
-
-  while ((match = regex.exec(content)) !== null) {
-    // parse plan and remove every "+"
-    let plan = match[1].replace(/\+/g, "");
-
-    // d3의 계층구조 따르기 위해 "Plans"를 "children"으로 대체
-    plan = plan.replace(/"Plans":/g, '"children":');
-
-    plans.push(JSON.parse(plan));
-  }
-
-  return plans;
-}
 
 const opTypes = [
   ["grouping_operation", "Group"],
@@ -72,13 +51,45 @@ function childrenToArray(obj) {
 }
 
 /*
+ * 1. PostgreSQL
+ */
+export function parseExpPostgreSQL(content, isCmp, fileIndex) {
+  const regex = /\[(.*?)\](?=\s*\()/gs;
+  let match = null;
+  const plans = [];
+
+  let i = 1;
+  while ((match = regex.exec(content)) !== null) {
+    // parse plan and remove every "+"
+    let plan = match[1].replace(/\+/g, "");
+
+    // d3의 계층구조 따르기 위해 "Plans"를 "children"으로 대체
+    plan = plan.replace(/"Plans":/g, '"children":');
+    plan = JSON.parse(plan);
+
+    if (isCmp)
+      plans.push({
+        queryNumber: i,
+        plan,
+        fileIndex,
+      });
+    else plans.push(plan);
+
+    i++;
+  }
+
+  return plans;
+}
+
+/*
  * 2. MySQL
  */
-export function parseExpMySQL(content) {
+export function parseExpMySQL(content, isCmp, fileIndex) {
   const regex = /(?:EXPLAIN|ANALYZE)([\s\S]*?)Query_ID/g;
   let match = null;
   const plans = [];
 
+  let i = 1;
   while ((match = regex.exec(content)) !== null) {
     // parse plan and remove every "\n" and "\"
     let plan = match[1].replace(/\\n/g, "");
@@ -103,7 +114,15 @@ export function parseExpMySQL(content) {
     );
     jsonPlan = childrenToArray(jsonPlan);
 
-    plans.push(jsonPlan);
+    if (isCmp)
+      plans.push({
+        queryNumber: i,
+        plan: jsonPlan,
+        fileIndex,
+      });
+    else plans.push(jsonPlan);
+
+    i++;
   }
 
   return plans;
@@ -180,11 +199,12 @@ function handleNestedLoop(original, data, num) {
 /*
  * 3. MariaDB
  */
-export function parseExpMariaDB(content) {
+export function parseExpMariaDB(content, isCmp, fileIndex) {
   const regex = /(?:EXPLAIN|ANALYZE)([\s\S]*?)Query_ID/g;
   let match = null;
   const plans = [];
 
+  let i = 1;
   while ((match = regex.exec(content)) !== null) {
     // parse plan and remove every "\n" and "\"
     let plan = match[1].replace(/\\n/g, "");
@@ -230,7 +250,15 @@ export function parseExpMariaDB(content) {
     jsonPlan = JSON.parse(jsonString);
     jsonPlan = childrenToArray(jsonPlan);
 
-    plans.push(jsonPlan);
+    if (isCmp)
+      plans.push({
+        queryNumber: i,
+        plan: jsonPlan,
+        fileIndex,
+      });
+    else plans.push(jsonPlan);
+
+    i++;
   }
 
   return plans;

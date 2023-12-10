@@ -45,17 +45,17 @@ function ParseQueryPlan({ files }) {
           const fileContent = await readFile(file);
 
           // default: try PostgreSQL
-          let plans = parseExpPostgreSQL(fileContent);
+          let plans = parseExpPostgreSQL(fileContent, false, null);
 
           // 실패 시
           if (plans.length === 0) {
             const regex = /cost_info/;
             if (regex.test(fileContent)) {
               // run MySQL
-              plans = parseExpMySQL(fileContent);
+              plans = parseExpMySQL(fileContent, false, null);
             } else {
               // run MariaDB
-              plans = parseExpMariaDB(fileContent);
+              plans = parseExpMariaDB(fileContent, false, null);
             }
           }
 
