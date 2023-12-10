@@ -65,7 +65,7 @@ export function retrieveCost(node, result) {
   let cost;
 
   if (nodeType !== "Limit") {
-    if (node["Total Cost"] && node["Startup Cost"]) {
+    if (node["Total Cost"]) {
       // PostgreSQL
       cost = node["Total Cost"] - node["Startup Cost"];
     } else if (node["cost_info"]) {

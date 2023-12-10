@@ -4,7 +4,7 @@ import { TpchContext } from "../../contexts/TpchContext";
 import "../../assets/stylesheets/Tpch.css";
 import { Checkbox } from "@material-tailwind/react";
 
-import { shadeColor, nodeColor } from "./mapping";
+import { shadeColor, nodeColor, legendOpColor, mapOpLegend } from "./mapping";
 import {
   parseExpPostgreSQL,
   parseExpMySQL,
@@ -494,6 +494,8 @@ const CompareView = (props) => {
       .append("div")
       .attr("class", "bar-tooltip");
 
+    let costPercentage;
+
     // create stack rect
     const rect = svg
       .selectAll()
@@ -501,27 +503,11 @@ const CompareView = (props) => {
       .enter()
       .append("g")
       .attr("transform", `translate(${selectedMarginX}, ${selectedMarginY})`)
-      .attr("fill", function (d) {
-        return nodeColor(d.key);
-      })
-      .on("mouseover", function (event, d) {
+      .attr("fill", (d) => nodeColor(d.key))
+      .on("mouseover mousemove", function (event, d) {
         tooltip
-          .html(
-            `Operator: ${d.key}<br> Cost: ${(
-              yScale(d[0][0]) - yScale(d[0][1])
-            ).toFixed(2)}`
-          )
+          .html(`Operator: ${d.key}<br> Cost: ${costPercentage}`)
           .style("visibility", "visible");
-        d3.select(this).attr("fill", (d) => shadeColor(nodeColor(d.key), -15));
-      })
-      .on("mousemove", function (e) {
-        tooltip
-          .style("top", e.pageY - 10 + "px")
-          .style("left", e.pageX + 10 + "px");
-      })
-      .on("mouseout", function () {
-        tooltip.html(``).style("visibility", "hidden");
-        d3.select(this).attr("fill", (d) => nodeColor(d.key));
       });
 
     // stack rect for each data value
@@ -539,17 +525,41 @@ const CompareView = (props) => {
       .transition()
       .duration(1000)
       .attr("y", (d) => yScale(d[1]))
-      .attr("height", (d) => yScale(d[0]) - yScale(d[1]));
+      .attr("height", (d) => yScale(d[0]) - yScale(d[1]))
+      .attr("stroke", "grey")
+      .attr("stroke-width", 0.2);
+
+    rect
+      .selectAll("rect")
+      .data((d) => d)
+      .on("mouseover", function (event, d) {
+        costPercentage = (d[1] - d[0]).toLocaleString("en-US", {
+          style: "percent",
+          minimumFractionDigits: 2,
+        });
+      })
+      .on("mousemove", function (e) {
+        tooltip
+          .style("top", e.pageY - 10 + "px")
+          .style("left", e.pageX + 10 + "px");
+      })
+      .on("mouseout", function () {
+        tooltip.html(``).style("visibility", "hidden");
+      });
 
     // draw legend
     const legend = d3.select(stackedLegendSvg.current);
     legend.selectAll("*").remove();
 
+    // duplicate keys are not allowed
+    const tempKeys = Array.from(new Set(keys.map((key) => mapOpLegend[key])));
+    const uniqueKeys = tempKeys.filter((value) => value !== undefined);
+
     // create legend items
     legend
       .append("g")
       .selectAll()
-      .data(keys)
+      .data(uniqueKeys)
       .join("rect")
       .attr("width", legendItemSize)
       .attr("height", legendItemSize)
@@ -558,12 +568,12 @@ const CompareView = (props) => {
         "transform",
         (d, idx) => `translate(0, ${(legendItemSize + legendMargin) * idx})`
       )
-      .style("fill", (d) => nodeColor(d));
+      .style("fill", (d) => legendOpColor(d));
 
     // append legend labels
     legend
       .selectAll("text")
-      .data(keys)
+      .data(uniqueKeys)
       .enter()
       .append("text")
       .attr("class", "legend-label")
