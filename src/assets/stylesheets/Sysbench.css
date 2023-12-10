@@ -13,18 +13,6 @@
   display: flex;
 }
 
-.title {
-  font-family: "NanumSquareEB";
-  font-size: large;
-  color: black;
-  background-color: #f0f8ff;
-  border-radius: 20px;
-  padding: 10px;
-  margin-top: 5px;
-
-  text-align: center;
-}
-
 .tps-card {
   margin: 0 20px;
   border: 2px solid #f0f8ff;
