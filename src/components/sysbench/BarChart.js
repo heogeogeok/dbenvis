@@ -1,7 +1,7 @@
 import { useRef, useEffect, useContext } from "react";
 import { SysbenchContext } from "../../contexts/SysbenchContext";
 import * as d3 from "d3";
-import { shadeColor } from "../tpch/parseResult";
+import { shadeColor } from "../tpch/mapping";
 
 const BarChart = ({ files }) => {
   const { avgTps } = useContext(SysbenchContext);
