@@ -25,6 +25,33 @@ const QueryPlanView = (props) => {
     .x((d) => d.x)
     .y((d) => d.y);
 
+  var totalNodes = 0;
+
+  // node 개수 계산
+  function visit(parent, visitFn, childrenFn) {
+    if (!parent) return;
+
+    visitFn(parent);
+
+    var children = childrenFn(parent);
+    if (children) {
+      var count = children.length;
+      for (var i = 0; i < count; i++) {
+        visit(children[i], visitFn, childrenFn);
+      }
+    }
+  }
+
+  visit(
+    treeData,
+    function (d) {
+      totalNodes++;
+    },
+    function (d) {
+      return d.children && d.children.length > 0 ? d.children : null;
+    }
+  );
+
   // query cost 계산
   const cost = treeData.links().map((link) => {
     if (link.target.data["Total Cost"]) {
@@ -133,9 +160,13 @@ const QueryPlanView = (props) => {
         .attr("fill", (d) => nodeColor(d.data["Node Type"]))
         .attr("r", (d, idx) => {
           if (selectedMetric === "cost") {
-            return cost[idx - 1] ? costScale(cost[idx - 1]) : 10;
+            return cost[totalNodes - idx - 2]
+              ? costScale(cost[totalNodes - idx - 2])
+              : 10;
           } else if (selectedMetric === "rows") {
-            return rows[idx - 1] ? rowScale(rows[idx - 1]) : 10;
+            return rows[totalNodes - idx - 2]
+              ? rowScale(rows[totalNodes - idx - 2])
+              : 10;
           } else {
             return 15;
           }
@@ -226,8 +257,8 @@ const QueryPlanView = (props) => {
       });
     }
 
-    root.x0 = dy / 2;
-    root.y0 = 0;
+    root.x0 = 0;
+    root.y0 = dy / 2;
 
     root.descendants().forEach((d, i) => {
       d.id = i;
@@ -247,9 +278,13 @@ const QueryPlanView = (props) => {
       .duration(1000)
       .attr("r", (d, idx) => {
         if (selectedMetric === "cost") {
-          return cost[idx - 1] ? costScale(cost[idx - 1]) : 10;
+          return cost[totalNodes - idx - 2]
+            ? costScale(cost[totalNodes - idx - 2])
+            : 10;
         } else if (selectedMetric === "rows") {
-          return rows[idx - 1] ? rowScale(rows[idx - 1]) : 10;
+          return rows[totalNodes - idx - 2]
+            ? rowScale(rows[totalNodes - idx - 2])
+            : 10;
         } else {
           return 15;
         }
