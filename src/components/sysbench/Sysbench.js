@@ -5,8 +5,7 @@ import BarChart from "./BarChart";
 import "../../assets/stylesheets/Sysbench.css";
 
 const Sysbench = ({ files }) => {
-  const { avgMetric, setAvgMetric } = useContext(SysbenchContext);
-  const initAvgMetric = [...avgMetric];
+  const { setAvgMetric, setInitAvgMetric } = useContext(SysbenchContext);
 
   const [queryResults, setQueryResults] = useState([]);
 
@@ -28,6 +27,7 @@ const Sysbench = ({ files }) => {
         }
 
         setQueryResults(fileContents);
+        setInitAvgMetric(avgValues);
         setAvgMetric(avgValues);
       } else {
         // 업로드 한 파일 없는 경우
@@ -139,7 +139,6 @@ const Sysbench = ({ files }) => {
                 fileIndex={index}
                 files={files}
                 queryResults={results.results}
-                initAvgMetric={initAvgMetric}
               />
             ))}
           </div>

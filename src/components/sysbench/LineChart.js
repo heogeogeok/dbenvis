@@ -4,8 +4,8 @@ import * as d3 from "d3";
 import TpsCard from "./TpsCard";
 
 const LineChart = (props) => {
-  const { fileIndex, files, queryResults, initAvgMetric } = props;
-  const { avgMetric, setAvgMetric, selectedMetric } =
+  const { fileIndex, files, queryResults } = props;
+  const { initAvgMetric, avgMetric, setAvgMetric, selectedMetric } =
     useContext(SysbenchContext);
 
   const lineplotSvg = useRef(null);
@@ -28,45 +28,46 @@ const LineChart = (props) => {
     }
   }
 
+  // create scales for x and y
+  const xScale = d3
+    .scaleLinear()
+    .domain([
+      d3.min(queryResults, (d) => d.time),
+      d3.max(queryResults, (d) => d.time),
+    ])
+    .range([margin, width - margin]);
+
+  const yScale = d3
+    .scaleLinear()
+    .domain([
+      d3.min(queryResults, (d) => getMetricValue(d)),
+      d3.max(queryResults, (d) => getMetricValue(d)),
+    ])
+    .range([height - margin, margin]);
+
+  // color scale to match the line color with bar
+  const colorScale = d3
+    .scaleOrdinal()
+    .domain(files.map((entry, index) => index))
+    .range([
+      "#7fc97f",
+      "#beaed4",
+      "#fdc086",
+      "#ffff99",
+      "#386cb0",
+      "#f0027f",
+      "#bf5b17",
+      "#666666",
+    ]);
+
   useEffect(() => {
     const svg = d3.select(lineplotSvg.current);
     svg.selectAll("*").remove(); // clear
 
-    // create scales for x and y
-    const xScale = d3
-      .scaleLinear()
-      .domain([
-        d3.min(queryResults, (d) => d.time),
-        d3.max(queryResults, (d) => d.time),
-      ])
-      .range([margin, width - margin]);
-
-    const yScale = d3
-      .scaleLinear()
-      .domain([
-        d3.min(queryResults, (d) => getMetricValue(d)),
-        d3.max(queryResults, (d) => getMetricValue(d)),
-      ])
-      .range([height - margin, margin]);
-
-    // color scale to match the line color with bar
-    const colorScale = d3
-      .scaleOrdinal()
-      .domain(files.map((entry, index) => index))
-      .range([
-        "#7fc97f",
-        "#beaed4",
-        "#fdc086",
-        "#ffff99",
-        "#386cb0",
-        "#f0027f",
-        "#bf5b17",
-        "#666666",
-      ]);
-
     // draw x and y axes
     const xAxis = svg
       .append("g")
+      .attr("id", "xAxis")
       .attr("transform", `translate(0, ${height - margin})`)
       .call(d3.axisBottom(xScale));
 
@@ -91,6 +92,8 @@ const LineChart = (props) => {
       .attr("clip-path", "url(#clip)")
       .append("g")
       .append("path")
+      .attr("id", "line")
+      .attr("id", "line")
       .datum(queryResults)
       .attr("fill", "none")
       .attr("stroke", colorScale(fileIndex))
@@ -101,6 +104,11 @@ const LineChart = (props) => {
           .x((d) => xScale(d.time))
           .y((d) => yScale(getMetricValue(d)))
       );
+  }, [selectedMetric]);
+
+  useEffect(() => {
+    const svg = d3.select(lineplotSvg.current);
+    svg.select(".brush").remove(); // remove brush
 
     // add brush
     const brush = d3
@@ -126,7 +134,8 @@ const LineChart = (props) => {
         });
 
         // 새로운 average 계산
-        const newAvgMetric = [...avgMetric];
+        const newAvgMetric = JSON.parse(JSON.stringify(avgMetric));
+
         let sum = 0;
         brushedData.forEach((d) => {
           sum += getMetricValue(d);
@@ -147,10 +156,15 @@ const LineChart = (props) => {
       }
 
       // update axis
-      xAxis.transition().duration(1000).call(d3.axisBottom(xScale));
+      svg
+        .select("#xAxis")
+        .transition()
+        .duration(1000)
+        .call(d3.axisBottom(xScale));
 
       // update line
-      line
+      svg
+        .select("#line")
         .transition()
         .duration(1000)
         .attr(
@@ -168,27 +182,34 @@ const LineChart = (props) => {
 
     // reinitialize the chart on double click
     svg.on("dblclick", function () {
-      setAvgMetric(initAvgMetric);
+      var update = JSON.parse(JSON.stringify(avgMetric));
+      update[fileIndex] = initAvgMetric[fileIndex];
+
+      setAvgMetric(update);
 
       xScale.domain([
         d3.min(queryResults, (d) => d.time),
         d3.max(queryResults, (d) => d.time),
       ]);
-      xAxis.transition().call(d3.axisBottom(xScale));
+      svg.select("#xAxis").transition().call(d3.axisBottom(xScale));
 
-      line.transition().attr(
-        "d",
-        d3
-          .line()
-          .x(function (d) {
-            return xScale(d.time);
-          })
-          .y(function (d) {
-            return yScale(getMetricValue(d));
-          })
-      );
+      svg
+        .select("#line")
+        .transition()
+        .duration(1000)
+        .attr(
+          "d",
+          d3
+            .line()
+            .x(function (d) {
+              return xScale(d.time);
+            })
+            .y(function (d) {
+              return yScale(getMetricValue(d));
+            })
+        );
     });
-  }, [selectedMetric]);
+  }, [selectedMetric, avgMetric]);
 
   return (
     <div>

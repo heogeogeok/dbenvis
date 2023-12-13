@@ -3,6 +3,7 @@ import { createContext, useState } from "react";
 export const SysbenchContext = createContext();
 const SysbenchContextProvider = (props) => {
   // 각 metric의 average
+  const [initAvgMetric, setInitAvgMetric] = useState([]);
   const [avgMetric, setAvgMetric] = useState([]);
 
   // 시각화 할 metric
@@ -10,7 +11,14 @@ const SysbenchContextProvider = (props) => {
 
   return (
     <SysbenchContext.Provider
-      value={{ avgMetric, setAvgMetric, selectedMetric, setselectedMetric }}
+      value={{
+        initAvgMetric,
+        setInitAvgMetric,
+        avgMetric,
+        setAvgMetric,
+        selectedMetric,
+        setselectedMetric,
+      }}
     >
       {props.children}
     </SysbenchContext.Provider>
