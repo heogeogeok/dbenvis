@@ -132,11 +132,12 @@ const QueryPlanView = (props) => {
     // create links
     const gLink = svg
       .append("g")
+      .attr("id", "g-link")
       .attr("fill", "none")
       .attr("stroke", "lightgrey");
 
     // create nodes
-    const gNode = svg.append("g");
+    const gNode = svg.append("g").attr("id", "g-node");
 
     // create tooltip
     var tooltip = d3
@@ -168,6 +169,7 @@ const QueryPlanView = (props) => {
       // append circles
       nodeEnter
         .append("circle")
+        .attr("id", "node-circle")
         .attr("fill", (d) => nodeColor(d.data["Node Type"]))
         .attr("r", (d, idx) => {
           if (selectedMetric === "cost") {
@@ -242,6 +244,7 @@ const QueryPlanView = (props) => {
       const linkEnter = link
         .enter()
         .append("path")
+        .attr("id", "link-path")
         .attr("d", (d) => {
           const o = { x: source.x0, y: source.y0 };
           return diagonal({ source: o, target: o });
