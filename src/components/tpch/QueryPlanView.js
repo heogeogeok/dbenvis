@@ -25,33 +25,6 @@ const QueryPlanView = (props) => {
     .x((d) => d.x)
     .y((d) => d.y);
 
-  var totalNodes = 0;
-
-  // node 개수 계산
-  function visit(parent, visitFn, childrenFn) {
-    if (!parent) return;
-
-    visitFn(parent);
-
-    var children = childrenFn(parent);
-    if (children) {
-      var count = children.length;
-      for (var i = 0; i < count; i++) {
-        visit(children[i], visitFn, childrenFn);
-      }
-    }
-  }
-
-  visit(
-    treeData,
-    function (d) {
-      totalNodes++;
-    },
-    function (d) {
-      return d.children && d.children.length > 0 ? d.children : null;
-    }
-  );
-
   // query cost 계산
   function calculateCost(data) {
     if (data["Node Type"] === "Limit") return 0;
@@ -113,7 +86,9 @@ const QueryPlanView = (props) => {
     .domain([d3.min(cost), d3.max(cost)])
     .range([10, 30]);
 
-  const drawTree = (term) => {
+  useEffect(() => {
+    d3.select(treeSvg.current).selectAll("*").remove(); // clear
+
     // create tree
     const svg = d3
       .select(treeSvg.current)
@@ -187,9 +162,9 @@ const QueryPlanView = (props) => {
         .attr("id", "node-type")
         .attr("text-anchor", "start")
         .text((d) => {
-          if (term === "PostgreSQL")
+          if (props.term === "PostgreSQL")
             return MySqlToPostgres[d.data["Node Type"]] || d.data["Node Type"];
-          else if (term === "MariaDB / MySQL")
+          else if (props.term === "MariaDB / MySQL")
             return PostgresToMySQL[d.data["Node Type"]] || d.data["Node Type"];
           else return d.data["Node Type"];
         });
@@ -222,14 +197,14 @@ const QueryPlanView = (props) => {
           tooltip.style("visibility", "hidden");
         });
 
-      const nodeUpdate = node
+      node
         .merge(nodeEnter)
         .transition(transition)
         .attr("transform", (d) => `translate(${d.x},${d.y})`)
         .attr("fill-opacity", 1)
         .attr("stroke-opacity", 1);
 
-      const nodeExit = node
+      node
         .exit()
         .transition(transition)
         .remove()
@@ -276,47 +251,17 @@ const QueryPlanView = (props) => {
     });
 
     update(null, root);
-  };
-
-  const updateTree = (term) => {
-    const svg = d3.select(treeSvg.current);
-
-    // update nodes
-    svg
-      .selectAll("circle")
-      .transition()
-      .duration(1000)
-      .attr("r", (d, idx) => {
-        if (selectedMetric === "cost") {
-          return costScale(calculateCost(d.data));
-        } else if (selectedMetric === "rows") {
-          return rowScale(calculateRows(d.data));
-        } else {
-          return 15;
-        }
-      });
-
-    // update terminology
-    svg
-      .selectAll("#node-type")
-      .attr("text-anchor", "start")
-      .text((d) => {
-        if (term === "PostgreSQL")
-          return MySqlToPostgres[d.data["Node Type"]] || d.data["Node Type"];
-        else if (term === "MariaDB / MySQL")
-          return PostgresToMySQL[d.data["Node Type"]] || d.data["Node Type"];
-        else return d.data["Node Type"];
-      });
-  };
-
-  useEffect(() => {
-    d3.select(treeSvg.current).selectAll("*").remove(); // clear
-    drawTree(props.term);
-  }, [props.plan]);
-
-  useEffect(() => {
-    updateTree(props.term);
-  }, [props.term, selectedMetric]);
+  }, [
+    props.plan,
+    props.term,
+    selectedMetric,
+    costScale,
+    rowScale,
+    diagonal,
+    dy,
+    root,
+    width,
+  ]);
 
   function tooltipContent(d) {
     let content = `<table class="tooltip-table"><tr><td>Node Type</td><td>${d.data["Node Type"]}</td></tr>`;
