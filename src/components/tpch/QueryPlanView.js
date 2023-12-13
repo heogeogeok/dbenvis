@@ -53,42 +53,53 @@ const QueryPlanView = (props) => {
   );
 
   // query cost 계산
-  const cost = treeData.links().map((link) => {
-    if (link.target.data["Total Cost"]) {
+  function calculateCost(data) {
+    if (data["Node Type"] === "Limit") return 0;
+
+    if (data["Total Cost"]) {
       // PostgreSQL
-      return link.target.data["Total Cost"] - link.target.data["Startup Cost"];
-    } else if (link.target.data["cost_info"]) {
+      return data["Total Cost"] - data["Startup Cost"];
+    } else if (data["cost_info"]) {
       // MySQL
       return d3.sum(
-        Object.entries(link.target.data["cost_info"] || {})
+        Object.entries(data["cost_info"] || {})
           .filter(([key]) => key.includes("cost"))
           .map(([_, value]) => parseFloat(value) || 0)
       );
-    } else if (link.target.data["r_total_time_ms"]) {
+    } else if (data["r_total_time_ms"]) {
       // MariaDB
-      return link.target.data["r_total_time_ms"];
+      return data["r_total_time_ms"];
     }
 
     return 0;
-  });
+  }
 
   // # of rows 계산
-  const rows = treeData.links().map((link) => {
-    if (link.target.data["Plan Rows"]) {
+  function calculateRows(data) {
+    if (data["Plan Rows"]) {
       // PostgreSQL
-      return link.target.data["Plan Rows"];
-    } else if (link.target.data["cost_info"]) {
+      return data["Plan Rows"];
+    } else if (data["cost_info"]) {
       // MySQL
       return d3.sum(
-        Object.entries(link.target.data || {})
+        Object.entries(data || {})
           .filter(([key]) => key.includes("rows"))
           .map(([_, value]) => value || 0)
       );
-    } else if (link.target.data["r_total_time_ms"]) {
+    } else if (data["r_total_time_ms"]) {
       // MariaDB
-      return link.target.data["rows"];
+      return data["rows"];
     }
+
     return 0;
+  }
+
+  const cost = treeData.links().map((link) => {
+    return calculateCost(link.target.data);
+  });
+
+  const rows = treeData.links().map((link) => {
+    return calculateRows(link.target.data);
   });
 
   // scale for node radius
@@ -160,13 +171,9 @@ const QueryPlanView = (props) => {
         .attr("fill", (d) => nodeColor(d.data["Node Type"]))
         .attr("r", (d, idx) => {
           if (selectedMetric === "cost") {
-            return cost[totalNodes - idx - 2]
-              ? costScale(cost[totalNodes - idx - 2])
-              : 10;
+            return costScale(calculateCost(d.data));
           } else if (selectedMetric === "rows") {
-            return rows[totalNodes - idx - 2]
-              ? rowScale(rows[totalNodes - idx - 2])
-              : 10;
+            return rowScale(calculateRows(d.data));
           } else {
             return 15;
           }
@@ -278,13 +285,9 @@ const QueryPlanView = (props) => {
       .duration(1000)
       .attr("r", (d, idx) => {
         if (selectedMetric === "cost") {
-          return cost[totalNodes - idx - 2]
-            ? costScale(cost[totalNodes - idx - 2])
-            : 10;
+          return costScale(calculateCost(d.data));
         } else if (selectedMetric === "rows") {
-          return rows[totalNodes - idx - 2]
-            ? rowScale(rows[totalNodes - idx - 2])
-            : 10;
+          return rowScale(calculateRows(d.data));
         } else {
           return 15;
         }
