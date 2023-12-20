@@ -11,6 +11,7 @@ const QueryPlanView = (props) => {
   const width = props.width;
   const height = 640;
   const marginY = 35;
+  const defaultRadius = 15;
 
   // data를 d3의 계층 구조로 바꾸어주기
   const root = d3.hierarchy(props.plan);
@@ -27,7 +28,7 @@ const QueryPlanView = (props) => {
 
   // query cost 계산
   function calculateCost(data) {
-    if (data["Node Type"] === "Limit") return 0;
+    if (data["Node Type"] === "Limit") return defaultRadius;
 
     if (data["Total Cost"]) {
       // PostgreSQL
@@ -44,7 +45,7 @@ const QueryPlanView = (props) => {
       return data["r_total_time_ms"];
     }
 
-    return 0;
+    return defaultRadius;
   }
 
   // # of rows 계산
@@ -64,7 +65,7 @@ const QueryPlanView = (props) => {
       return data["rows"];
     }
 
-    return 0;
+    return defaultRadius;
   }
 
   const cost = treeData.links().map((link) => {
